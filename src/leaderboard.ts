@@ -6,6 +6,7 @@ import type { ResolvedScenario } from "./types.js";
 export interface LeaderboardCollectInput {
   scenarios: string[];
   maxPages?: number;
+  sampleRate?: number;
   refreshDb?: boolean;
   maxAgeHours?: number;
   onProgress?: (progress: CollectionProgress) => void;
@@ -14,6 +15,7 @@ export interface LeaderboardCollectInput {
 export interface ResolvedLeaderboardCollectInput {
   scenarios: ResolvedScenario[];
   maxPages?: number;
+  sampleRate?: number;
   refreshDb?: boolean;
   maxAgeHours?: number;
   onProgress?: (progress: CollectionProgress) => void;
@@ -174,6 +176,7 @@ export async function collectResolvedLeaderboards(
   for (const scenario of input.scenarios) {
     collected.push(await collectOne(client, db, scenario, {
       maxPages: input.maxPages,
+      sampleRate: input.sampleRate,
       refreshDb: input.refreshDb ?? false,
       maxAgeHours: input.maxAgeHours,
       onProgress: input.onProgress,
@@ -448,6 +451,7 @@ async function collectOne(
   scenario: ResolvedScenario,
   options: {
     maxPages: number | undefined;
+    sampleRate: number | undefined;
     refreshDb: boolean;
     maxAgeHours: number | undefined;
     onProgress: ((progress: CollectionProgress) => void) | undefined;
@@ -459,7 +463,12 @@ async function collectOne(
   let pagesFailed = 0;
   let totalAvailable = 0;
 
-  for (let page = 0; options.maxPages === undefined || page < options.maxPages; page += 1) {
+  let page = 0;
+  let totalPages: number | undefined;
+  let stride = 1;
+  let lastPlannedPage: number | undefined;
+
+  while (options.maxPages === undefined || page < options.maxPages) {
     const existingPage = db.getCollectionPage(scenario.leaderboardId, page);
     if (
       existingPage?.status === "success" &&
@@ -468,7 +477,9 @@ async function collectOne(
     ) {
       pagesSkipped += 1;
       totalAvailable = existingPage.totalAvailable;
-      const totalPages = totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : undefined;
+      totalPages = totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : undefined;
+      stride = collectionPageStride(options.sampleRate, totalPages);
+      lastPlannedPage = plannedLastPage(totalPages, options.maxPages);
       options.onProgress?.({
         scenarioName: scenario.scenarioName,
         leaderboardId: scenario.leaderboardId,
@@ -479,9 +490,10 @@ async function collectOne(
         totalAvailable,
         status: "skipped",
       });
-      if (totalPages !== undefined && page + 1 >= totalPages) {
+      if (lastPlannedPage !== undefined && page >= lastPlannedPage) {
         break;
       }
+      page = nextCollectionPage(page, stride, lastPlannedPage);
       continue;
     }
 
@@ -494,6 +506,9 @@ async function collectOne(
       });
       pagesFetched += 1;
       totalAvailable = leaderboard.total;
+      totalPages = leaderboard.max > 0 ? Math.ceil(leaderboard.total / leaderboard.max) : undefined;
+      stride = collectionPageStride(options.sampleRate, totalPages);
+      lastPlannedPage = plannedLastPage(totalPages, options.maxPages);
       db.upsertLeaderboardScores(scenario.leaderboardId, leaderboard.scores, fetchedAt);
       const scoresStored = db.getScoreCount(scenario.leaderboardId);
       db.upsertCollectionPage({
@@ -509,14 +524,15 @@ async function collectOne(
         leaderboardId: scenario.leaderboardId,
         page,
         pagesFetched,
-        totalPages: leaderboard.max > 0 ? Math.ceil(leaderboard.total / leaderboard.max) : undefined,
+        totalPages,
         scoresStored,
         totalAvailable,
         status: "fetched",
       });
-      if ((page + 1) * leaderboard.max >= leaderboard.total) {
+      if (lastPlannedPage !== undefined && page >= lastPlannedPage) {
         break;
       }
+      page = nextCollectionPage(page, stride, lastPlannedPage);
     } catch (error) {
       pagesFailed += 1;
       db.upsertCollectionPage({
@@ -545,8 +561,8 @@ async function collectOne(
 
   const scoresStored = db.getScoreCount(scenario.leaderboardId);
   const pageStats = db.getCollectionPageStats(scenario.leaderboardId);
-  const totalPages = totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : 0;
-  const complete = totalPages > 0 && pageStats.successfulPages >= totalPages;
+  const finalTotalPages = totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : 0;
+  const complete = finalTotalPages > 0 && pageStats.successfulPages >= finalTotalPages;
   db.upsertCollectionMetadata({
     leaderboardId: scenario.leaderboardId,
     pagesFetched: pageStats.successfulPages,
@@ -565,6 +581,29 @@ async function collectOne(
     totalAvailable,
     complete,
   };
+}
+
+function collectionPageStride(sampleRate: number | undefined, totalPages: number | undefined): number {
+  if (sampleRate === undefined || sampleRate >= 1 || totalPages === undefined || totalPages <= 50) {
+    return 1;
+  }
+  return Math.max(1, Math.floor(1 / sampleRate));
+}
+
+function plannedLastPage(totalPages: number | undefined, maxPages: number | undefined): number | undefined {
+  if (totalPages === undefined || totalPages <= 0) {
+    return undefined;
+  }
+  const pageLimit = maxPages === undefined ? totalPages : Math.min(totalPages, maxPages);
+  return pageLimit > 0 ? pageLimit - 1 : undefined;
+}
+
+function nextCollectionPage(currentPage: number, stride: number, lastPlannedPage: number | undefined): number {
+  const nextPage = currentPage + stride;
+  if (lastPlannedPage === undefined || stride <= 1 || nextPage <= lastPlannedPage) {
+    return nextPage;
+  }
+  return lastPlannedPage;
 }
 
 function isFresh(fetchedAt: string, maxAgeHours: number | undefined): boolean {

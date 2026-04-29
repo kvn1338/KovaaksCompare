@@ -86,6 +86,18 @@ node dist/cli.js collect \
 
 Collection is resumable. Successful pages are skipped on later runs unless you pass `--refresh-db` or `--max-age-hours`.
 
+For faster exploratory reports on large leaderboards, collect a rank-stratified page sample:
+
+```bash
+node dist/cli.js collect \
+  --match viscose-easier-s1-to-s2 \
+  --sample-rate 0.2
+```
+
+`--sample-rate 0.2` fetches roughly every 5th page, `0.1` roughly every 10th page, and so on. The page stride is rounded down from `1 / sampleRate`, page 0 is always fetched first, and the final page is included when sampling across the full leaderboard. Sampling is ignored for leaderboards with 50 pages or fewer.
+
+Sampled collections are useful for fast global percentile and cutoff exploration, but they are not a substitute for final full pulls. Paired-player estimates can become noisier because sampling may reduce overlap between scenarios.
+
 ### 5. Generate a calibration report
 
 ```bash
@@ -200,6 +212,7 @@ Useful collection flags:
 
 ```bash
 --max-pages 10
+--sample-rate 0.2
 --refresh-db
 --max-age-hours 24
 --request-delay-ms 750

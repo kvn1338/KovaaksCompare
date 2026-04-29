@@ -165,6 +165,11 @@ leaderboard
     parseInteger,
   )
   .option(
+    "--sample-rate <rate>",
+    "Fetch a rank-stratified sample of pages, e.g. 0.2 fetches roughly every 5th page; ignored for leaderboards with 50 pages or fewer",
+    parseSampleRate,
+  )
+  .option(
     "--refresh-db",
     "Refetch pages even when successful page records already exist",
   )
@@ -208,6 +213,7 @@ leaderboard
       const output = await collectLeaderboards(client, db, {
         scenarios,
         maxPages: options.maxPages,
+        sampleRate: options.sampleRate,
         refreshDb: options.refreshDb,
         maxAgeHours: options.maxAgeHours,
         onProgress: options.json
@@ -448,6 +454,11 @@ program
   .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
   .option("--max-pages <count>", "Optional max pages per leaderboard; omit to collect all pages", parseInteger)
+  .option(
+    "--sample-rate <rate>",
+    "Fetch a rank-stratified sample of pages, e.g. 0.2 fetches roughly every 5th page; ignored for leaderboards with 50 pages or fewer",
+    parseSampleRate,
+  )
   .option("--refresh-db", "Refetch pages even when successful page records already exist")
   .option("--max-age-hours <hours>", "Refetch successful page records older than this many hours", parseNumber)
   .option("--request-delay-ms <ms>", "Initial delay between API requests", parseInteger, 750)
@@ -475,6 +486,7 @@ program
       const output = await collectResolvedLeaderboards(client, db, {
         scenarios,
         maxPages: options.maxPages,
+        sampleRate: options.sampleRate,
         refreshDb: options.refreshDb,
         maxAgeHours: options.maxAgeHours,
         onProgress: options.json ? undefined : collectionProgressLogger,
@@ -675,6 +687,11 @@ calibration
     parseInteger,
   )
   .option(
+    "--sample-rate <rate>",
+    "Fetch a rank-stratified sample of pages, e.g. 0.2 fetches roughly every 5th page; ignored for leaderboards with 50 pages or fewer",
+    parseSampleRate,
+  )
+  .option(
     "--refresh-db",
     "Refetch pages even when successful page records already exist",
   )
@@ -722,6 +739,7 @@ calibration
       const output = await collectResolvedLeaderboards(client, db, {
         scenarios,
         maxPages: options.maxPages,
+        sampleRate: options.sampleRate,
         refreshDb: options.refreshDb,
         maxAgeHours: options.maxAgeHours,
         onProgress: options.json ? undefined : collectionProgressLogger,
@@ -839,6 +857,14 @@ function parseNumber(value: string): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
     throw new Error(`Expected number, got ${value}`);
+  }
+  return parsed;
+}
+
+function parseSampleRate(value: string): number {
+  const parsed = parseNumber(value);
+  if (parsed <= 0 || parsed > 1) {
+    throw new Error(`Expected --sample-rate to be > 0 and <= 1, got ${value}`);
   }
   return parsed;
 }
