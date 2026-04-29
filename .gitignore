@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.cache/
+data/
+.codex
+comparison.csv
+related-projects/
