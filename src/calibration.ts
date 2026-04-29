@@ -179,6 +179,35 @@ export interface MappingSuggestion {
   warnings: string[];
 }
 
+export interface MappingValidationResult {
+  mappingId: string;
+  sourceBenchmark: BenchmarkConfig;
+  targetBenchmark: BenchmarkConfig;
+  pairCount: number;
+  sourceScenarioCount: number;
+  targetScenarioCount: number;
+  duplicateSources: ScenarioConfig[];
+  duplicateTargets: ScenarioConfig[];
+  unpairedSources: ScenarioConfig[];
+  unpairedTargets: ScenarioConfig[];
+  missingSourceScenarioIds: string[];
+  missingTargetScenarioIds: string[];
+  categoryMismatches: MappingValidationPairIssue[];
+  suspiciousPairs: MappingValidationPairIssue[];
+  missingLeaderboardIds: Array<{ side: "source" | "target"; scenario: ScenarioConfig }>;
+  missingScoreData: Array<{ side: "source" | "target"; scenario: ScenarioConfig; leaderboardId: string }>;
+  warnings: string[];
+}
+
+export interface MappingValidationPairIssue {
+  sourceScenario: ScenarioConfig;
+  targetScenario: ScenarioConfig;
+  sourceCategory?: string;
+  targetCategory?: string;
+  similarity?: number;
+  reason: string;
+}
+
 const UNCATEGORIZED = "__uncategorized__";
 const CATEGORY_OCCURRENCE_SEPARATOR = "@@";
 
@@ -274,6 +303,123 @@ export function suggestMapping(input: {
   };
 }
 
+export function validateMapping(input: {
+  config: CalibrationConfig;
+  mapping: CalibrationMapping;
+  db?: AppDatabase;
+  suspiciousSimilarityThreshold?: number;
+}): MappingValidationResult {
+  const sourceBenchmark = getBenchmark(input.config, input.mapping.sourceBenchmark);
+  const targetBenchmark = getBenchmark(input.config, input.mapping.targetBenchmark);
+  const sourceById = new Map(sourceBenchmark.scenarios.map((scenario) => [scenario.id, scenario]));
+  const targetById = new Map(targetBenchmark.scenarios.map((scenario) => [scenario.id, scenario]));
+  const sourceUsage = countScenarioUsage(input.mapping.pairs.map((pair) => pair.sourceScenario));
+  const targetUsage = countScenarioUsage(input.mapping.pairs.map((pair) => pair.targetScenario));
+  const sourceBlocks = scenarioCategoryBlockMap(sourceBenchmark.scenarios);
+  const targetBlocks = scenarioCategoryBlockMap(targetBenchmark.scenarios);
+  const similarityThreshold = input.suspiciousSimilarityThreshold ?? 0.08;
+
+  const duplicateSources = [...sourceUsage.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([id]) => sourceById.get(id))
+    .filter((scenario): scenario is ScenarioConfig => Boolean(scenario));
+  const duplicateTargets = [...targetUsage.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([id]) => targetById.get(id))
+    .filter((scenario): scenario is ScenarioConfig => Boolean(scenario));
+
+  const missingSourceScenarioIds = [...sourceUsage.keys()].filter((id) => !sourceById.has(id));
+  const missingTargetScenarioIds = [...targetUsage.keys()].filter((id) => !targetById.has(id));
+  const pairedSourceIds = new Set([...sourceUsage.keys()].filter((id) => sourceById.has(id)));
+  const pairedTargetIds = new Set([...targetUsage.keys()].filter((id) => targetById.has(id)));
+  const unpairedSources = sourceBenchmark.scenarios.filter((scenario) => !pairedSourceIds.has(scenario.id));
+  const unpairedTargets = targetBenchmark.scenarios.filter((scenario) => !pairedTargetIds.has(scenario.id));
+  const categoryMismatches: MappingValidationPairIssue[] = [];
+  const suspiciousPairs: MappingValidationPairIssue[] = [];
+  const missingLeaderboardIds: Array<{ side: "source" | "target"; scenario: ScenarioConfig }> = [];
+  const missingScoreData: Array<{ side: "source" | "target"; scenario: ScenarioConfig; leaderboardId: string }> = [];
+
+  for (const scenario of sourceBenchmark.scenarios) {
+    if (!scenario.leaderboardId) missingLeaderboardIds.push({ side: "source", scenario });
+  }
+  for (const scenario of targetBenchmark.scenarios) {
+    if (!scenario.leaderboardId) missingLeaderboardIds.push({ side: "target", scenario });
+  }
+
+  for (const pair of input.mapping.pairs) {
+    const sourceScenario = sourceById.get(pair.sourceScenario);
+    const targetScenario = targetById.get(pair.targetScenario);
+    if (!sourceScenario || !targetScenario) continue;
+    const sourceCategory = sourceBlocks.get(sourceScenario.id);
+    const targetCategory = targetBlocks.get(targetScenario.id);
+    if (sourceCategory !== targetCategory) {
+      categoryMismatches.push({
+        sourceScenario,
+        targetScenario,
+        sourceCategory,
+        targetCategory,
+        reason: "Paired scenarios are in different category blocks.",
+      });
+    }
+    const similarity = jaccard(tokenize(sourceScenario.name), tokenize(targetScenario.name));
+    if (similarity < similarityThreshold) {
+      suspiciousPairs.push({
+        sourceScenario,
+        targetScenario,
+        sourceCategory,
+        targetCategory,
+        similarity,
+        reason: `Name token similarity is below ${similarityThreshold}.`,
+      });
+    }
+  }
+
+  if (input.db) {
+    for (const scenario of sourceBenchmark.scenarios) {
+      if (!scenario.leaderboardId) continue;
+      if (input.db.getScoreCount(scenario.leaderboardId) === 0) {
+        missingScoreData.push({ side: "source", scenario, leaderboardId: scenario.leaderboardId });
+      }
+    }
+    for (const scenario of targetBenchmark.scenarios) {
+      if (!scenario.leaderboardId) continue;
+      if (input.db.getScoreCount(scenario.leaderboardId) === 0) {
+        missingScoreData.push({ side: "target", scenario, leaderboardId: scenario.leaderboardId });
+      }
+    }
+  }
+
+  const warnings: string[] = [];
+  if (duplicateSources.length > 0) warnings.push(`${duplicateSources.length} source scenario(s) are mapped more than once.`);
+  if (duplicateTargets.length > 0) warnings.push(`${duplicateTargets.length} target scenario(s) are mapped more than once.`);
+  if (missingSourceScenarioIds.length > 0) warnings.push(`${missingSourceScenarioIds.length} source scenario ID(s) do not exist in the source benchmark.`);
+  if (missingTargetScenarioIds.length > 0) warnings.push(`${missingTargetScenarioIds.length} target scenario ID(s) do not exist in the target benchmark.`);
+  if (categoryMismatches.length > 0) warnings.push(`${categoryMismatches.length} pair(s) cross category blocks.`);
+  if (suspiciousPairs.length > 0) warnings.push(`${suspiciousPairs.length} pair(s) have low name similarity and should be reviewed.`);
+  if (missingLeaderboardIds.length > 0) warnings.push(`${missingLeaderboardIds.length} scenario(s) are missing leaderboard IDs.`);
+  if (missingScoreData.length > 0) warnings.push(`${missingScoreData.length} scenario(s) have no scores stored in the provided database.`);
+
+  return {
+    mappingId: input.mapping.id,
+    sourceBenchmark,
+    targetBenchmark,
+    pairCount: input.mapping.pairs.length,
+    sourceScenarioCount: sourceBenchmark.scenarios.length,
+    targetScenarioCount: targetBenchmark.scenarios.length,
+    duplicateSources,
+    duplicateTargets,
+    unpairedSources,
+    unpairedTargets,
+    missingSourceScenarioIds,
+    missingTargetScenarioIds,
+    categoryMismatches,
+    suspiciousPairs,
+    missingLeaderboardIds,
+    missingScoreData,
+    warnings,
+  };
+}
+
 function groupByMatchingCategory(scenarios: ScenarioConfig[]): Map<string, ScenarioConfig[]> {
   const groups = new Map<string, ScenarioConfig[]>();
   const occurrences = new Map<string, number>();
@@ -297,6 +443,16 @@ function groupByMatchingCategory(scenarios: ScenarioConfig[]): Map<string, Scena
     }
   }
   return groups;
+}
+
+function scenarioCategoryBlockMap(scenarios: ScenarioConfig[]): Map<string, string> {
+  const output = new Map<string, string>();
+  for (const [category, categoryScenarios] of groupByMatchingCategory(scenarios)) {
+    for (const scenario of categoryScenarios) {
+      output.set(scenario.id, category);
+    }
+  }
+  return output;
 }
 
 function orderedCategories(
@@ -333,6 +489,33 @@ function categoryLabel(key: string): string {
   const [baseKey, occurrence] = key.split(CATEGORY_OCCURRENCE_SEPARATOR);
   if (baseKey === UNCATEGORIZED) return "(uncategorized)";
   return occurrence && occurrence !== "1" ? `"${baseKey}" block ${occurrence}` : `"${baseKey}"`;
+}
+
+function countScenarioUsage(ids: string[]): Map<string, number> {
+  const output = new Map<string, number>();
+  for (const id of ids) {
+    output.set(id, (output.get(id) ?? 0) + 1);
+  }
+  return output;
+}
+
+function tokenize(name: string): Set<string> {
+  return new Set(
+    name
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((token) => token.length > 1),
+  );
+}
+
+function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 0;
+  let intersection = 0;
+  for (const token of a) {
+    if (b.has(token)) intersection += 1;
+  }
+  const union = a.size + b.size - intersection;
+  return union === 0 ? 0 : intersection / union;
 }
 
 function findBenchmark(config: CalibrationConfig, query: string): BenchmarkConfig {

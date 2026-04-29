@@ -67,6 +67,14 @@ node dist/cli.js match create \
 
 The matcher groups scenarios by imported benchmark category block, then pairs them sequentially inside each block. Repeated category labels are kept separate by occurrence order, so an early `Speed` block and a later `Speed` block do not get merged. Review the generated file before collecting/reporting, because this assumes both benchmarks keep the same category order.
 
+Validate the match file before using it:
+
+```bash
+node dist/cli.js match validate viscose-easier-s1-to-s2
+```
+
+This checks for missing scenario IDs, duplicate source/target usage, unpaired scenarios, category/block mismatches, low-similarity pairs that deserve review, and missing leaderboard IDs. Add `--db data/kovaaks-compare.sqlite` to also check whether every scenario has collected score data.
+
 ### 4. Collect leaderboard scores for the matched benchmarks
 
 This collects every scenario from both benchmarks referenced by the match file into SQLite.

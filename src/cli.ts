@@ -20,9 +20,11 @@ import {
   resolvedScenariosForBenchmarks,
   resolveCalibrationConfig,
   suggestMapping,
+  validateMapping,
   withMapping,
   type CalibrationConfig,
   type MappingSuggestion,
+  type MappingValidationResult,
 } from "./calibration.js";
 
 const DEFAULT_INDEX_PATH = "configs/benchmark-index.json";
@@ -445,6 +447,43 @@ match
     const outPath = options.out ?? mappingPathForId(suggestion.mapping.id);
     await writeTextFile(outPath, `${JSON.stringify(suggestion.mapping, null, 2)}\n`);
     printMappingSuggestion(config, suggestion, outPath);
+  });
+
+match
+  .command("validate")
+  .description("Validate a standalone match file before collection or reporting.")
+  .argument("<match>", "Match ID or match JSON path")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--db <path>", "Optional SQLite database path to check collected score coverage")
+  .option(
+    "--suspicious-similarity <value>",
+    "Name similarity threshold below which pairs are flagged for review",
+    parseNumber,
+    0.08,
+  )
+  .option("--json", "Print JSON instead of terminal text")
+  .action(async (matchInput: string, options) => {
+    const config = await loadCalibrationConfig(options.benchmarks);
+    const mapping = await loadCalibrationMapping(mappingPathFromInput(matchInput));
+    const db = options.db ? new AppDatabase(options.db) : undefined;
+    try {
+      const validation = validateMapping({
+        config,
+        mapping,
+        db,
+        suspiciousSimilarityThreshold: options.suspiciousSimilarity,
+      });
+      if (options.json) {
+        console.log(JSON.stringify(validation, null, 2));
+      } else {
+        console.log(formatMappingValidation(validation, Boolean(options.db)));
+      }
+      if (validation.warnings.length > 0) {
+        process.exitCode = 1;
+      }
+    } finally {
+      db?.close();
+    }
   });
 
 program
@@ -987,6 +1026,104 @@ function printMappingSuggestion(
       console.log(`- ${scenario.name} (${scenario.id})`);
     }
   }
+}
+
+function formatMappingValidation(result: MappingValidationResult, checkedDb: boolean): string {
+  const lines = [
+    `Match: ${result.mappingId}`,
+    `Source: ${result.sourceBenchmark.name} (${result.sourceBenchmark.id})`,
+    `Target: ${result.targetBenchmark.name} (${result.targetBenchmark.id})`,
+    `Pairs: ${result.pairCount}`,
+    `Source scenarios: ${result.sourceScenarioCount} (${result.unpairedSources.length} unpaired)`,
+    `Target scenarios: ${result.targetScenarioCount} (${result.unpairedTargets.length} unpaired)`,
+  ];
+
+  if (result.warnings.length === 0) {
+    lines.push("", "Status: OK");
+  } else {
+    lines.push("", "Warnings:");
+    for (const warning of result.warnings) {
+      lines.push(`- ${warning}`);
+    }
+  }
+
+  appendScenarioList(lines, "Duplicate source scenarios", result.duplicateSources);
+  appendScenarioList(lines, "Duplicate target scenarios", result.duplicateTargets);
+
+  if (result.missingSourceScenarioIds.length > 0) {
+    lines.push("", "Missing source scenario IDs:");
+    for (const id of result.missingSourceScenarioIds) lines.push(`- ${id}`);
+  }
+  if (result.missingTargetScenarioIds.length > 0) {
+    lines.push("", "Missing target scenario IDs:");
+    for (const id of result.missingTargetScenarioIds) lines.push(`- ${id}`);
+  }
+
+  appendScenarioList(lines, "Unpaired source scenarios", result.unpairedSources);
+  appendScenarioList(lines, "Unpaired target scenarios", result.unpairedTargets);
+
+  if (result.categoryMismatches.length > 0) {
+    lines.push("", "Category/block mismatches:");
+    for (const issue of result.categoryMismatches) {
+      lines.push(
+        `- ${issue.sourceScenario.name} [${formatCategoryBlock(issue.sourceCategory)}] -> ` +
+          `${issue.targetScenario.name} [${formatCategoryBlock(issue.targetCategory)}]`,
+      );
+    }
+  }
+
+  if (result.suspiciousPairs.length > 0) {
+    lines.push("", "Suspicious low-similarity pairs:");
+    for (const issue of result.suspiciousPairs) {
+      lines.push(
+        `- ${issue.sourceScenario.name} -> ${issue.targetScenario.name} ` +
+          `(similarity ${issue.similarity?.toFixed(2) ?? "n/a"})`,
+      );
+    }
+  }
+
+  if (result.missingLeaderboardIds.length > 0) {
+    lines.push("", "Scenarios missing leaderboard IDs:");
+    for (const item of result.missingLeaderboardIds) {
+      lines.push(`- ${item.side}: ${item.scenario.name} (${item.scenario.id})`);
+    }
+  }
+
+  if (checkedDb) {
+    if (result.missingScoreData.length > 0) {
+      lines.push("", "Scenarios with no stored scores in DB:");
+      for (const item of result.missingScoreData) {
+        lines.push(`- ${item.side}: ${item.scenario.name} (${item.leaderboardId})`);
+      }
+    } else {
+      lines.push("", "DB score coverage: OK");
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function appendScenarioList(
+  lines: string[],
+  title: string,
+  scenarios: Array<{ id: string; name: string; category?: string; leaderboardId?: string }>,
+): void {
+  if (scenarios.length === 0) return;
+  lines.push("", `${title}:`);
+  for (const scenario of scenarios) {
+    lines.push(
+      `- ${scenario.name} (${scenario.id})` +
+        `${scenario.category ? `, category ${scenario.category}` : ""}` +
+        `${scenario.leaderboardId ? `, leaderboard ${scenario.leaderboardId}` : ""}`,
+    );
+  }
+}
+
+function formatCategoryBlock(category: string | undefined): string {
+  if (!category) return "unknown";
+  const [name, occurrence] = category.split("@@");
+  if (name === "__uncategorized__") return "uncategorized";
+  return occurrence && occurrence !== "1" ? `${name} block ${occurrence}` : name;
 }
 
 async function runReportCommand(options: {
