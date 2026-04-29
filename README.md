@@ -94,7 +94,7 @@ node dist/cli.js collect \
   --sample-rate 0.2
 ```
 
-`--sample-rate 0.2` fetches roughly every 5th page, `0.1` roughly every 10th page, and so on. KovaaK's leaderboard endpoint returns 100 scores per page. The page stride is rounded down from `1 / sampleRate`, page 0 is always fetched first, and the final page is included when sampling across the full leaderboard. Sampling is ignored for leaderboards with 50 pages or fewer.
+`--sample-rate 0.2` fetches roughly every 5th page, `0.1` roughly every 10th page, and so on. The page stride is rounded down from `1 / sampleRate`, page 0 is always fetched first, and the final page is included when sampling across the full leaderboard. Sampling is ignored for leaderboards with 50 pages or fewer.
 
 Sampled collections are useful for fast global percentile and cutoff exploration, but they are not a substitute for final full pulls. Paired-player estimates can become noisier because sampling may reduce overlap between scenarios.
 
