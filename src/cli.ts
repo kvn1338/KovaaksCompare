@@ -9,21 +9,24 @@ import { existsSync } from "node:fs";
 import {
   CALIBRATION_TEMPLATE,
   appendBenchmarkToConfig,
-  appendMappingToConfig,
   buildCalibrationReport,
   calibrationReportToCsv,
   calibrationReportToMarkdown,
   downloadBenchmarkIndex,
   importBenchmarkFromApi,
   loadBenchmarkIndex,
+  loadCalibrationMapping,
   loadCalibrationConfig,
   resolvedScenariosForBenchmarks,
   resolveCalibrationConfig,
   suggestMapping,
+  withMapping,
+  type CalibrationConfig,
+  type MappingSuggestion,
 } from "./calibration.js";
 
 const DEFAULT_INDEX_PATH = "configs/benchmark-index.json";
-const DEFAULT_CONFIG_PATH = "configs/calibration.json";
+const DEFAULT_BENCHMARKS_PATH = "configs/benchmarks.json";
 import {
   buildLeaderboardCutoffs,
   collectLeaderboards,
@@ -359,6 +362,151 @@ leaderboard
     }
   });
 
+const benchmarks = program
+  .command("benchmarks")
+  .description("Download benchmark metadata into configs/benchmarks.json.");
+
+benchmarks
+  .command("download")
+  .description("Download the benchmark name-to-ID index.")
+  .option("--out <path>", "Path for benchmark index JSON", DEFAULT_INDEX_PATH)
+  .option("--username <username>", "Override username used for the API request cache key", "KovaaksCompare")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
+    const index = await downloadBenchmarkIndex(client, options.username);
+    await writeTextFile(options.out, `${JSON.stringify(index, null, 2)}\n`);
+    console.log(`Benchmark index with ${index.benchmarks.length} benchmark(s) written to ${options.out}`);
+  });
+
+benchmarks
+  .command("import")
+  .description("Import one benchmark's scenarios and cutoff values.")
+  .argument("<benchmark>", "Benchmark name or KovaaK benchmark ID")
+  .option("--out <path>", "Path for updated benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--index <path>", "Benchmark index JSON for name lookup; auto-detected by default")
+  .option("--key <id>", "Local benchmark ID; defaults to slugified benchmark name")
+  .option("--difficulty <label>", "Difficulty label to store in benchmark metadata")
+  .option("--steam-id <steamId>", "Override dummy SteamID64 query parameter", "11111111111111111")
+  .option("--username <username>", "Override username used for benchmark name lookup", "KovaaksCompare")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (benchmark: string, options) => {
+    const indexPath = options.index ?? (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
+    const target = await resolveImportBenchmarkOptions({
+      index: indexPath,
+      benchmarkId: /^\d+$/.test(benchmark) ? benchmark : undefined,
+      benchmarkName: /^\d+$/.test(benchmark) ? undefined : benchmark,
+    });
+    const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
+    const imported = await importBenchmarkFromApi(client, {
+      username: options.username,
+      benchmarkId: target.benchmarkId,
+      benchmarkName: target.benchmarkName,
+      steamId: options.steamId,
+      id: options.key,
+      difficulty: options.difficulty,
+    });
+    const existing = existsSync(options.out) ? await loadCalibrationConfig(options.out) : undefined;
+    const updated = appendBenchmarkToConfig(existing, imported);
+    await writeTextFile(options.out, `${JSON.stringify(updated, null, 2)}\n`);
+    console.log(`Imported ${imported.scenarios.length} scenario(s) from ${imported.name} to ${options.out}`);
+  });
+
+const match = program
+  .command("match")
+  .description("Create editable source-target benchmark matching files.");
+
+match
+  .command("create")
+  .description("Create configs/<match-id>.json by pairing scenarios sequentially within categories.")
+  .argument("<source>", "Source benchmark id, name, or KovaaK benchmarkId")
+  .argument("<target>", "Target benchmark id, name, or KovaaK benchmarkId")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--out <path>", "Path to write the match JSON; defaults to configs/<match-id>.json")
+  .option("--id <id>", "Override the match id; defaults to source__to__target")
+  .option("--name <name>", "Override the match display name")
+  .action(async (source: string, target: string, options) => {
+    const config = await loadCalibrationConfig(options.benchmarks);
+    const suggestion = suggestMapping({
+      config,
+      sourceBenchmark: source,
+      targetBenchmark: target,
+      id: options.id,
+      name: options.name,
+    });
+    const outPath = options.out ?? mappingPathForId(suggestion.mapping.id);
+    await writeTextFile(outPath, `${JSON.stringify(suggestion.mapping, null, 2)}\n`);
+    printMappingSuggestion(config, suggestion, outPath);
+  });
+
+program
+  .command("collect")
+  .description("Collect leaderboard scores for both benchmarks in a match file.")
+  .requiredOption("--match <id>", "Match ID or match JSON path")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--max-pages <count>", "Optional max pages per leaderboard; omit to collect all pages", parseInteger)
+  .option("--refresh-db", "Refetch pages even when successful page records already exist")
+  .option("--max-age-hours <hours>", "Refetch successful page records older than this many hours", parseNumber)
+  .option("--request-delay-ms <ms>", "Initial delay between API requests", parseInteger, 750)
+  .option("--max-request-delay-ms <ms>", "Maximum adaptive delay between API requests", parseInteger, 15000)
+  .option("--max-retries <count>", "Retry attempts for retryable API errors", parseInteger, 6)
+  .option("--json", "Print JSON instead of terminal text")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const benchmarksConfig = await loadCalibrationConfig(options.benchmarks);
+    const mapping = await loadCalibrationMapping(mappingPathFromInput(options.match));
+    const scenarios = resolvedScenariosForBenchmarks(benchmarksConfig, [
+      mapping.sourceBenchmark,
+      mapping.targetBenchmark,
+    ]);
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+      requestDelayMs: options.requestDelayMs,
+      maxRequestDelayMs: options.maxRequestDelayMs,
+      maxRetries: options.maxRetries,
+    });
+    const db = new AppDatabase(options.db);
+    try {
+      const output = await collectResolvedLeaderboards(client, db, {
+        scenarios,
+        maxPages: options.maxPages,
+        refreshDb: options.refreshDb,
+        maxAgeHours: options.maxAgeHours,
+        onProgress: options.json ? undefined : collectionProgressLogger,
+      });
+      if (options.json) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log(formatCollectOutput(output, options.db));
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+program
+  .command("report")
+  .description("Generate a Markdown/CSV calibration report for a match file.")
+  .requiredOption("--match <id>", "Match ID or match JSON path")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--paired-only", "Restrict percentile mapping and compared distributions to overlapping Steam IDs")
+  .option("--percentiles <values>", "Comma-separated percentile rows to report", "50,60,75,88,95")
+  .option("--outlier-trim-percent <percent>", "Trim this percentage of largest residual outliers for robust regression", parseTrimPercent, 0)
+  .option("--outlier-limit <count>", "Number of residual outliers to include in output", parseNonNegativeInteger, 10)
+  .option("--markdown <path>", "Write a Markdown report")
+  .option("--csv <path>", "Write cutoff-focused CSV rows")
+  .option("--json", "Print JSON instead of Markdown text")
+  .option("--explain", "Append a short glossary describing each reported metric")
+  .action(async (options) => {
+    await runReportCommand(options);
+  });
+
 const calibration = program
   .command("calibration")
   .description("Work with benchmark calibration configs and mapped reports.");
@@ -429,7 +577,7 @@ calibration
   .description(
     "Import scenarios and rank cutoffs for one benchmark from KovaaK's benchmark API. Benchmark structure is account-independent; defaults are used unless overridden.",
   )
-  .option("--out <path>", "Path for updated calibration JSON config", DEFAULT_CONFIG_PATH)
+  .option("--out <path>", "Path for updated benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
   .option(
     "--steam-id <steamId>",
     "Override the SteamID64 query parameter (any valid 17-digit value works for benchmark structure)",
@@ -437,7 +585,7 @@ calibration
   )
   .option(
     "--config <path>",
-    "Existing calibration JSON config to update; defaults to --out path if it already exists",
+    "Existing benchmark metadata JSON to update; defaults to --out path if it already exists",
   )
   .option(
     "--index <path>",
@@ -485,76 +633,29 @@ calibration
 
 const mapping = calibration
   .command("mapping")
-  .description("Create or edit calibration mappings between benchmarks in a config.");
+  .description("Create or edit calibration mappings between imported benchmarks.");
 
 mapping
   .command("create")
-  .description("Auto-pair scenarios between two benchmarks in the config and append the mapping.")
+  .description("Auto-pair scenarios between two imported benchmarks and write a standalone mapping file.")
   .requiredOption("--source <benchmark>", "Source benchmark id, name, or KovaaK benchmarkId")
   .requiredOption("--target <benchmark>", "Target benchmark id, name, or KovaaK benchmarkId")
-  .option("--config <path>", "Calibration JSON config to read and update", DEFAULT_CONFIG_PATH)
-  .option("--out <path>", "Path to write the updated config; defaults to --config")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option("--out <path>", "Path to write the mapping JSON; defaults to configs/<mapping-id>.json")
   .option("--id <id>", "Override the mapping id; defaults to source__to__target")
   .option("--name <name>", "Override the mapping display name")
-  .option(
-    "--similarity-threshold <value>",
-    "Minimum Jaccard token similarity for auto-pairing (0..1)",
-    parseNumber,
-    0.3,
-  )
   .action(async (options) => {
-    const config = await loadCalibrationConfig(options.config);
+    const config = await loadCalibrationConfig(options.benchmarks);
     const suggestion = suggestMapping({
       config,
       sourceBenchmark: options.source,
       targetBenchmark: options.target,
       id: options.id,
       name: options.name,
-      similarityThreshold: options.similarityThreshold,
     });
-    const updated = appendMappingToConfig(config, suggestion.mapping);
-    const outPath = options.out ?? options.config;
-    await writeTextFile(outPath, `${JSON.stringify(updated, null, 2)}\n`);
-    const sourceBenchmarkConfig = updated.benchmarks.find((b) => b.id === suggestion.mapping.sourceBenchmark);
-    const targetBenchmarkConfig = updated.benchmarks.find((b) => b.id === suggestion.mapping.targetBenchmark);
-    const findScenarioName = (benchmarkId: string, scenarioId: string): string => {
-      const benchmark = updated.benchmarks.find((b) => b.id === benchmarkId);
-      return benchmark?.scenarios.find((s) => s.id === scenarioId)?.name ?? scenarioId;
-    };
-
-    console.log(
-      `Mapping "${suggestion.mapping.id}" written to ${outPath} ` +
-        `(${suggestion.mapping.pairs.length} paired scenario(s)).`,
-    );
-    console.log("Pairs:");
-    for (const pair of suggestion.mapping.pairs) {
-      console.log(
-        `- ${findScenarioName(suggestion.mapping.sourceBenchmark, pair.sourceScenario)} -> ` +
-          `${findScenarioName(suggestion.mapping.targetBenchmark, pair.targetScenario)}`,
-      );
-    }
-    if (suggestion.warnings.length > 0) {
-      console.log("\nWarnings (verify pairings in the config):");
-      for (const warning of suggestion.warnings) {
-        console.log(`- ${warning}`);
-      }
-    }
-    if (suggestion.unpairedSources.length > 0) {
-      console.log(
-        `\nUnpaired source scenarios in ${sourceBenchmarkConfig?.name ?? suggestion.mapping.sourceBenchmark} (edit ${outPath} to pair manually):`,
-      );
-      for (const scenario of suggestion.unpairedSources) {
-        console.log(`- ${scenario.name} (${scenario.id})`);
-      }
-    }
-    if (suggestion.unpairedTargets.length > 0) {
-      console.log(
-        `\nUnused target scenarios in ${targetBenchmarkConfig?.name ?? suggestion.mapping.targetBenchmark}:`,
-      );
-      for (const scenario of suggestion.unpairedTargets) {
-        console.log(`- ${scenario.name} (${scenario.id})`);
-      }
-    }
+    const outPath = options.out ?? mappingPathForId(suggestion.mapping.id);
+    await writeTextFile(outPath, `${JSON.stringify(suggestion.mapping, null, 2)}\n`);
+    printMappingSuggestion(config, suggestion, outPath);
   });
 
 calibration
@@ -562,9 +663,9 @@ calibration
   .description(
     "Collect all scenarios from selected calibration config benchmarks.",
   )
-  .requiredOption("--config <path>", "Resolved calibration JSON config")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
   .option(
-    "--benchmarks <ids>",
+    "--benchmark-ids <ids>",
     "Comma-separated benchmark IDs; defaults to all benchmarks",
   )
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
@@ -604,10 +705,10 @@ calibration
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (options) => {
-    const config = await loadCalibrationConfig(options.config);
+    const config = await loadCalibrationConfig(options.benchmarks);
     const scenarios = resolvedScenariosForBenchmarks(
       config,
-      options.benchmarks ? parseScenarioList(options.benchmarks) : undefined,
+      options.benchmarkIds ? parseScenarioList(options.benchmarkIds) : undefined,
     );
     const client = new KovaaksClient({
       refresh: options.refresh,
@@ -640,8 +741,8 @@ calibration
   .description(
     "Generate a multi-pair calibration report from configured benchmark mappings.",
   )
-  .requiredOption("--config <path>", "Resolved calibration JSON config")
-  .requiredOption("--mapping <id>", "Mapping ID from the calibration config")
+  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .requiredOption("--mapping <id>", "Mapping ID or mapping JSON path")
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
   .option(
     "--paired-only",
@@ -672,40 +773,7 @@ calibration
     "Append a short glossary describing each reported metric",
   )
   .action(async (options) => {
-    const config = await loadCalibrationConfig(options.config);
-    const db = new AppDatabase(options.db);
-    try {
-      const report = buildCalibrationReport(db, config, {
-        mappingId: options.mapping,
-        percentiles: parsePercentiles(options.percentiles),
-        pairedOnly: options.pairedOnly,
-        outlierTrimPercent: options.outlierTrimPercent,
-        outlierLimit: options.outlierLimit,
-      });
-      const baseMarkdown = calibrationReportToMarkdown(report);
-      const markdown = options.explain
-        ? `${baseMarkdown}\n## Glossary\n\n${METRICS_GLOSSARY}\n`
-        : baseMarkdown;
-      if (options.markdown) {
-        await writeTextFile(options.markdown, markdown);
-      }
-      if (options.csv) {
-        await writeTextFile(options.csv, calibrationReportToCsv(report));
-      }
-      if (options.json) {
-        console.log(JSON.stringify(report, null, 2));
-      } else {
-        console.log(markdown);
-        if (options.markdown) {
-          console.log(`\nMarkdown written to ${options.markdown}`);
-        }
-        if (options.csv) {
-          console.log(`CSV written to ${options.csv}`);
-        }
-      }
-    } finally {
-      db.close();
-    }
+    await runReportCommand(options);
   });
 
 program.parseAsync().catch((error: unknown) => {
@@ -846,6 +914,117 @@ function collectionProgressLogger(progress: {
 async function writeTextFile(path: string, content: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, content);
+}
+
+function printMappingSuggestion(
+  config: CalibrationConfig,
+  suggestion: MappingSuggestion,
+  outPath: string,
+): void {
+  const sourceBenchmarkConfig = config.benchmarks.find((b) => b.id === suggestion.mapping.sourceBenchmark);
+  const targetBenchmarkConfig = config.benchmarks.find((b) => b.id === suggestion.mapping.targetBenchmark);
+  const findScenarioName = (benchmarkId: string, scenarioId: string): string => {
+    const benchmark = config.benchmarks.find((b) => b.id === benchmarkId);
+    return benchmark?.scenarios.find((s) => s.id === scenarioId)?.name ?? scenarioId;
+  };
+
+  console.log(
+    `Mapping "${suggestion.mapping.id}" written to ${outPath} ` +
+      `(${suggestion.mapping.pairs.length} paired scenario(s)).`,
+  );
+  console.log("Pairs:");
+  for (const pair of suggestion.mapping.pairs) {
+    console.log(
+      `- ${findScenarioName(suggestion.mapping.sourceBenchmark, pair.sourceScenario)} -> ` +
+        `${findScenarioName(suggestion.mapping.targetBenchmark, pair.targetScenario)}`,
+    );
+  }
+  if (suggestion.warnings.length > 0) {
+    console.log("\nWarnings (verify pairings in the mapping file):");
+    for (const warning of suggestion.warnings) {
+      console.log(`- ${warning}`);
+    }
+  }
+  if (suggestion.unpairedSources.length > 0) {
+    console.log(
+      `\nUnpaired source scenarios in ${sourceBenchmarkConfig?.name ?? suggestion.mapping.sourceBenchmark} (edit ${outPath} to pair manually):`,
+    );
+    for (const scenario of suggestion.unpairedSources) {
+      console.log(`- ${scenario.name} (${scenario.id})`);
+    }
+  }
+  if (suggestion.unpairedTargets.length > 0) {
+    console.log(
+      `\nUnused target scenarios in ${targetBenchmarkConfig?.name ?? suggestion.mapping.targetBenchmark}:`,
+    );
+    for (const scenario of suggestion.unpairedTargets) {
+      console.log(`- ${scenario.name} (${scenario.id})`);
+    }
+  }
+}
+
+async function runReportCommand(options: {
+  benchmarks: string;
+  match?: string;
+  mapping?: string;
+  db: string;
+  percentiles: string;
+  pairedOnly?: boolean;
+  outlierTrimPercent?: number;
+  outlierLimit?: number;
+  markdown?: string;
+  csv?: string;
+  json?: boolean;
+  explain?: boolean;
+}): Promise<void> {
+  const mappingInput = options.match ?? options.mapping;
+  if (!mappingInput) {
+    throw new Error("Provide --match or --mapping.");
+  }
+  const benchmarks = await loadCalibrationConfig(options.benchmarks);
+  const mapping = await loadCalibrationMapping(mappingPathFromInput(mappingInput));
+  const config = withMapping(benchmarks, mapping);
+  const db = new AppDatabase(options.db);
+  try {
+    const report = buildCalibrationReport(db, config, {
+      mappingId: mapping.id,
+      percentiles: parsePercentiles(options.percentiles),
+      pairedOnly: options.pairedOnly,
+      outlierTrimPercent: options.outlierTrimPercent,
+      outlierLimit: options.outlierLimit,
+    });
+    const baseMarkdown = calibrationReportToMarkdown(report);
+    const markdown = options.explain
+      ? `${baseMarkdown}\n## Glossary\n\n${METRICS_GLOSSARY}\n`
+      : baseMarkdown;
+    if (options.markdown) {
+      await writeTextFile(options.markdown, markdown);
+    }
+    if (options.csv) {
+      await writeTextFile(options.csv, calibrationReportToCsv(report));
+    }
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(markdown);
+      if (options.markdown) {
+        console.log(`\nMarkdown written to ${options.markdown}`);
+      }
+      if (options.csv) {
+        console.log(`CSV written to ${options.csv}`);
+      }
+    }
+  } finally {
+    db.close();
+  }
+}
+
+function mappingPathForId(id: string): string {
+  return `configs/${id}.json`;
+}
+
+function mappingPathFromInput(value: string): string {
+  return value.endsWith(".json") || value.includes("/") ? value : mappingPathForId(value);
 }
 
 async function resolveImportBenchmarkOptions(options: {

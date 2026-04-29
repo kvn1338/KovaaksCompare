@@ -104,6 +104,18 @@ export async function loadCalibrationConfig(path: string): Promise<CalibrationCo
   return CalibrationConfigSchema.parse(JSON.parse(raw));
 }
 
+export async function loadCalibrationMapping(path: string): Promise<CalibrationMapping> {
+  const raw = await readFile(path, "utf8");
+  return CalibrationMappingSchema.parse(JSON.parse(raw));
+}
+
+export function withMapping(config: CalibrationConfig, mapping: CalibrationMapping): CalibrationConfig {
+  return {
+    ...config,
+    mappings: [mapping],
+  };
+}
+
 export async function loadBenchmarkIndex(path: string): Promise<BenchmarkIndex> {
   const raw = await readFile(path, "utf8");
   return BenchmarkIndexSchema.parse(JSON.parse(raw));
@@ -178,6 +190,7 @@ export interface MappingSuggestion {
 }
 
 const UNCATEGORIZED = "__uncategorized__";
+const CATEGORY_OCCURRENCE_SEPARATOR = "@@";
 
 export function suggestMapping(input: {
   config: CalibrationConfig;
@@ -185,7 +198,6 @@ export function suggestMapping(input: {
   targetBenchmark: string;
   id?: string;
   name?: string;
-  similarityThreshold?: number;
 }): MappingSuggestion {
   const sourceBenchmark = findBenchmark(input.config, input.sourceBenchmark);
   const targetBenchmark = findBenchmark(input.config, input.targetBenchmark);
@@ -193,27 +205,26 @@ export function suggestMapping(input: {
     throw new Error("Source and target benchmarks must differ.");
   }
 
-  const threshold = input.similarityThreshold ?? 0.3;
-  const sourceByCategory = groupByCategory(sourceBenchmark.scenarios);
-  const targetByCategory = groupByCategory(targetBenchmark.scenarios);
+  const sourceByCategory = groupByMatchingCategory(sourceBenchmark.scenarios);
+  const targetByCategory = groupByMatchingCategory(targetBenchmark.scenarios);
   const allCategories = new Set([...sourceByCategory.keys(), ...targetByCategory.keys()]);
 
   const pairs: Array<{ sourceScenario: string; targetScenario: string }> = [];
   const unpairedSources: ScenarioConfig[] = [];
   const unpairedTargets: ScenarioConfig[] = [];
   const warnings: string[] = [];
-  const sortedCategories = [...allCategories].sort();
-  const hasUncategorized = sortedCategories.includes(UNCATEGORIZED);
+  const categoryOrder = orderedCategories(sourceBenchmark.scenarios, targetBenchmark.scenarios, allCategories);
+  const hasUncategorized = categoryOrder.some((category) => category.startsWith(UNCATEGORIZED));
   if (hasUncategorized) {
     warnings.push(
       "Some scenarios have no category metadata; pairing them across the full benchmark instead of by category. Re-run calibration import-benchmark to populate categories.",
     );
   }
 
-  for (const category of sortedCategories) {
+  for (const category of categoryOrder) {
     const sources = sourceByCategory.get(category) ?? [];
     const targets = targetByCategory.get(category) ?? [];
-    const label = category === UNCATEGORIZED ? "(uncategorized)" : `"${category}"`;
+    const label = categoryLabel(category);
 
     if (sources.length === 0) {
       unpairedTargets.push(...targets);
@@ -235,42 +246,18 @@ export function suggestMapping(input: {
       );
     }
 
-    const used = new Set<string>();
-    const forcedPairs: string[] = [];
-    for (const sourceScenario of sources) {
-      const sourceTokens = tokenize(sourceScenario.name);
-      let bestScore = 0;
-      let bestTarget: ScenarioConfig | undefined;
-      for (const candidate of targets) {
-        if (used.has(candidate.id)) continue;
-        const score = jaccard(sourceTokens, tokenize(candidate.name));
-        if (score > bestScore) {
-          bestScore = score;
-          bestTarget = candidate;
-        }
-      }
-      if (!bestTarget) {
-        unpairedSources.push(sourceScenario);
-        continue;
-      }
-      const aboveThreshold = bestScore >= threshold;
-      if (aboveThreshold) {
-        pairs.push({ sourceScenario: sourceScenario.id, targetScenario: bestTarget.id });
-        used.add(bestTarget.id);
-      } else {
-        // Force-pair within a category-bucketed group; user verifies.
-        pairs.push({ sourceScenario: sourceScenario.id, targetScenario: bestTarget.id });
-        used.add(bestTarget.id);
-        forcedPairs.push(`${sourceScenario.name} -> ${bestTarget.name} (similarity ${bestScore.toFixed(2)})`);
-      }
+    const pairCount = Math.min(sources.length, targets.length);
+    for (let index = 0; index < pairCount; index += 1) {
+      pairs.push({
+        sourceScenario: sources[index].id,
+        targetScenario: targets[index].id,
+      });
     }
-    if (forcedPairs.length > 0) {
-      warnings.push(
-        `Category ${label} pairs below ${threshold} similarity threshold; verify: ${forcedPairs.join("; ")}.`,
-      );
+    if (sources.length > pairCount) {
+      unpairedSources.push(...sources.slice(pairCount));
     }
-    for (const candidate of targets) {
-      if (!used.has(candidate.id)) unpairedTargets.push(candidate);
+    if (targets.length > pairCount) {
+      unpairedTargets.push(...targets.slice(pairCount));
     }
   }
 
@@ -297,10 +284,21 @@ export function suggestMapping(input: {
   };
 }
 
-function groupByCategory(scenarios: ScenarioConfig[]): Map<string, ScenarioConfig[]> {
+function groupByMatchingCategory(scenarios: ScenarioConfig[]): Map<string, ScenarioConfig[]> {
   const groups = new Map<string, ScenarioConfig[]>();
+  const occurrences = new Map<string, number>();
+  let previousBaseKey: string | undefined;
+  let currentKey: string | undefined;
+
   for (const scenario of scenarios) {
-    const key = scenario.category?.trim() || UNCATEGORIZED;
+    const baseKey = normalizedCategoryKey(scenario.category);
+    if (baseKey !== previousBaseKey) {
+      const nextOccurrence = (occurrences.get(baseKey) ?? 0) + 1;
+      occurrences.set(baseKey, nextOccurrence);
+      currentKey = categoryBucketKey(baseKey, nextOccurrence);
+      previousBaseKey = baseKey;
+    }
+    const key = currentKey ?? categoryBucketKey(baseKey, 1);
     const bucket = groups.get(key);
     if (bucket) {
       bucket.push(scenario);
@@ -309,6 +307,42 @@ function groupByCategory(scenarios: ScenarioConfig[]): Map<string, ScenarioConfi
     }
   }
   return groups;
+}
+
+function orderedCategories(
+  sourceScenarios: ScenarioConfig[],
+  targetScenarios: ScenarioConfig[],
+  allCategories: Set<string>,
+): string[] {
+  const ordered: string[] = [];
+  for (const category of [
+    ...groupByMatchingCategory(sourceScenarios).keys(),
+    ...groupByMatchingCategory(targetScenarios).keys(),
+  ]) {
+    if (!ordered.includes(category)) ordered.push(category);
+  }
+  for (const category of allCategories) {
+    if (!ordered.includes(category)) {
+      ordered.push(category);
+    }
+  }
+  return ordered;
+}
+
+function normalizedCategoryKey(category: string | undefined): string {
+  const trimmed = category?.trim();
+  if (!trimmed) return UNCATEGORIZED;
+  return trimmed.replace(/\s+track$/i, "");
+}
+
+function categoryBucketKey(baseKey: string, occurrence: number): string {
+  return `${baseKey}${CATEGORY_OCCURRENCE_SEPARATOR}${occurrence}`;
+}
+
+function categoryLabel(key: string): string {
+  const [baseKey, occurrence] = key.split(CATEGORY_OCCURRENCE_SEPARATOR);
+  if (baseKey === UNCATEGORIZED) return "(uncategorized)";
+  return occurrence && occurrence !== "1" ? `"${baseKey}" block ${occurrence}` : `"${baseKey}"`;
 }
 
 function findBenchmark(config: CalibrationConfig, query: string): BenchmarkConfig {
@@ -325,25 +359,6 @@ function findBenchmark(config: CalibrationConfig, query: string): BenchmarkConfi
     throw new Error(`No benchmark matching "${query}" found in config.`);
   }
   return found;
-}
-
-function tokenize(name: string): Set<string> {
-  return new Set(
-    name
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter((token) => token.length > 0),
-  );
-}
-
-function jaccard(a: Set<string>, b: Set<string>): number {
-  if (a.size === 0 && b.size === 0) return 0;
-  let intersection = 0;
-  for (const token of a) {
-    if (b.has(token)) intersection += 1;
-  }
-  const union = a.size + b.size - intersection;
-  return union === 0 ? 0 : intersection / union;
 }
 
 export async function resolveCalibrationConfig(

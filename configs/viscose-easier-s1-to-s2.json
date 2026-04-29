@@ -1,0 +1,152 @@
+{
+  "id": "viscose-easier-s1-to-s2",
+  "name": "Viscose Easier -> Viscose Benchmark S2 Easier",
+  "sourceBenchmark": "viscose-easier",
+  "targetBenchmark": "viscose-benchmark-s2-easier",
+  "pairs": [
+    {
+      "sourceScenario": "whisphererawcontrol-larger-slowed",
+      "targetScenario": "smoothsphere-viscose-easier"
+    },
+    {
+      "sourceScenario": "whisphere-80",
+      "targetScenario": "vt-controlsphere-viscose-easier"
+    },
+    {
+      "sourceScenario": "smoothbot-invincible-goated-75",
+      "targetScenario": "smoothbot-perfected-easier"
+    },
+    {
+      "sourceScenario": "leaptrack-goated-60-larger",
+      "targetScenario": "leapstrafes-control-wobin-easier"
+    },
+    {
+      "sourceScenario": "controlsphere-raim-easy-90",
+      "targetScenario": "controlsphere-superbaim-viscose-easier"
+    },
+    {
+      "sourceScenario": "vt-controlsphere-intermediate-s5-80",
+      "targetScenario": "whisphere-viscose-easier"
+    },
+    {
+      "sourceScenario": "air-angelic-4-voltaic-easy-80-good-version",
+      "targetScenario": "air-angelic-4-voltaic-easy-70"
+    },
+    {
+      "sourceScenario": "cloverrawcontrol-easy-80-speed",
+      "targetScenario": "cloverrawcontrol-viscose-easier-50cm"
+    },
+    {
+      "sourceScenario": "controlsphere-far-far-larger-90",
+      "targetScenario": "flower-easier-50cm"
+    },
+    {
+      "sourceScenario": "pgti-voltaic-easy-80",
+      "targetScenario": "pgti-voltaic-easy-smoother"
+    },
+    {
+      "sourceScenario": "air-celestial-no-ufo-easy-slowed",
+      "targetScenario": "air-celestial-no-ufo-easier"
+    },
+    {
+      "sourceScenario": "whisphere-small-slow-55",
+      "targetScenario": "rawcontrolsphere-easier"
+    },
+    {
+      "sourceScenario": "air-voltaic-invincible-7-easy-80",
+      "targetScenario": "ground-plaza-sparky-v3-easy"
+    },
+    {
+      "sourceScenario": "controlsphere-ow-long-strafes-90",
+      "targetScenario": "air-spectral-easy-85"
+    },
+    {
+      "sourceScenario": "flicker-plaza-raim-easy-less-blinks",
+      "targetScenario": "air-spectral-easy-85"
+    },
+    {
+      "sourceScenario": "controlsphere-ow-long-strafes-90",
+      "targetScenario": "air-spectral-easy-85"
+    },
+    {
+      "sourceScenario": "controlsphere-ow-long-strafes-90",
+      "targetScenario": "air-spectral-easy-85"
+    },
+    {
+      "sourceScenario": "controlsphere-ow-long-strafes-90",
+      "targetScenario": "air-spectral-easy-85"
+    },
+    {
+      "sourceScenario": "pokeball-frenzy-auto-te-wide",
+      "targetScenario": "vt-aether-novice-s5-bot-1"
+    },
+    {
+      "sourceScenario": "1w3ts-reload-larger",
+      "targetScenario": "plink-palace-easy-less-blinks"
+    },
+    {
+      "sourceScenario": "voxtargetswitch-2-large",
+      "targetScenario": "ww5t-voltaic-slightly-larger"
+    },
+    {
+      "sourceScenario": "beants-larger",
+      "targetScenario": "1w6ts-reload-v2-20-bigger"
+    },
+    {
+      "sourceScenario": "floatts-angelic-easy-larger",
+      "targetScenario": "beants-larger"
+    },
+    {
+      "sourceScenario": "waldots-novice",
+      "targetScenario": "1w2ts-reload-smallflicks-larger"
+    },
+    {
+      "sourceScenario": "devts-goated-nr-static-5bot",
+      "targetScenario": "eth-pasu-micro-easier"
+    },
+    {
+      "sourceScenario": "1wall5targets-pasu-slow",
+      "targetScenario": "air-pure-easier-no-ufo"
+    },
+    {
+      "sourceScenario": "b180-voltaic-easy-92",
+      "targetScenario": "air-voltaic-invincible-4-easier"
+    },
+    {
+      "sourceScenario": "controlsphere-click-easy",
+      "targetScenario": "pasu-voltaic-reload-easier"
+    },
+    {
+      "sourceScenario": "popcorn-mv-novice",
+      "targetScenario": "1w3ts-pasu-perfected-micro-goated-larger-80"
+    },
+    {
+      "sourceScenario": "pasu-angelic-20-larger-80-speed",
+      "targetScenario": "popcorn-mv-easier"
+    },
+    {
+      "sourceScenario": "1w2ts-pasu-perfected-easy",
+      "targetScenario": "skyclick-goated-easier"
+    },
+    {
+      "sourceScenario": "domiswitch-easy-slower",
+      "targetScenario": "domiswitch-easier"
+    },
+    {
+      "sourceScenario": "tamtargetswitch-smooth-easy",
+      "targetScenario": "kints-voltaic-easy-85"
+    },
+    {
+      "sourceScenario": "1w3ts-pasu-perfected-micro-goated-larger-80",
+      "targetScenario": "voxts-click-easier"
+    },
+    {
+      "sourceScenario": "floating-heads-timing-400-larger",
+      "targetScenario": "vt-floating-heads-viscose-easier"
+    },
+    {
+      "sourceScenario": "voxtargetswitch-click",
+      "targetScenario": "voxts-click-easier"
+    }
+  ]
+}

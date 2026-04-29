@@ -1,0 +1,1860 @@
+{
+  "benchmarks": [
+    {
+      "benchmarkId": "2",
+      "benchmarkName": "KOVAAK'S AIM OFFICIAL"
+    },
+    {
+      "benchmarkId": "3",
+      "benchmarkName": "PureG Benchmarks"
+    },
+    {
+      "benchmarkId": "4",
+      "benchmarkName": "APEX LEGENDS OFFICIAL"
+    },
+    {
+      "benchmarkId": "6",
+      "benchmarkName": "COUNTER-STRIKE 2 OFFICIAL"
+    },
+    {
+      "benchmarkId": "11",
+      "benchmarkName": "OVERWATCH 2 OFFICIAL"
+    },
+    {
+      "benchmarkId": "15",
+      "benchmarkName": "APEX OFFICIAL"
+    },
+    {
+      "benchmarkId": "53",
+      "benchmarkName": "Group MIYU Tracking"
+    },
+    {
+      "benchmarkId": "63",
+      "benchmarkName": "MattyOW Overwatch"
+    },
+    {
+      "benchmarkId": "65",
+      "benchmarkName": "SuperbAim S2"
+    },
+    {
+      "benchmarkId": "67",
+      "benchmarkName": "Sarnt Roos Tracking (V1.2)"
+    },
+    {
+      "benchmarkId": "71",
+      "benchmarkName": "Temeski tracking V2"
+    },
+    {
+      "benchmarkId": "84",
+      "benchmarkName": "AIMERZ+ EASY S1"
+    },
+    {
+      "benchmarkId": "85",
+      "benchmarkName": "e1se Tracking"
+    },
+    {
+      "benchmarkId": "90",
+      "benchmarkName": "AIMERZ+ HARD S1"
+    },
+    {
+      "benchmarkId": "138",
+      "benchmarkName": "Mariflax ...."
+    },
+    {
+      "benchmarkId": "150",
+      "benchmarkName": "Temeski Movement Tracking 4"
+    },
+    {
+      "benchmarkId": "164",
+      "benchmarkName": "Simple Tracking"
+    },
+    {
+      "benchmarkId": "227",
+      "benchmarkName": "TSK Main Classic Benchmarks"
+    },
+    {
+      "benchmarkId": "235",
+      "benchmarkName": "Voltaic Benchmarks INT S4"
+    },
+    {
+      "benchmarkId": "237",
+      "benchmarkName": "Voltaic Benchmark Novice S4"
+    },
+    {
+      "benchmarkId": "253",
+      "benchmarkName": "Voltaic Benchmarks ADV S4"
+    },
+    {
+      "benchmarkId": "256",
+      "benchmarkName": "Journey to above average"
+    },
+    {
+      "benchmarkId": "265",
+      "benchmarkName": "Voltaic Benchmarks INT S3"
+    },
+    {
+      "benchmarkId": "266",
+      "benchmarkName": "Voltaic Benchmarks ADV S3"
+    },
+    {
+      "benchmarkId": "268",
+      "benchmarkName": "VT S4 - INT - No Strafe"
+    },
+    {
+      "benchmarkId": "270",
+      "benchmarkName": "AimSpeed Easy Benchmarks"
+    },
+    {
+      "benchmarkId": "271",
+      "benchmarkName": "FN Benchmarks"
+    },
+    {
+      "benchmarkId": "279",
+      "benchmarkName": "thundah Precise Tracking S1"
+    },
+    {
+      "benchmarkId": "280",
+      "benchmarkName": "MINICOMP X LAMZU"
+    },
+    {
+      "benchmarkId": "286",
+      "benchmarkName": "thundah precise tracking S2"
+    },
+    {
+      "benchmarkId": "304",
+      "benchmarkName": "MINICOMP X PWNAGE"
+    },
+    {
+      "benchmarkId": "305",
+      "benchmarkName": "spray TacFPS Challenge"
+    },
+    {
+      "benchmarkId": "315",
+      "benchmarkName": "LG56 Warmup Benchmark"
+    },
+    {
+      "benchmarkId": "318",
+      "benchmarkName": "VALORANT Role Decider"
+    },
+    {
+      "benchmarkId": "319",
+      "benchmarkName": "COMMUNITY BENCHMARKS EASY"
+    },
+    {
+      "benchmarkId": "320",
+      "benchmarkName": "COMMUNITY BENCHMARKS HARD"
+    },
+    {
+      "benchmarkId": "321",
+      "benchmarkName": "New & Trending MiniComp"
+    },
+    {
+      "benchmarkId": "341",
+      "benchmarkName": "Revosect Hard Benchmarks S4"
+    },
+    {
+      "benchmarkId": "354",
+      "benchmarkName": "rA x OBSBOT Aim Tournament"
+    },
+    {
+      "benchmarkId": "361",
+      "benchmarkName": "Revosect Easy Benchmarks S4"
+    },
+    {
+      "benchmarkId": "374",
+      "benchmarkName": "Halloween Aim MiniComp"
+    },
+    {
+      "benchmarkId": "378",
+      "benchmarkName": "TSK Strafes Benchmarks"
+    },
+    {
+      "benchmarkId": "379",
+      "benchmarkName": "TSK Bouncesphere by thundah"
+    },
+    {
+      "benchmarkId": "401",
+      "benchmarkName": "The Finals Easy"
+    },
+    {
+      "benchmarkId": "427",
+      "benchmarkName": "Voltaic S5 - Advanced"
+    },
+    {
+      "benchmarkId": "431",
+      "benchmarkName": "Voltaic S5 - Intermediate"
+    },
+    {
+      "benchmarkId": "432",
+      "benchmarkName": "Voltaic S5 - Novice"
+    },
+    {
+      "benchmarkId": "442",
+      "benchmarkName": "Pulsar Competition 1 - 2025"
+    },
+    {
+      "benchmarkId": "446",
+      "benchmarkName": "Liz <:3"
+    },
+    {
+      "benchmarkId": "448",
+      "benchmarkName": "Apex Smoothness"
+    },
+    {
+      "benchmarkId": "455",
+      "benchmarkName": "cA Static Benchmarks s1"
+    },
+    {
+      "benchmarkId": "458",
+      "benchmarkName": "VT S5 Intermediate (v1.0.7)"
+    },
+    {
+      "benchmarkId": "459",
+      "benchmarkName": "VT S5 Novice (v1.0.7)"
+    },
+    {
+      "benchmarkId": "460",
+      "benchmarkName": "VT S5 Advanced (v1.0.7)"
+    },
+    {
+      "benchmarkId": "461",
+      "benchmarkName": "Fantech Comp 2025"
+    },
+    {
+      "benchmarkId": "466",
+      "benchmarkName": "TSK Static Benchmarks"
+    },
+    {
+      "benchmarkId": "469",
+      "benchmarkName": "TSK Extra Classic Benchmark"
+    },
+    {
+      "benchmarkId": "475",
+      "benchmarkName": "VT x KVK S5 - Elite"
+    },
+    {
+      "benchmarkId": "478",
+      "benchmarkName": "VT BENCHMARK S3-S5 Inter"
+    },
+    {
+      "benchmarkId": "480",
+      "benchmarkName": "Hewchy's LRS Benchmark"
+    },
+    {
+      "benchmarkId": "485",
+      "benchmarkName": "prac trac"
+    },
+    {
+      "benchmarkId": "488",
+      "benchmarkName": "useless tracking"
+    },
+    {
+      "benchmarkId": "490",
+      "benchmarkName": "My funny useless playlist"
+    },
+    {
+      "benchmarkId": "491",
+      "benchmarkName": "Blizzerz Wrist Foundations"
+    },
+    {
+      "benchmarkId": "497",
+      "benchmarkName": "Mackimo's Shimmy Benchmarks"
+    },
+    {
+      "benchmarkId": "498",
+      "benchmarkName": "Reactive by slapped"
+    },
+    {
+      "benchmarkId": "527",
+      "benchmarkName": "Ab1fullltest"
+    },
+    {
+      "benchmarkId": "533",
+      "benchmarkName": "Revosect Season 1 - Easy"
+    },
+    {
+      "benchmarkId": "534",
+      "benchmarkName": "Revosect Season 1 Advanced"
+    },
+    {
+      "benchmarkId": "535",
+      "benchmarkName": "cA Static S1 Fixed"
+    },
+    {
+      "benchmarkId": "536",
+      "benchmarkName": "rA S4 Easy V.4.3"
+    },
+    {
+      "benchmarkId": "540",
+      "benchmarkName": "rA S4 Hard V.4.3"
+    },
+    {
+      "benchmarkId": "549",
+      "benchmarkName": "Aimbot Val 1.0"
+    },
+    {
+      "benchmarkId": "550",
+      "benchmarkName": "Anima Micro Benchmark"
+    },
+    {
+      "benchmarkId": "551",
+      "benchmarkName": "Angle Smoothing Easy"
+    },
+    {
+      "benchmarkId": "559",
+      "benchmarkName": "Angle Smoothing Hard"
+    },
+    {
+      "benchmarkId": "567",
+      "benchmarkName": "WALLHACK Comp 2025"
+    },
+    {
+      "benchmarkId": "570",
+      "benchmarkName": "Viscose Benches Int BETA"
+    },
+    {
+      "benchmarkId": "571",
+      "benchmarkName": "4BK Benchmark Stage 1"
+    },
+    {
+      "benchmarkId": "573",
+      "benchmarkName": "Fortnite Warm-up"
+    },
+    {
+      "benchmarkId": "575",
+      "benchmarkName": "TSK Main"
+    },
+    {
+      "benchmarkId": "576",
+      "benchmarkName": "wobin Benchmark S1 Novice"
+    },
+    {
+      "benchmarkId": "577",
+      "benchmarkName": "wobin Benchmark S1 Advanced"
+    },
+    {
+      "benchmarkId": "581",
+      "benchmarkName": "AimSpeed Easy Fixed"
+    },
+    {
+      "benchmarkId": "582",
+      "benchmarkName": "Aimerz+ Dynamic Clicking"
+    },
+    {
+      "benchmarkId": "583",
+      "benchmarkName": "Aimerz+ Dynamic Hard"
+    },
+    {
+      "benchmarkId": "584",
+      "benchmarkName": "Aimerz+ SpeedTS"
+    },
+    {
+      "benchmarkId": "585",
+      "benchmarkName": "Aimerz+ SpeedTS Hard"
+    },
+    {
+      "benchmarkId": "586",
+      "benchmarkName": "Treino Hyze"
+    },
+    {
+      "benchmarkId": "588",
+      "benchmarkName": "Viscose Beginner Bench BETA"
+    },
+    {
+      "benchmarkId": "589",
+      "benchmarkName": "Viscose Adv Bench Beta"
+    },
+    {
+      "benchmarkId": "590",
+      "benchmarkName": "Aimerz+ Precise Hard"
+    },
+    {
+      "benchmarkId": "593",
+      "benchmarkName": "Aimerz+ Precise Easy"
+    },
+    {
+      "benchmarkId": "596",
+      "benchmarkName": "Aimerz+ Evasive Switch Easy"
+    },
+    {
+      "benchmarkId": "597",
+      "benchmarkName": "Aimerz+ Evasive Switch Hard"
+    },
+    {
+      "benchmarkId": "598",
+      "benchmarkName": "Sparky (Voltaic) S1"
+    },
+    {
+      "benchmarkId": "599",
+      "benchmarkName": "PureG S1"
+    },
+    {
+      "benchmarkId": "600",
+      "benchmarkName": "MIRA Easy S2"
+    },
+    {
+      "benchmarkId": "601",
+      "benchmarkName": "MIRA Hard S2"
+    },
+    {
+      "benchmarkId": "603",
+      "benchmarkName": "XYZ Smoothness Bench Easy"
+    },
+    {
+      "benchmarkId": "604",
+      "benchmarkName": "XYZ Smoothness Bench Hard"
+    },
+    {
+      "benchmarkId": "607",
+      "benchmarkName": "all rounder"
+    },
+    {
+      "benchmarkId": "610",
+      "benchmarkName": "Reactive by Slapped Fixed"
+    },
+    {
+      "benchmarkId": "613",
+      "benchmarkName": "voltaic"
+    },
+    {
+      "benchmarkId": "615",
+      "benchmarkName": "Micro Benchmark v2"
+    },
+    {
+      "benchmarkId": "619",
+      "benchmarkName": "Voltaic S4 - Intermediate"
+    },
+    {
+      "benchmarkId": "620",
+      "benchmarkName": "Ladydoodlez Benchmarks"
+    },
+    {
+      "benchmarkId": "622",
+      "benchmarkName": "Voltaic S4 - Advanced"
+    },
+    {
+      "benchmarkId": "624",
+      "benchmarkName": "Voltaic S3 - Intermediate"
+    },
+    {
+      "benchmarkId": "625",
+      "benchmarkName": "Voltaic S3 - Advanced"
+    },
+    {
+      "benchmarkId": "630",
+      "benchmarkName": "Voltaic S4 - Novice"
+    },
+    {
+      "benchmarkId": "636",
+      "benchmarkName": "Aimerz+ Hard S1 v1.5.1"
+    },
+    {
+      "benchmarkId": "637",
+      "benchmarkName": "Bouling GANG !"
+    },
+    {
+      "benchmarkId": "642",
+      "benchmarkName": "TSK Beginner Benchmark New"
+    },
+    {
+      "benchmarkId": "644",
+      "benchmarkName": "m0narcS & hizku Track Easy"
+    },
+    {
+      "benchmarkId": "645",
+      "benchmarkName": "m0narcS & hizku Track Med"
+    },
+    {
+      "benchmarkId": "646",
+      "benchmarkName": "m0narcS & hizku Track Hard"
+    },
+    {
+      "benchmarkId": "648",
+      "benchmarkName": "what rock are you"
+    },
+    {
+      "benchmarkId": "649",
+      "benchmarkName": "talentedly tracking INT"
+    },
+    {
+      "benchmarkId": "650",
+      "benchmarkName": "Ziden Bench"
+    },
+    {
+      "benchmarkId": "653",
+      "benchmarkName": "Valorant Benchmarks Medium"
+    },
+    {
+      "benchmarkId": "655",
+      "benchmarkName": "Roblox Rivals Aim Trainer"
+    },
+    {
+      "benchmarkId": "656",
+      "benchmarkName": "Valorant Benchmarks Hard"
+    },
+    {
+      "benchmarkId": "657",
+      "benchmarkName": "camboim workout"
+    },
+    {
+      "benchmarkId": "661",
+      "benchmarkName": "KovaaK's Aim Official Adapt"
+    },
+    {
+      "benchmarkId": "663",
+      "benchmarkName": "EnzerFrost's benchmark"
+    },
+    {
+      "benchmarkId": "664",
+      "benchmarkName": "lets learn to track strafes"
+    },
+    {
+      "benchmarkId": "667",
+      "benchmarkName": "TSK Beginner 2.0"
+    },
+    {
+      "benchmarkId": "668",
+      "benchmarkName": "TSK Main 2.0"
+    },
+    {
+      "benchmarkId": "669",
+      "benchmarkName": "TSK Ultimate 2.0"
+    },
+    {
+      "benchmarkId": "670",
+      "benchmarkName": "TSK Static 2.0"
+    },
+    {
+      "benchmarkId": "671",
+      "benchmarkName": "TSK Strafes 2.0"
+    },
+    {
+      "benchmarkId": "673",
+      "benchmarkName": "talentedly tracking ADV"
+    },
+    {
+      "benchmarkId": "674",
+      "benchmarkName": "TSK - Beginner Benchmark"
+    },
+    {
+      "benchmarkId": "675",
+      "benchmarkName": "Run and Gun Valorant Normal"
+    },
+    {
+      "benchmarkId": "676",
+      "benchmarkName": "Run and Gun Valorant Hard"
+    },
+    {
+      "benchmarkId": "677",
+      "benchmarkName": "InfinityMice x MattyOW Challenge 2025"
+    },
+    {
+      "benchmarkId": "678",
+      "benchmarkName": "Practice Makes Perfect"
+    },
+    {
+      "benchmarkId": "679",
+      "benchmarkName": "cAt Aimers Medium S2"
+    },
+    {
+      "benchmarkId": "680",
+      "benchmarkName": "TAFfest one"
+    },
+    {
+      "benchmarkId": "686",
+      "benchmarkName": "Viscose Easier"
+    },
+    {
+      "benchmarkId": "687",
+      "benchmarkName": "Viscose Medium"
+    },
+    {
+      "benchmarkId": "688",
+      "benchmarkName": "Viscose Hard"
+    },
+    {
+      "benchmarkId": "692",
+      "benchmarkName": "Setsunai's Static Normal"
+    },
+    {
+      "benchmarkId": "693",
+      "benchmarkName": "e1se Tracking Beginner"
+    },
+    {
+      "benchmarkId": "694",
+      "benchmarkName": "e1se Tracking Beginner+"
+    },
+    {
+      "benchmarkId": "695",
+      "benchmarkName": "e1se Tracking Intermediate"
+    },
+    {
+      "benchmarkId": "696",
+      "benchmarkName": "e1se Smooth Normal"
+    },
+    {
+      "benchmarkId": "697",
+      "benchmarkName": "e1se Smooth Hard"
+    },
+    {
+      "benchmarkId": "698",
+      "benchmarkName": "Astro Tracking Bench - Norm"
+    },
+    {
+      "benchmarkId": "699",
+      "benchmarkName": "Astro Tracking Bench - Hard"
+    },
+    {
+      "benchmarkId": "700",
+      "benchmarkName": "uli CS TRACK SWITCH"
+    },
+    {
+      "benchmarkId": "701",
+      "benchmarkName": "uli CS CLICKING"
+    },
+    {
+      "benchmarkId": "702",
+      "benchmarkName": "Aimerz IND Dynamic"
+    },
+    {
+      "benchmarkId": "706",
+      "benchmarkName": "Aleksandaaar2025"
+    },
+    {
+      "benchmarkId": "708",
+      "benchmarkName": "Matty OW Benchmark v2"
+    },
+    {
+      "benchmarkId": "710",
+      "benchmarkName": "valorant zowie"
+    },
+    {
+      "benchmarkId": "711",
+      "benchmarkName": "AoiAim"
+    },
+    {
+      "benchmarkId": "712",
+      "benchmarkName": "AoiAimers S2"
+    },
+    {
+      "benchmarkId": "713",
+      "benchmarkName": "Astro Tracking Bench - Easy"
+    },
+    {
+      "benchmarkId": "722",
+      "benchmarkName": "LANGOSTA"
+    },
+    {
+      "benchmarkId": "725",
+      "benchmarkName": "PureG S2"
+    },
+    {
+      "benchmarkId": "728",
+      "benchmarkName": "cR Main Benchmark"
+    },
+    {
+      "benchmarkId": "730",
+      "benchmarkName": "Aimerz+ Reactive Hard"
+    },
+    {
+      "benchmarkId": "732",
+      "benchmarkName": "SuperbAim Hard S2 Fixed"
+    },
+    {
+      "benchmarkId": "733",
+      "benchmarkName": "SuperbAim Easy S2"
+    },
+    {
+      "benchmarkId": "736",
+      "benchmarkName": "psev Benches"
+    },
+    {
+      "benchmarkId": "738",
+      "benchmarkName": "Avasive S1 - Genesis"
+    },
+    {
+      "benchmarkId": "739",
+      "benchmarkName": "Avasive S1 - Ascension"
+    },
+    {
+      "benchmarkId": "740",
+      "benchmarkName": "Avasive S1 - Enlightenment"
+    },
+    {
+      "benchmarkId": "741",
+      "benchmarkName": "Angelic Tac-FPS Easy"
+    },
+    {
+      "benchmarkId": "742",
+      "benchmarkName": "Angelic Tac-FPS"
+    },
+    {
+      "benchmarkId": "743",
+      "benchmarkName": "Setsunai's Static Hard"
+    },
+    {
+      "benchmarkId": "745",
+      "benchmarkName": "Victory Road"
+    },
+    {
+      "benchmarkId": "747",
+      "benchmarkName": "TacFPS ClownBench"
+    },
+    {
+      "benchmarkId": "751",
+      "benchmarkName": "DADOX"
+    },
+    {
+      "benchmarkId": "759",
+      "benchmarkName": "track hunt and other stuff1"
+    },
+    {
+      "benchmarkId": "764",
+      "benchmarkName": "Pre OW Competitive 1"
+    },
+    {
+      "benchmarkId": "767",
+      "benchmarkName": "Dante's Inferno for wrist"
+    },
+    {
+      "benchmarkId": "768",
+      "benchmarkName": "Brain Rot Benchmark"
+    },
+    {
+      "benchmarkId": "770",
+      "benchmarkName": "Washedgarand Benchmarks"
+    },
+    {
+      "benchmarkId": "772",
+      "benchmarkName": "TSK Benchmark \"Ultimate\""
+    },
+    {
+      "benchmarkId": "776",
+      "benchmarkName": "benchtest"
+    },
+    {
+      "benchmarkId": "783",
+      "benchmarkName": "1434234234234"
+    },
+    {
+      "benchmarkId": "788",
+      "benchmarkName": "VT Intermediate Compilation"
+    },
+    {
+      "benchmarkId": "791",
+      "benchmarkName": "4rKs Tracking - Precise I"
+    },
+    {
+      "benchmarkId": "793",
+      "benchmarkName": "4rKs Tracking - Precise II"
+    },
+    {
+      "benchmarkId": "796",
+      "benchmarkName": "Good Habits all the way."
+    },
+    {
+      "benchmarkId": "797",
+      "benchmarkName": "4rKs Tracking - Reactive I"
+    },
+    {
+      "benchmarkId": "798",
+      "benchmarkName": "4rKs Tracking - Reactive II"
+    },
+    {
+      "benchmarkId": "799",
+      "benchmarkName": "4rKs Tracking - Control I"
+    },
+    {
+      "benchmarkId": "800",
+      "benchmarkName": "4rKs Tracking - Control II"
+    },
+    {
+      "benchmarkId": "802",
+      "benchmarkName": "Dark & Rafal SpeedTS"
+    },
+    {
+      "benchmarkId": "807",
+      "benchmarkName": "Easy Daily Warmup"
+    },
+    {
+      "benchmarkId": "808",
+      "benchmarkName": "hahahp"
+    },
+    {
+      "benchmarkId": "818",
+      "benchmarkName": "Dejexx Warmup"
+    },
+    {
+      "benchmarkId": "819",
+      "benchmarkName": "Aimerz+ Static Clicking"
+    },
+    {
+      "benchmarkId": "820",
+      "benchmarkName": "rA S5 Benches- Advanced"
+    },
+    {
+      "benchmarkId": "821",
+      "benchmarkName": "Revosect Season 5 Advanced"
+    },
+    {
+      "benchmarkId": "822",
+      "benchmarkName": "Revosect Season 5 Int"
+    },
+    {
+      "benchmarkId": "823",
+      "benchmarkName": "Revosect Season 5 Entry"
+    },
+    {
+      "benchmarkId": "824",
+      "benchmarkName": "rA S5 Benches- Intermediate"
+    },
+    {
+      "benchmarkId": "825",
+      "benchmarkName": "rA S5 Benches- Entry"
+    },
+    {
+      "benchmarkId": "826",
+      "benchmarkName": "roa ultimate"
+    },
+    {
+      "benchmarkId": "828",
+      "benchmarkName": "r21343"
+    },
+    {
+      "benchmarkId": "829",
+      "benchmarkName": "cAt Benchmark Easy"
+    },
+    {
+      "benchmarkId": "830",
+      "benchmarkName": "cAt Benchmarks Normal"
+    },
+    {
+      "benchmarkId": "831",
+      "benchmarkName": "cAt Benchmarks Hard"
+    },
+    {
+      "benchmarkId": "832",
+      "benchmarkName": "OLD Sparky"
+    },
+    {
+      "benchmarkId": "845",
+      "benchmarkName": "MAROTO ROUTINE"
+    },
+    {
+      "benchmarkId": "846",
+      "benchmarkName": "WALLHACK - AWAKENING"
+    },
+    {
+      "benchmarkId": "848",
+      "benchmarkName": "someonesss"
+    },
+    {
+      "benchmarkId": "849",
+      "benchmarkName": "warmup routine val 2121"
+    },
+    {
+      "benchmarkId": "850",
+      "benchmarkName": "Air Pure Intermediate"
+    },
+    {
+      "benchmarkId": "851",
+      "benchmarkName": "Deadmans Static S1 L1"
+    },
+    {
+      "benchmarkId": "852",
+      "benchmarkName": "Deadmans Static S1 L2"
+    },
+    {
+      "benchmarkId": "853",
+      "benchmarkName": "Deadmans Static S1 L3"
+    },
+    {
+      "benchmarkId": "854",
+      "benchmarkName": "Deadmans Static S1 L4"
+    },
+    {
+      "benchmarkId": "855",
+      "benchmarkName": "Deadmans Static S1 L5 Boss"
+    },
+    {
+      "benchmarkId": "856",
+      "benchmarkName": "Deadmans Static S1 L6 Boss+"
+    },
+    {
+      "benchmarkId": "857",
+      "benchmarkName": "DM Poke Static S2 L1"
+    },
+    {
+      "benchmarkId": "859",
+      "benchmarkName": "DM Poke Static S2 L2"
+    },
+    {
+      "benchmarkId": "860",
+      "benchmarkName": "DM Poke Static S2 L3"
+    },
+    {
+      "benchmarkId": "861",
+      "benchmarkName": "DM Poke Static S2 L4"
+    },
+    {
+      "benchmarkId": "862",
+      "benchmarkName": "DM Poke Static S2 L5"
+    },
+    {
+      "benchmarkId": "863",
+      "benchmarkName": "DM Poke Static S2 L6"
+    },
+    {
+      "benchmarkId": "864",
+      "benchmarkName": "DM Poke Static S2 L7"
+    },
+    {
+      "benchmarkId": "865",
+      "benchmarkName": "Deadmans Static S2 L1"
+    },
+    {
+      "benchmarkId": "866",
+      "benchmarkName": "Deadmans Static S2 L2"
+    },
+    {
+      "benchmarkId": "867",
+      "benchmarkName": "DM Static S2 L3"
+    },
+    {
+      "benchmarkId": "868",
+      "benchmarkName": "DM Static S2 L4"
+    },
+    {
+      "benchmarkId": "869",
+      "benchmarkName": "DM Static S2 L5"
+    },
+    {
+      "benchmarkId": "870",
+      "benchmarkName": "DM Static S2 L6"
+    },
+    {
+      "benchmarkId": "871",
+      "benchmarkName": "DM Static S2 L7"
+    },
+    {
+      "benchmarkId": "875",
+      "benchmarkName": "Valorant Training Academy"
+    },
+    {
+      "benchmarkId": "877",
+      "benchmarkName": "The Speedclicking Benchmark"
+    },
+    {
+      "benchmarkId": "878",
+      "benchmarkName": "The Tracking Benchmark"
+    },
+    {
+      "benchmarkId": "880",
+      "benchmarkName": "Pasu Track Dojo"
+    },
+    {
+      "benchmarkId": "882",
+      "benchmarkName": "owen benchmarka"
+    },
+    {
+      "benchmarkId": "883",
+      "benchmarkName": "12123112312312312312"
+    },
+    {
+      "benchmarkId": "886",
+      "benchmarkName": "cA static with more ranks"
+    },
+    {
+      "benchmarkId": "887",
+      "benchmarkName": "Valorant 20-Min Low Sens Ro"
+    },
+    {
+      "benchmarkId": "892",
+      "benchmarkName": "Warmup Rabblllt 1 of 2 AIM"
+    },
+    {
+      "benchmarkId": "893",
+      "benchmarkName": "Warmup Rabblllt 2 of 2 AIM"
+    },
+    {
+      "benchmarkId": "894",
+      "benchmarkName": "e1se Dodge Basic"
+    },
+    {
+      "benchmarkId": "895",
+      "benchmarkName": "e1se Flick Routine"
+    },
+    {
+      "benchmarkId": "897",
+      "benchmarkName": "Valorant Benchmarks Umikwon"
+    },
+    {
+      "benchmarkId": "900",
+      "benchmarkName": "VT Static Easy"
+    },
+    {
+      "benchmarkId": "901",
+      "benchmarkName": "Marvel Rivals Official"
+    },
+    {
+      "benchmarkId": "902",
+      "benchmarkName": "Lalo Benchmark 1"
+    },
+    {
+      "benchmarkId": "904",
+      "benchmarkName": "XYZ Benchmarks Easy"
+    },
+    {
+      "benchmarkId": "906",
+      "benchmarkName": "XYZ Benchmarks Hard"
+    },
+    {
+      "benchmarkId": "907",
+      "benchmarkName": "seanAIMS' Haus of Switching"
+    },
+    {
+      "benchmarkId": "908",
+      "benchmarkName": "TZY SpeedClicking"
+    },
+    {
+      "benchmarkId": "909",
+      "benchmarkName": "MIRA x Apex Legends IB"
+    },
+    {
+      "benchmarkId": "911",
+      "benchmarkName": "9 DAYS TO GLORY"
+    },
+    {
+      "benchmarkId": "914",
+      "benchmarkName": "Pubg train"
+    },
+    {
+      "benchmarkId": "918",
+      "benchmarkName": "Stellar - Speed Benches"
+    },
+    {
+      "benchmarkId": "919",
+      "benchmarkName": "773TS Static Basic"
+    },
+    {
+      "benchmarkId": "920",
+      "benchmarkName": "pissAim Intermediate"
+    },
+    {
+      "benchmarkId": "923",
+      "benchmarkName": "pissAim Advancedd"
+    },
+    {
+      "benchmarkId": "928",
+      "benchmarkName": "rxn"
+    },
+    {
+      "benchmarkId": "929",
+      "benchmarkName": "R Bench Easy"
+    },
+    {
+      "benchmarkId": "930",
+      "benchmarkName": "potato shouldnt be trusted"
+    },
+    {
+      "benchmarkId": "934",
+      "benchmarkName": "ak4rii"
+    },
+    {
+      "benchmarkId": "935",
+      "benchmarkName": "Aether"
+    },
+    {
+      "benchmarkId": "936",
+      "benchmarkName": "KovaaksMicroValorantBoppy"
+    },
+    {
+      "benchmarkId": "944",
+      "benchmarkName": "TestV1"
+    },
+    {
+      "benchmarkId": "946",
+      "benchmarkName": "batata 666 1"
+    },
+    {
+      "benchmarkId": "948",
+      "benchmarkName": "TPP Benchmark - sydney"
+    },
+    {
+      "benchmarkId": "950",
+      "benchmarkName": "Fortnite Ultimate Benchmark"
+    },
+    {
+      "benchmarkId": "959",
+      "benchmarkName": "Jade Palace Ground - Hard"
+    },
+    {
+      "benchmarkId": "962",
+      "benchmarkName": "Jade Palace Ground - Novice"
+    },
+    {
+      "benchmarkId": "963",
+      "benchmarkName": "mh Benchmarks (easy)"
+    },
+    {
+      "benchmarkId": "966",
+      "benchmarkName": "mH Benchmark (Hard)"
+    },
+    {
+      "benchmarkId": "977",
+      "benchmarkName": "Ground Track DOJO"
+    },
+    {
+      "benchmarkId": "979",
+      "benchmarkName": "anakin TREINO SCORE V.01"
+    },
+    {
+      "benchmarkId": "983",
+      "benchmarkName": "kl2 - Micro by dummy"
+    },
+    {
+      "benchmarkId": "985",
+      "benchmarkName": "RXZU - VALORANT EZ"
+    },
+    {
+      "benchmarkId": "986",
+      "benchmarkName": "uhh"
+    },
+    {
+      "benchmarkId": "988",
+      "benchmarkName": "Jade Palace Ground - Entry"
+    },
+    {
+      "benchmarkId": "993",
+      "benchmarkName": "222222222222"
+    },
+    {
+      "benchmarkId": "997",
+      "benchmarkName": "kl2 - Reflex by dummy"
+    },
+    {
+      "benchmarkId": "1000",
+      "benchmarkName": "a"
+    },
+    {
+      "benchmarkId": "1797",
+      "benchmarkName": "kl2 - switch by dummy"
+    },
+    {
+      "benchmarkId": "1799",
+      "benchmarkName": "Roblox Training"
+    },
+    {
+      "benchmarkId": "1811",
+      "benchmarkName": "Medaka Valorant Benchmark"
+    },
+    {
+      "benchmarkId": "1813",
+      "benchmarkName": "Cassidy OW2 - beta fs"
+    },
+    {
+      "benchmarkId": "1815",
+      "benchmarkName": "playlist from Alante"
+    },
+    {
+      "benchmarkId": "1816",
+      "benchmarkName": "Alante playlist v2"
+    },
+    {
+      "benchmarkId": "1822",
+      "benchmarkName": "aimerz+ Hard S0"
+    },
+    {
+      "benchmarkId": "1823",
+      "benchmarkName": "aimerz+ Medium S0"
+    },
+    {
+      "benchmarkId": "1824",
+      "benchmarkName": "TacFPSGOATED"
+    },
+    {
+      "benchmarkId": "1825",
+      "benchmarkName": "BF6"
+    },
+    {
+      "benchmarkId": "1829",
+      "benchmarkName": "Lemon Static Benchmark"
+    },
+    {
+      "benchmarkId": "1840",
+      "benchmarkName": "--zzz1"
+    },
+    {
+      "benchmarkId": "1854",
+      "benchmarkName": "Slopcore Funmax Bench"
+    },
+    {
+      "benchmarkId": "1857",
+      "benchmarkName": "BANHAMMER GROUND v1"
+    },
+    {
+      "benchmarkId": "1862",
+      "benchmarkName": "delete"
+    },
+    {
+      "benchmarkId": "1863",
+      "benchmarkName": "VDIM Clicking Static"
+    },
+    {
+      "benchmarkId": "1864",
+      "benchmarkName": "Glasspad Mastery"
+    },
+    {
+      "benchmarkId": "1866",
+      "benchmarkName": "Zeonlos Cluster technique"
+    },
+    {
+      "benchmarkId": "1870",
+      "benchmarkName": "Euphoric TacFPS Basic"
+    },
+    {
+      "benchmarkId": "1871",
+      "benchmarkName": "Euphoric TacFPS"
+    },
+    {
+      "benchmarkId": "1874",
+      "benchmarkName": "Smoothness Day1"
+    },
+    {
+      "benchmarkId": "1879",
+      "benchmarkName": "day2"
+    },
+    {
+      "benchmarkId": "1883",
+      "benchmarkName": "RXZU - VALORANT HARD"
+    },
+    {
+      "benchmarkId": "1885",
+      "benchmarkName": "dnn"
+    },
+    {
+      "benchmarkId": "1886",
+      "benchmarkName": "unnamed33"
+    },
+    {
+      "benchmarkId": "1887",
+      "benchmarkName": "BM3 Valorant Benchmark"
+    },
+    {
+      "benchmarkId": "1903",
+      "benchmarkName": "A R S METHOD"
+    },
+    {
+      "benchmarkId": "1904",
+      "benchmarkName": "톱드래곤 Medium-Hard"
+    },
+    {
+      "benchmarkId": "1908",
+      "benchmarkName": "XYZ Smoothness Newcomer"
+    },
+    {
+      "benchmarkId": "1911",
+      "benchmarkName": "Kou Personalized Benchmarks"
+    },
+    {
+      "benchmarkId": "1912",
+      "benchmarkName": "Kou's Smoothness Benchmarks"
+    },
+    {
+      "benchmarkId": "1917",
+      "benchmarkName": "Sniping Scores by Sophia"
+    },
+    {
+      "benchmarkId": "1926",
+      "benchmarkName": "Ligeirinho Treino"
+    },
+    {
+      "benchmarkId": "1927",
+      "benchmarkName": "Amare's Quest"
+    },
+    {
+      "benchmarkId": "1928",
+      "benchmarkName": "anakin 2026 VALORANT"
+    },
+    {
+      "benchmarkId": "1933",
+      "benchmarkName": "z3il on twitch"
+    },
+    {
+      "benchmarkId": "1937",
+      "benchmarkName": "Mrsavage wroti1"
+    },
+    {
+      "benchmarkId": "1938",
+      "benchmarkName": "TheCas Aim Val"
+    },
+    {
+      "benchmarkId": "1950",
+      "benchmarkName": "pixo v1 benchmark"
+    },
+    {
+      "benchmarkId": "1956",
+      "benchmarkName": "swagle"
+    },
+    {
+      "benchmarkId": "1957",
+      "benchmarkName": "Movement Reading Playlist"
+    },
+    {
+      "benchmarkId": "1958",
+      "benchmarkName": "Appoh Smoothness"
+    },
+    {
+      "benchmarkId": "1959",
+      "benchmarkName": "Appoh Dynamic"
+    },
+    {
+      "benchmarkId": "1960",
+      "benchmarkName": "XCZ"
+    },
+    {
+      "benchmarkId": "1962",
+      "benchmarkName": "Voltaic SpeedTS"
+    },
+    {
+      "benchmarkId": "1963",
+      "benchmarkName": "Voltaic SpeedTS Easier"
+    },
+    {
+      "benchmarkId": "1964",
+      "benchmarkName": "VT SpeedSwitching Advanced"
+    },
+    {
+      "benchmarkId": "1966",
+      "benchmarkName": "SpeedTS test"
+    },
+    {
+      "benchmarkId": "1967",
+      "benchmarkName": "Blehbleh test"
+    },
+    {
+      "benchmarkId": "1970",
+      "benchmarkName": "TrackingHellButEasyNDFun"
+    },
+    {
+      "benchmarkId": "1971",
+      "benchmarkName": "Takotor playlist"
+    },
+    {
+      "benchmarkId": "1974",
+      "benchmarkName": "Phinies2's Benchmark"
+    },
+    {
+      "benchmarkId": "1977",
+      "benchmarkName": "Voltaic Season 4 - Elite"
+    },
+    {
+      "benchmarkId": "1978",
+      "benchmarkName": "CLICKING II dashti"
+    },
+    {
+      "benchmarkId": "1981",
+      "benchmarkName": "fivemLcnxz"
+    },
+    {
+      "benchmarkId": "1983",
+      "benchmarkName": "Tracking 4 Joystick Users"
+    },
+    {
+      "benchmarkId": "1992",
+      "benchmarkName": "Smooth Tracking"
+    },
+    {
+      "benchmarkId": "1993",
+      "benchmarkName": "Cs2 davedson"
+    },
+    {
+      "benchmarkId": "1999",
+      "benchmarkName": "W training sesh"
+    },
+    {
+      "benchmarkId": "2000",
+      "benchmarkName": "fipo cs2 workout"
+    },
+    {
+      "benchmarkId": "2005",
+      "benchmarkName": "773 TS"
+    },
+    {
+      "benchmarkId": "2009",
+      "benchmarkName": "OVERWATCH-List"
+    },
+    {
+      "benchmarkId": "2011",
+      "benchmarkName": "Benchmark Naru"
+    },
+    {
+      "benchmarkId": "2012",
+      "benchmarkName": "My Benchmark for myself"
+    },
+    {
+      "benchmarkId": "2039",
+      "benchmarkName": "Valorant Aim Enhancer"
+    },
+    {
+      "benchmarkId": "2040",
+      "benchmarkName": "xela's Tac FPS Benchmark"
+    },
+    {
+      "benchmarkId": "2045",
+      "benchmarkName": "AllinOne"
+    },
+    {
+      "benchmarkId": "2046",
+      "benchmarkName": "Henwood Benchmarks"
+    },
+    {
+      "benchmarkId": "2060",
+      "benchmarkName": "Nubar's Daily Bench"
+    },
+    {
+      "benchmarkId": "2064",
+      "benchmarkName": "REVENGE - TRIAD BENCHMARK"
+    },
+    {
+      "benchmarkId": "2066",
+      "benchmarkName": "xddxdxd"
+    },
+    {
+      "benchmarkId": "2070",
+      "benchmarkName": "Voltaic S5.5 Advanced"
+    },
+    {
+      "benchmarkId": "2074",
+      "benchmarkName": "Voltaic S5 Extended Ranks"
+    },
+    {
+      "benchmarkId": "2078",
+      "benchmarkName": "Niko's Benchmarks Season 1"
+    },
+    {
+      "benchmarkId": "2080",
+      "benchmarkName": "VT Inter Benches S5 Hard"
+    },
+    {
+      "benchmarkId": "2081",
+      "benchmarkName": "Aquecimento"
+    },
+    {
+      "benchmarkId": "2082",
+      "benchmarkName": "fluidezexe"
+    },
+    {
+      "benchmarkId": "2083",
+      "benchmarkName": "Region Glide"
+    },
+    {
+      "benchmarkId": "2085",
+      "benchmarkName": "dddddd warmup 2026"
+    },
+    {
+      "benchmarkId": "2086",
+      "benchmarkName": "Sonderr"
+    },
+    {
+      "benchmarkId": "2088",
+      "benchmarkName": "CLICK I S1"
+    },
+    {
+      "benchmarkId": "2091",
+      "benchmarkName": "trackpilled"
+    },
+    {
+      "benchmarkId": "2092",
+      "benchmarkName": "VT NOVICE BENCHES S5 HARD"
+    },
+    {
+      "benchmarkId": "2093",
+      "benchmarkName": "R Bench Normal"
+    },
+    {
+      "benchmarkId": "2095",
+      "benchmarkName": "B&S Valo training  (easy)"
+    },
+    {
+      "benchmarkId": "2101",
+      "benchmarkName": "sunsh1ne playlist666"
+    },
+    {
+      "benchmarkId": "2103",
+      "benchmarkName": "tf2 - beats"
+    },
+    {
+      "benchmarkId": "2104",
+      "benchmarkName": "Mokad - Art Like Aim"
+    },
+    {
+      "benchmarkId": "2108",
+      "benchmarkName": "M&H Reactive Tracking Easy"
+    },
+    {
+      "benchmarkId": "2109",
+      "benchmarkName": "M&H Reactive Tracking Hard"
+    },
+    {
+      "benchmarkId": "2110",
+      "benchmarkName": "DM S3 Static Pokeball L1"
+    },
+    {
+      "benchmarkId": "2111",
+      "benchmarkName": "DM S3 Static Level 1"
+    },
+    {
+      "benchmarkId": "2112",
+      "benchmarkName": "DM S3 Static Pokeball L2"
+    },
+    {
+      "benchmarkId": "2113",
+      "benchmarkName": "DM S3 Static Level 2"
+    },
+    {
+      "benchmarkId": "2114",
+      "benchmarkName": "DM S3 Static Pokeball L3"
+    },
+    {
+      "benchmarkId": "2115",
+      "benchmarkName": "DM S3 Static Level 3"
+    },
+    {
+      "benchmarkId": "2116",
+      "benchmarkName": "DM S3 Static Pokeball L4"
+    },
+    {
+      "benchmarkId": "2117",
+      "benchmarkName": "DM S3 Static Level 4"
+    },
+    {
+      "benchmarkId": "2118",
+      "benchmarkName": "DM S3 Static Pokeball Boss"
+    },
+    {
+      "benchmarkId": "2119",
+      "benchmarkName": "DM S3 Static Boss"
+    },
+    {
+      "benchmarkId": "2120",
+      "benchmarkName": "DM S3 Static Pokeball Boss+"
+    },
+    {
+      "benchmarkId": "2121",
+      "benchmarkName": "DM S3 Static Boss+"
+    },
+    {
+      "benchmarkId": "2122",
+      "benchmarkName": "DM S3 Static Pokebal Boss++"
+    },
+    {
+      "benchmarkId": "2123",
+      "benchmarkName": "DM S3 Static Boss++"
+    },
+    {
+      "benchmarkId": "2130",
+      "benchmarkName": "eA x Ritual Tracking"
+    },
+    {
+      "benchmarkId": "2132",
+      "benchmarkName": "Voltaic S5 - Interm Hard"
+    },
+    {
+      "benchmarkId": "2140",
+      "benchmarkName": "Aimerx9999"
+    },
+    {
+      "benchmarkId": "2148",
+      "benchmarkName": "ea tracking compv2"
+    },
+    {
+      "benchmarkId": "2151",
+      "benchmarkName": "Universlais"
+    },
+    {
+      "benchmarkId": "2158",
+      "benchmarkName": "m0narcS Euphoric TacFPS Nov"
+    },
+    {
+      "benchmarkId": "2159",
+      "benchmarkName": "ZHOUYANG Custom Benchmark"
+    },
+    {
+      "benchmarkId": "2164",
+      "benchmarkName": "Gawizmud Playlist"
+    },
+    {
+      "benchmarkId": "2168",
+      "benchmarkName": "AimSpeed Benchmarks Easy v2"
+    },
+    {
+      "benchmarkId": "2171",
+      "benchmarkName": "CONTROL TEMPLE"
+    },
+    {
+      "benchmarkId": "2172",
+      "benchmarkName": "XDweakness"
+    },
+    {
+      "benchmarkId": "2174",
+      "benchmarkName": "Cat Burg Benchmark"
+    },
+    {
+      "benchmarkId": "2175",
+      "benchmarkName": "AimSpeed Benchmark Normal"
+    },
+    {
+      "benchmarkId": "2176",
+      "benchmarkName": "AimSpeed Benchmarks Hard"
+    },
+    {
+      "benchmarkId": "2177",
+      "benchmarkName": "Meowi Micro + Track"
+    },
+    {
+      "benchmarkId": "2178",
+      "benchmarkName": "cs2 workout"
+    },
+    {
+      "benchmarkId": "2195",
+      "benchmarkName": "CONTROL SANCTUARY"
+    },
+    {
+      "benchmarkId": "2199",
+      "benchmarkName": "Real Xit-Benchmark"
+    },
+    {
+      "benchmarkId": "2201",
+      "benchmarkName": "AXR Aiming"
+    },
+    {
+      "benchmarkId": "2202",
+      "benchmarkName": "S345"
+    },
+    {
+      "benchmarkId": "2205",
+      "benchmarkName": "Aimerz+ Cats Collective"
+    },
+    {
+      "benchmarkId": "2207",
+      "benchmarkName": "SxnSpeedTS"
+    },
+    {
+      "benchmarkId": "2208",
+      "benchmarkName": "Anti-Overaiming v1"
+    },
+    {
+      "benchmarkId": "2211",
+      "benchmarkName": "DL warmup kaifs"
+    },
+    {
+      "benchmarkId": "2219",
+      "benchmarkName": "SpeedTS"
+    },
+    {
+      "benchmarkId": "2222",
+      "benchmarkName": "PAFI"
+    },
+    {
+      "benchmarkId": "2223",
+      "benchmarkName": "EpicMemer412 Benchmarks"
+    },
+    {
+      "benchmarkId": "2227",
+      "benchmarkName": "Glimmer"
+    },
+    {
+      "benchmarkId": "2231",
+      "benchmarkName": "joycattest"
+    },
+    {
+      "benchmarkId": "2232",
+      "benchmarkName": "HyperX MiniComp"
+    },
+    {
+      "benchmarkId": "2235",
+      "benchmarkName": "Am i STABLE"
+    },
+    {
+      "benchmarkId": "2245",
+      "benchmarkName": "GG TF2 Scout Benchmarks"
+    },
+    {
+      "benchmarkId": "2249",
+      "benchmarkName": "Endgame Tracking"
+    },
+    {
+      "benchmarkId": "2250",
+      "benchmarkName": "Endgame Switching"
+    },
+    {
+      "benchmarkId": "2251",
+      "benchmarkName": "Endgame Clicking"
+    },
+    {
+      "benchmarkId": "2252",
+      "benchmarkName": "negative Aim"
+    },
+    {
+      "benchmarkId": "2253",
+      "benchmarkName": "BLAZED ver:A"
+    },
+    {
+      "benchmarkId": "2254",
+      "benchmarkName": "pasu"
+    },
+    {
+      "benchmarkId": "2256",
+      "benchmarkName": "zhker's Benchmark - Easy"
+    },
+    {
+      "benchmarkId": "2259",
+      "benchmarkName": "Fortnite Pro Benchmark"
+    },
+    {
+      "benchmarkId": "2261",
+      "benchmarkName": "AJun Switching"
+    },
+    {
+      "benchmarkId": "2262",
+      "benchmarkName": "Jade Palace New"
+    },
+    {
+      "benchmarkId": "2264",
+      "benchmarkName": "PointZero - Valorant s1"
+    },
+    {
+      "benchmarkId": "2267",
+      "benchmarkName": "4BK - STS Benchmark(Step1)"
+    },
+    {
+      "benchmarkId": "2268",
+      "benchmarkName": "4BK - STS Benchmark(Step2)"
+    },
+    {
+      "benchmarkId": "2269",
+      "benchmarkName": "4BK - STS Benchmark(Strep3)"
+    },
+    {
+      "benchmarkId": "2270",
+      "benchmarkName": "4BK - STS Benchmark(Step4)"
+    },
+    {
+      "benchmarkId": "2271",
+      "benchmarkName": "4BK - STS Benchmark(Step 5)"
+    },
+    {
+      "benchmarkId": "2272",
+      "benchmarkName": "trial of lords"
+    },
+    {
+      "benchmarkId": "2275",
+      "benchmarkName": "test33333"
+    },
+    {
+      "benchmarkId": "2277",
+      "benchmarkName": "Lemon Static Benchmark INT"
+    },
+    {
+      "benchmarkId": "2280",
+      "benchmarkName": "@fangvalo"
+    },
+    {
+      "benchmarkId": "2282",
+      "benchmarkName": "Point Zero [Aim Academy] - Valorant S1"
+    },
+    {
+      "benchmarkId": "2283",
+      "benchmarkName": "asd"
+    },
+    {
+      "benchmarkId": "2284",
+      "benchmarkName": "Reactive Tracking Master Playlist"
+    },
+    {
+      "benchmarkId": "2285",
+      "benchmarkName": "Trial of lords S2"
+    },
+    {
+      "benchmarkId": "2287",
+      "benchmarkName": "33 benchmarks by unnaamed33"
+    },
+    {
+      "benchmarkId": "2291",
+      "benchmarkName": "Kaltstart Benchmarks"
+    },
+    {
+      "benchmarkId": "2295",
+      "benchmarkName": "eA Loopy's Jade Qualifiers"
+    },
+    {
+      "benchmarkId": "2305",
+      "benchmarkName": "33 Advanced"
+    },
+    {
+      "benchmarkId": "2309",
+      "benchmarkName": "DCC"
+    },
+    {
+      "benchmarkId": "2311",
+      "benchmarkName": "Dopamine benchmark"
+    },
+    {
+      "benchmarkId": "2313",
+      "benchmarkName": "MattyOW Linear Clicking"
+    },
+    {
+      "benchmarkId": "2327",
+      "benchmarkName": "AIR IMPROVEMENT"
+    },
+    {
+      "benchmarkId": "2332",
+      "benchmarkName": "Ultimate Valorant Benchmark"
+    },
+    {
+      "benchmarkId": "2333",
+      "benchmarkName": "S3-S5 tracking"
+    },
+    {
+      "benchmarkId": "2334",
+      "benchmarkName": "Aefx TS Benchmarks"
+    },
+    {
+      "benchmarkId": "2335",
+      "benchmarkName": "Viscose Benchmark S2 Easier"
+    },
+    {
+      "benchmarkId": "2336",
+      "benchmarkName": "Viscose Benchmark S2 Medium"
+    },
+    {
+      "benchmarkId": "2337",
+      "benchmarkName": "Viscose Benchmark S2 Hard"
+    },
+    {
+      "benchmarkId": "2338",
+      "benchmarkName": "Viscose Benchmark S2 Expert"
+    },
+    {
+      "benchmarkId": "2340",
+      "benchmarkName": "33 - bonkie's benchmarks"
+    },
+    {
+      "benchmarkId": "2341",
+      "benchmarkName": "SMOKOT valorant benchmark"
+    },
+    {
+      "benchmarkId": "2347",
+      "benchmarkName": "Training kelim"
+    },
+    {
+      "benchmarkId": "2348",
+      "benchmarkName": "Kelim treino"
+    },
+    {
+      "benchmarkId": "2353",
+      "benchmarkName": "suki's VALORANT Benchmark!!"
+    }
+  ]
+}
