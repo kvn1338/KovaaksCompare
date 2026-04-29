@@ -53,13 +53,13 @@ const CalibrationMappingSchema = z.object({
 const CalibrationConfigSchema = z.object({
   name: z.string().min(1),
   benchmarks: z.array(BenchmarkConfigSchema).min(1),
-  mappings: z.array(CalibrationMappingSchema).default([]),
 });
 
 export type CalibrationConfig = z.infer<typeof CalibrationConfigSchema>;
 export type BenchmarkConfig = z.infer<typeof BenchmarkConfigSchema>;
 export type ScenarioConfig = z.infer<typeof ScenarioConfigSchema>;
 export type CalibrationMapping = z.infer<typeof CalibrationMappingSchema>;
+type CalibrationReportConfig = CalibrationConfig & { mappings: CalibrationMapping[] };
 export type BenchmarkIndex = z.infer<typeof BenchmarkIndexSchema>;
 
 export interface ImportBenchmarkInput {
@@ -109,7 +109,7 @@ export async function loadCalibrationMapping(path: string): Promise<CalibrationM
   return CalibrationMappingSchema.parse(JSON.parse(raw));
 }
 
-export function withMapping(config: CalibrationConfig, mapping: CalibrationMapping): CalibrationConfig {
+export function withMapping(config: CalibrationConfig, mapping: CalibrationMapping): CalibrationReportConfig {
   return {
     ...config,
     mappings: [mapping],
@@ -165,21 +165,11 @@ export function appendBenchmarkToConfig(
     return {
       name: `${benchmark.name} Calibration`,
       benchmarks: [benchmark],
-      mappings: [],
     };
   }
   const benchmarks = config.benchmarks.filter((item) => item.id !== benchmark.id);
   benchmarks.push(benchmark);
   return { ...config, benchmarks };
-}
-
-export function appendMappingToConfig(
-  config: CalibrationConfig,
-  mapping: CalibrationMapping,
-): CalibrationConfig {
-  const mappings = config.mappings.filter((item) => item.id !== mapping.id);
-  mappings.push(mapping);
-  return { ...config, mappings };
 }
 
 export interface MappingSuggestion {
@@ -429,7 +419,7 @@ export function resolvedScenariosForBenchmarks(
 
 export function buildCalibrationReport(
   db: AppDatabase,
-  config: CalibrationConfig,
+  config: CalibrationReportConfig,
   input: CalibrationReportInput,
 ): CalibrationReport {
   const mapping = config.mappings.find((item) => item.id === input.mappingId);
@@ -652,20 +642,6 @@ export const CALIBRATION_TEMPLATE = {
           cutoffs: [],
           rankCutoffs: {},
           notes: "Fill in proposed S2 rank cutoffs if this scenario is used as a source.",
-        },
-      ],
-    },
-  ],
-  mappings: [
-    {
-      id: "viscose-easier-to-s2-easier",
-      name: "Viscose Easier -> Viscose S2 Easier",
-      sourceBenchmark: "viscose-current-easier",
-      targetBenchmark: "viscose-s2-easier",
-      pairs: [
-        {
-          sourceScenario: "smoothsphere-viscose-easier",
-          targetScenario: "whisphere-raw-control-larger-slowed",
         },
       ],
     },

@@ -151,8 +151,7 @@ The report uses source benchmark cutoff values from `configs/benchmarks.json` an
         }
       ]
     }
-  ],
-  "mappings": []
+  ]
 }
 ```
 
@@ -233,7 +232,7 @@ node dist/cli.js user \
   --targets "VT Raw Control Intermediate S5,WhisphereRawControl Larger + Slowed"
 ```
 
-Only best-score comparison is supported. The unofficial web API does not appear to expose reliable recent run history for arbitrary Steam identities, so `average_last_x` was removed rather than faked.
+Only best-score comparison is supported.
 
 Player lookup behavior:
 
