@@ -1,12 +1,33 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { KovaaksClient } from "./kovaaks-client.js";
 import { compareUserScenarios, formatNumber } from "./comparison.js";
 import { AppDatabase } from "./database.js";
+import { existsSync } from "node:fs";
+import {
+  CALIBRATION_TEMPLATE,
+  appendBenchmarkToConfig,
+  appendMappingToConfig,
+  buildCalibrationReport,
+  calibrationReportToCsv,
+  calibrationReportToMarkdown,
+  downloadBenchmarkIndex,
+  importBenchmarkFromApi,
+  loadBenchmarkIndex,
+  loadCalibrationConfig,
+  resolvedScenariosForBenchmarks,
+  resolveCalibrationConfig,
+  suggestMapping,
+} from "./calibration.js";
+
+const DEFAULT_INDEX_PATH = "configs/benchmark-index.json";
+const DEFAULT_CONFIG_PATH = "configs/calibration.json";
 import {
   buildLeaderboardCutoffs,
   collectLeaderboards,
+  collectResolvedLeaderboards,
   compareStoredLeaderboards,
   type LeaderboardCutoffsOutput,
   type LeaderboardCollectOutput,
@@ -14,24 +35,63 @@ import {
 } from "./leaderboard.js";
 import type { UserComparisonOutput } from "./comparison.js";
 
+const METRICS_GLOSSARY = [
+  "Glossary:",
+  "- Overlapping players, overlap %: paired players appearing in both leaderboards. Below ~50 paired players makes the rest shaky.",
+  "- Correlation (Pearson): linear strength of paired source vs target scores in [-1, 1]; near 1 means target tracks source closely.",
+  "- Log correlation: same metric on log(score). Often higher than raw when scores span a wide range; suggests a multiplicative relationship.",
+  "- Linear regression: target ~= a*source + b. Use slope/intercept to project a source score; R^2 is the share of variance explained.",
+  "- Trimmed regression: linear fit after dropping the largest residual outliers (--outlier-trim-percent). Less sensitive to weird players.",
+  "- Log-log regression: log(target) ~= a*log(source) + b, projected back via exp(...). Better when scores scale multiplicatively across the range.",
+  "- Percentile mapping (global): source score at percentile P vs target score at percentile P, computed independently per leaderboard.",
+  "- Paired-player quantile mapping: median target score among the ~5% of paired players whose source score sits nearest the queried value.",
+  "- Paired-window target score: same paired median anchored at a specific cutoff. n= is the window sample size.",
+  "- Monotonic paired target score: paired-window estimates at every 5th percentile, forced non-decreasing. Use for cutoff ladders.",
+  "- Confidence: low/medium/high heuristic over overlap count and ratio. Treat 'low' as informational only.",
+  "- Top outliers: paired players with the largest signed residual against the linear regression. + over-performers in target, - under-performers.",
+  "Workflow tip: prefer paired-window where overlap is dense at the cutoff, fall back to log-log at extreme tails, use monotonic for full rank ladders. Large divergence between estimators signals data sparsity.",
+].join("\n");
+
 const program = new Command();
 
 program
   .name("kovaaks-compare")
-  .description("Prototype CLI for comparing KovaaK's benchmark scenario scores.")
+  .description(
+    "Prototype CLI for comparing KovaaK's benchmark scenario scores.",
+  )
   .version("0.1.0");
 
 program
   .command("user")
-  .description("Compare one player across one source scenario and 1-3 target scenarios.")
-  .requiredOption("--player <player>", "Steam ID, webapp username, or display username")
-  .requiredOption("--source <scenario>", "Source scenario name or leaderboard ID")
-  .requiredOption("--targets <scenarios>", "Comma-separated target scenario names or leaderboard IDs")
-  .option("--max-pages <count>", "Max leaderboard pages to scan for player fallback lookup", parseInteger, 100)
+  .description(
+    "Compare one player across one source scenario and 1-3 target scenarios.",
+  )
+  .requiredOption(
+    "--player <player>",
+    "Steam ID, webapp username, or display username",
+  )
+  .requiredOption(
+    "--source <scenario>",
+    "Source scenario name or leaderboard ID",
+  )
+  .requiredOption(
+    "--targets <scenarios>",
+    "Comma-separated target scenario names or leaderboard IDs",
+  )
+  .option(
+    "--max-pages <count>",
+    "Max leaderboard pages to scan for player fallback lookup",
+    parseInteger,
+    100,
+  )
   .option("--json", "Print JSON instead of terminal text")
   .option("--csv <path>", "Export pair summary as CSV")
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
+  .option(
+    "--db <path>",
+    "Use a previously collected SQLite leaderboard to compute equivalent target scores locally",
+  )
   .action(async (options) => {
     const targets = String(options.targets)
       .split(",")
@@ -39,29 +99,40 @@ program
       .filter(Boolean);
 
     if (targets.length < 1 || targets.length > 3) {
-      throw new Error("--targets must contain 1 to 3 comma-separated scenarios.");
+      throw new Error(
+        "--targets must contain 1 to 3 comma-separated scenarios.",
+      );
     }
 
-    const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
-    const output = await compareUserScenarios(client, {
-      player: options.player,
-      sourceScenario: options.source,
-      targetScenarios: targets,
-      scoreMode: { type: "best" },
-      maxPages: options.maxPages,
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
     });
+    const db = options.db ? new AppDatabase(options.db) : undefined;
+    try {
+      const output = await compareUserScenarios(client, {
+        player: options.player,
+        sourceScenario: options.source,
+        targetScenarios: targets,
+        scoreMode: { type: "best" },
+        maxPages: options.maxPages,
+        db,
+      });
 
-    if (options.csv) {
-      await writeFile(options.csv, toCsv(output));
-    }
-
-    if (options.json) {
-      console.log(JSON.stringify(output, null, 2));
-    } else {
-      console.log(formatUserOutput(output));
       if (options.csv) {
-        console.log(`\nCSV written to ${options.csv}`);
+        await writeFile(options.csv, toCsv(output));
       }
+
+      if (options.json) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log(formatUserOutput(output));
+        if (options.csv) {
+          console.log(`\nCSV written to ${options.csv}`);
+        }
+      }
+    } finally {
+      db?.close();
     }
   });
 
@@ -72,16 +143,51 @@ const leaderboard = program
 leaderboard
   .command("collect")
   .description("Collect scenario leaderboard pages into SQLite.")
-  .option("--scenarios <scenarios>", "Comma-separated scenario names or leaderboard IDs")
-  .option("--source <scenario>", "Compatibility alias: source scenario name or leaderboard ID")
-  .option("--targets <scenarios>", "Compatibility alias: comma-separated target scenario names or leaderboard IDs")
+  .option(
+    "--scenarios <scenarios>",
+    "Comma-separated scenario names or leaderboard IDs",
+  )
+  .option(
+    "--source <scenario>",
+    "Compatibility alias: source scenario name or leaderboard ID",
+  )
+  .option(
+    "--targets <scenarios>",
+    "Compatibility alias: comma-separated target scenario names or leaderboard IDs",
+  )
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
-  .option("--max-pages <count>", "Optional max pages per leaderboard; omit to collect all pages", parseInteger)
-  .option("--refresh-db", "Refetch pages even when successful page records already exist")
-  .option("--max-age-hours <hours>", "Refetch successful page records older than this many hours", parseNumber)
-  .option("--request-delay-ms <ms>", "Initial delay between API requests", parseInteger, 750)
-  .option("--max-request-delay-ms <ms>", "Maximum adaptive delay between API requests", parseInteger, 15000)
-  .option("--max-retries <count>", "Retry attempts for retryable API errors", parseInteger, 6)
+  .option(
+    "--max-pages <count>",
+    "Optional max pages per leaderboard; omit to collect all pages",
+    parseInteger,
+  )
+  .option(
+    "--refresh-db",
+    "Refetch pages even when successful page records already exist",
+  )
+  .option(
+    "--max-age-hours <hours>",
+    "Refetch successful page records older than this many hours",
+    parseNumber,
+  )
+  .option(
+    "--request-delay-ms <ms>",
+    "Initial delay between API requests",
+    parseInteger,
+    750,
+  )
+  .option(
+    "--max-request-delay-ms <ms>",
+    "Maximum adaptive delay between API requests",
+    parseInteger,
+    15000,
+  )
+  .option(
+    "--max-retries <count>",
+    "Retry attempts for retryable API errors",
+    parseInteger,
+    6,
+  )
   .option("--json", "Print JSON instead of terminal text")
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
@@ -104,7 +210,10 @@ leaderboard
         onProgress: options.json
           ? undefined
           : (progress) => {
-              const totalPages = progress.totalPages === undefined ? "?" : String(progress.totalPages);
+              const totalPages =
+                progress.totalPages === undefined
+                  ? "?"
+                  : String(progress.totalPages);
               console.error(
                 `[collect] ${progress.scenarioName} (${progress.leaderboardId}) ` +
                   `page ${progress.page + 1}/${totalPages} ${progress.status}, stored ` +
@@ -125,16 +234,42 @@ leaderboard
 
 leaderboard
   .command("compare")
-  .description("Compare previously collected source and target leaderboard populations.")
+  .description(
+    "Compare previously collected source and target leaderboard populations.",
+  )
   .requiredOption("--source <leaderboardId>", "Collected source leaderboard ID")
-  .requiredOption("--targets <leaderboardIds>", "Comma-separated collected target leaderboard IDs")
+  .requiredOption(
+    "--targets <leaderboardIds>",
+    "Comma-separated collected target leaderboard IDs",
+  )
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
-  .option("--paired-only", "Restrict percentile mapping and compared distributions to overlapping Steam IDs")
-  .option("--percentiles <values>", "Comma-separated percentile rows to report", "50,60,75,88,95")
-  .option("--outlier-trim-percent <percent>", "Trim this percentage of largest residual outliers for robust regression", parseTrimPercent, 0)
-  .option("--outlier-limit <count>", "Number of residual outliers to include in output", parseNonNegativeInteger, 10)
+  .option(
+    "--paired-only",
+    "Restrict percentile mapping and compared distributions to overlapping Steam IDs",
+  )
+  .option(
+    "--percentiles <values>",
+    "Comma-separated percentile rows to report",
+    "50,60,75,88,95",
+  )
+  .option(
+    "--outlier-trim-percent <percent>",
+    "Trim this percentage of largest residual outliers for robust regression",
+    parseTrimPercent,
+    0,
+  )
+  .option(
+    "--outlier-limit <count>",
+    "Number of residual outliers to include in output",
+    parseNonNegativeInteger,
+    10,
+  )
   .option("--json", "Print JSON instead of terminal text")
   .option("--csv <path>", "Export comparison summary as CSV")
+  .option(
+    "--explain",
+    "Append a short glossary describing each reported metric",
+  )
   .action(async (options) => {
     const targetLeaderboardIds = parseTargets(options.targets);
     const percentiles = parsePercentiles(options.percentiles);
@@ -158,6 +293,9 @@ leaderboard
         if (options.csv) {
           console.log(`\nCSV written to ${options.csv}`);
         }
+        if (options.explain) {
+          console.log(`\n${METRICS_GLOSSARY}`);
+        }
       }
     } finally {
       db.close();
@@ -166,14 +304,31 @@ leaderboard
 
 leaderboard
   .command("cutoffs")
-  .description("Map proposed source score cutoffs onto collected target leaderboards.")
+  .description(
+    "Map proposed source score cutoffs onto collected target leaderboards.",
+  )
   .requiredOption("--source <leaderboardId>", "Collected source leaderboard ID")
-  .requiredOption("--targets <leaderboardIds>", "Comma-separated collected target leaderboard IDs")
-  .requiredOption("--source-cutoffs <scores>", "Comma-separated source cutoff scores to map")
+  .requiredOption(
+    "--targets <leaderboardIds>",
+    "Comma-separated collected target leaderboard IDs",
+  )
+  .requiredOption(
+    "--source-cutoffs <scores>",
+    "Comma-separated source cutoff scores to map",
+  )
   .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
-  .option("--outlier-trim-percent <percent>", "Trim this percentage of largest residual outliers for robust regression", parseTrimPercent, 0)
+  .option(
+    "--outlier-trim-percent <percent>",
+    "Trim this percentage of largest residual outliers for robust regression",
+    parseTrimPercent,
+    0,
+  )
   .option("--json", "Print JSON instead of terminal text")
   .option("--csv <path>", "Export cutoff rows as CSV")
+  .option(
+    "--explain",
+    "Append a short glossary describing each reported metric",
+  )
   .action(async (options) => {
     const targetLeaderboardIds = parseTargets(options.targets);
     const sourceCutoffs = parseScoreList(options.sourceCutoffs);
@@ -194,6 +349,358 @@ leaderboard
         console.log(formatLeaderboardCutoffsOutput(output));
         if (options.csv) {
           console.log(`\nCSV written to ${options.csv}`);
+        }
+        if (options.explain) {
+          console.log(`\n${METRICS_GLOSSARY}`);
+        }
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+const calibration = program
+  .command("calibration")
+  .description("Work with benchmark calibration configs and mapped reports.");
+
+calibration
+  .command("init")
+  .description("Write an editable calibration config template.")
+  .requiredOption("--out <path>", "Path for the new JSON config")
+  .action(async (options) => {
+    await writeTextFile(
+      options.out,
+      `${JSON.stringify(CALIBRATION_TEMPLATE, null, 2)}\n`,
+    );
+    console.log(`Calibration config template written to ${options.out}`);
+  });
+
+calibration
+  .command("resolve")
+  .description(
+    "Resolve scenario names in a calibration config to leaderboard IDs.",
+  )
+  .requiredOption("--config <path>", "Calibration JSON config")
+  .requiredOption("--out <path>", "Path for resolved JSON config")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const config = await loadCalibrationConfig(options.config);
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
+    const resolved = await resolveCalibrationConfig(client, config);
+    await writeTextFile(options.out, `${JSON.stringify(resolved, null, 2)}\n`);
+    console.log(`Resolved calibration config written to ${options.out}`);
+  });
+
+calibration
+  .command("benchmark-index")
+  .description(
+    "Download a benchmark name-to-ID index. Username only matters for cache key; benchmark list is the same for any account.",
+  )
+  .option(
+    "--out <path>",
+    "Path for benchmark index JSON",
+    DEFAULT_INDEX_PATH,
+  )
+  .option(
+    "--username <username>",
+    "Override username used for the API request and cache key",
+    "KovaaksCompare",
+  )
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
+    const index = await downloadBenchmarkIndex(client, options.username);
+    await writeTextFile(options.out, `${JSON.stringify(index, null, 2)}\n`);
+    console.log(
+      `Benchmark index with ${index.benchmarks.length} benchmark(s) written to ${options.out}`,
+    );
+  });
+
+calibration
+  .command("import-benchmark")
+  .description(
+    "Import scenarios and rank cutoffs for one benchmark from KovaaK's benchmark API. Benchmark structure is account-independent; defaults are used unless overridden.",
+  )
+  .option("--out <path>", "Path for updated calibration JSON config", DEFAULT_CONFIG_PATH)
+  .option(
+    "--steam-id <steamId>",
+    "Override the SteamID64 query parameter (any valid 17-digit value works for benchmark structure)",
+    "11111111111111111",
+  )
+  .option(
+    "--config <path>",
+    "Existing calibration JSON config to update; defaults to --out path if it already exists",
+  )
+  .option(
+    "--index <path>",
+    "Benchmark index JSON for name-to-ID lookup; auto-detected if configs/benchmark-index.json exists",
+  )
+  .option(
+    "--username <username>",
+    "Override username used for benchmark name lookup",
+    "KovaaksCompare",
+  )
+  .option("--benchmark-id <id>", "Benchmark ID to import")
+  .option("--benchmark-name <name>", "Benchmark name to import")
+  .option(
+    "--benchmark-key <id>",
+    "Local config benchmark ID; defaults to slugified benchmark name",
+  )
+  .option("--difficulty <label>", "Difficulty label to store in config")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const indexPath = options.index ?? (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
+    const configPath = options.config ?? (existsSync(options.out) ? options.out : undefined);
+    const target = await resolveImportBenchmarkOptions({ ...options, index: indexPath });
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
+    const benchmark = await importBenchmarkFromApi(client, {
+      username: options.username,
+      benchmarkId: target.benchmarkId,
+      benchmarkName: target.benchmarkName,
+      steamId: options.steamId,
+      id: options.benchmarkKey,
+      difficulty: options.difficulty,
+    });
+    const existing = configPath ? await loadCalibrationConfig(configPath) : undefined;
+    const updated = appendBenchmarkToConfig(existing, benchmark);
+    await writeTextFile(options.out, `${JSON.stringify(updated, null, 2)}\n`);
+    console.log(
+      `Imported ${benchmark.scenarios.length} scenario(s) from ${benchmark.name} ` +
+        `(${benchmark.benchmarkId ?? "unknown benchmark ID"}) to ${options.out}` +
+        `${configPath && configPath === options.out ? " (appended)" : ""}`,
+    );
+  });
+
+const mapping = calibration
+  .command("mapping")
+  .description("Create or edit calibration mappings between benchmarks in a config.");
+
+mapping
+  .command("create")
+  .description("Auto-pair scenarios between two benchmarks in the config and append the mapping.")
+  .requiredOption("--source <benchmark>", "Source benchmark id, name, or KovaaK benchmarkId")
+  .requiredOption("--target <benchmark>", "Target benchmark id, name, or KovaaK benchmarkId")
+  .option("--config <path>", "Calibration JSON config to read and update", DEFAULT_CONFIG_PATH)
+  .option("--out <path>", "Path to write the updated config; defaults to --config")
+  .option("--id <id>", "Override the mapping id; defaults to source__to__target")
+  .option("--name <name>", "Override the mapping display name")
+  .option(
+    "--similarity-threshold <value>",
+    "Minimum Jaccard token similarity for auto-pairing (0..1)",
+    parseNumber,
+    0.3,
+  )
+  .action(async (options) => {
+    const config = await loadCalibrationConfig(options.config);
+    const suggestion = suggestMapping({
+      config,
+      sourceBenchmark: options.source,
+      targetBenchmark: options.target,
+      id: options.id,
+      name: options.name,
+      similarityThreshold: options.similarityThreshold,
+    });
+    const updated = appendMappingToConfig(config, suggestion.mapping);
+    const outPath = options.out ?? options.config;
+    await writeTextFile(outPath, `${JSON.stringify(updated, null, 2)}\n`);
+    const sourceBenchmarkConfig = updated.benchmarks.find((b) => b.id === suggestion.mapping.sourceBenchmark);
+    const targetBenchmarkConfig = updated.benchmarks.find((b) => b.id === suggestion.mapping.targetBenchmark);
+    const findScenarioName = (benchmarkId: string, scenarioId: string): string => {
+      const benchmark = updated.benchmarks.find((b) => b.id === benchmarkId);
+      return benchmark?.scenarios.find((s) => s.id === scenarioId)?.name ?? scenarioId;
+    };
+
+    console.log(
+      `Mapping "${suggestion.mapping.id}" written to ${outPath} ` +
+        `(${suggestion.mapping.pairs.length} paired scenario(s)).`,
+    );
+    console.log("Pairs:");
+    for (const pair of suggestion.mapping.pairs) {
+      console.log(
+        `- ${findScenarioName(suggestion.mapping.sourceBenchmark, pair.sourceScenario)} -> ` +
+          `${findScenarioName(suggestion.mapping.targetBenchmark, pair.targetScenario)}`,
+      );
+    }
+    if (suggestion.warnings.length > 0) {
+      console.log("\nWarnings (verify pairings in the config):");
+      for (const warning of suggestion.warnings) {
+        console.log(`- ${warning}`);
+      }
+    }
+    if (suggestion.unpairedSources.length > 0) {
+      console.log(
+        `\nUnpaired source scenarios in ${sourceBenchmarkConfig?.name ?? suggestion.mapping.sourceBenchmark} (edit ${outPath} to pair manually):`,
+      );
+      for (const scenario of suggestion.unpairedSources) {
+        console.log(`- ${scenario.name} (${scenario.id})`);
+      }
+    }
+    if (suggestion.unpairedTargets.length > 0) {
+      console.log(
+        `\nUnused target scenarios in ${targetBenchmarkConfig?.name ?? suggestion.mapping.targetBenchmark}:`,
+      );
+      for (const scenario of suggestion.unpairedTargets) {
+        console.log(`- ${scenario.name} (${scenario.id})`);
+      }
+    }
+  });
+
+calibration
+  .command("collect")
+  .description(
+    "Collect all scenarios from selected calibration config benchmarks.",
+  )
+  .requiredOption("--config <path>", "Resolved calibration JSON config")
+  .option(
+    "--benchmarks <ids>",
+    "Comma-separated benchmark IDs; defaults to all benchmarks",
+  )
+  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option(
+    "--max-pages <count>",
+    "Optional max pages per leaderboard; omit to collect all pages",
+    parseInteger,
+  )
+  .option(
+    "--refresh-db",
+    "Refetch pages even when successful page records already exist",
+  )
+  .option(
+    "--max-age-hours <hours>",
+    "Refetch successful page records older than this many hours",
+    parseNumber,
+  )
+  .option(
+    "--request-delay-ms <ms>",
+    "Initial delay between API requests",
+    parseInteger,
+    750,
+  )
+  .option(
+    "--max-request-delay-ms <ms>",
+    "Maximum adaptive delay between API requests",
+    parseInteger,
+    15000,
+  )
+  .option(
+    "--max-retries <count>",
+    "Retry attempts for retryable API errors",
+    parseInteger,
+    6,
+  )
+  .option("--json", "Print JSON instead of terminal text")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    const config = await loadCalibrationConfig(options.config);
+    const scenarios = resolvedScenariosForBenchmarks(
+      config,
+      options.benchmarks ? parseScenarioList(options.benchmarks) : undefined,
+    );
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+      requestDelayMs: options.requestDelayMs,
+      maxRequestDelayMs: options.maxRequestDelayMs,
+      maxRetries: options.maxRetries,
+    });
+    const db = new AppDatabase(options.db);
+    try {
+      const output = await collectResolvedLeaderboards(client, db, {
+        scenarios,
+        maxPages: options.maxPages,
+        refreshDb: options.refreshDb,
+        maxAgeHours: options.maxAgeHours,
+        onProgress: options.json ? undefined : collectionProgressLogger,
+      });
+      if (options.json) {
+        console.log(JSON.stringify(output, null, 2));
+      } else {
+        console.log(formatCollectOutput(output, options.db));
+      }
+    } finally {
+      db.close();
+    }
+  });
+
+calibration
+  .command("report")
+  .description(
+    "Generate a multi-pair calibration report from configured benchmark mappings.",
+  )
+  .requiredOption("--config <path>", "Resolved calibration JSON config")
+  .requiredOption("--mapping <id>", "Mapping ID from the calibration config")
+  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option(
+    "--paired-only",
+    "Restrict percentile mapping and compared distributions to overlapping Steam IDs",
+  )
+  .option(
+    "--percentiles <values>",
+    "Comma-separated percentile rows to report",
+    "50,60,75,88,95",
+  )
+  .option(
+    "--outlier-trim-percent <percent>",
+    "Trim this percentage of largest residual outliers for robust regression",
+    parseTrimPercent,
+    0,
+  )
+  .option(
+    "--outlier-limit <count>",
+    "Number of residual outliers to include in output",
+    parseNonNegativeInteger,
+    10,
+  )
+  .option("--markdown <path>", "Write a Markdown report")
+  .option("--csv <path>", "Write cutoff-focused CSV rows")
+  .option("--json", "Print JSON instead of Markdown text")
+  .option(
+    "--explain",
+    "Append a short glossary describing each reported metric",
+  )
+  .action(async (options) => {
+    const config = await loadCalibrationConfig(options.config);
+    const db = new AppDatabase(options.db);
+    try {
+      const report = buildCalibrationReport(db, config, {
+        mappingId: options.mapping,
+        percentiles: parsePercentiles(options.percentiles),
+        pairedOnly: options.pairedOnly,
+        outlierTrimPercent: options.outlierTrimPercent,
+        outlierLimit: options.outlierLimit,
+      });
+      const baseMarkdown = calibrationReportToMarkdown(report);
+      const markdown = options.explain
+        ? `${baseMarkdown}\n## Glossary\n\n${METRICS_GLOSSARY}\n`
+        : baseMarkdown;
+      if (options.markdown) {
+        await writeTextFile(options.markdown, markdown);
+      }
+      if (options.csv) {
+        await writeTextFile(options.csv, calibrationReportToCsv(report));
+      }
+      if (options.json) {
+        console.log(JSON.stringify(report, null, 2));
+      } else {
+        console.log(markdown);
+        if (options.markdown) {
+          console.log(`\nMarkdown written to ${options.markdown}`);
+        }
+        if (options.csv) {
+          console.log(`CSV written to ${options.csv}`);
         }
       }
     } finally {
@@ -233,14 +740,20 @@ function parseTargets(value: string): string[] {
   return targets;
 }
 
-function parseCollectScenarios(options: { scenarios?: string; source?: string; targets?: string }): string[] {
+function parseCollectScenarios(options: {
+  scenarios?: string;
+  source?: string;
+  targets?: string;
+}): string[] {
   if (options.scenarios) {
     return parseScenarioList(options.scenarios);
   }
   if (options.source && options.targets) {
     return [options.source, ...parseScenarioList(options.targets)];
   }
-  throw new Error("Provide --scenarios x,y,z, or the compatibility pair --source x --targets y,z.");
+  throw new Error(
+    "Provide --scenarios x,y,z, or the compatibility pair --source x --targets y,z.",
+  );
 }
 
 function parseScenarioList(value: string): string[] {
@@ -275,7 +788,9 @@ function parsePercentiles(value: string): number[] {
   const uniqueSorted = [...new Set(percentiles)].sort((a, b) => a - b);
   for (const percentile of uniqueSorted) {
     if (!Number.isFinite(percentile) || percentile <= 0 || percentile >= 100) {
-      throw new Error("--percentiles values must be numbers greater than 0 and less than 100.");
+      throw new Error(
+        "--percentiles values must be numbers greater than 0 and less than 100.",
+      );
     }
   }
   return uniqueSorted;
@@ -301,9 +816,87 @@ function parseScoreList(value: string): number[] {
 function parseTrimPercent(value: string): number {
   const parsed = parseNumber(value);
   if (parsed < 0 || parsed >= 50) {
-    throw new Error("--outlier-trim-percent must be greater than or equal to 0 and less than 50.");
+    throw new Error(
+      "--outlier-trim-percent must be greater than or equal to 0 and less than 50.",
+    );
   }
   return parsed;
+}
+
+function collectionProgressLogger(progress: {
+  scenarioName: string;
+  leaderboardId: string;
+  page: number;
+  totalPages?: number;
+  status: string;
+  scoresStored: number;
+  totalAvailable: number;
+  error?: string;
+}): void {
+  const totalPages =
+    progress.totalPages === undefined ? "?" : String(progress.totalPages);
+  console.error(
+    `[collect] ${progress.scenarioName} (${progress.leaderboardId}) ` +
+      `page ${progress.page + 1}/${totalPages} ${progress.status}, stored ` +
+      `${progress.scoresStored}/${progress.totalAvailable}` +
+      `${progress.error ? `, error: ${progress.error}` : ""}`,
+  );
+}
+
+async function writeTextFile(path: string, content: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
+}
+
+async function resolveImportBenchmarkOptions(options: {
+  index?: string;
+  benchmarkId?: string;
+  benchmarkName?: string;
+}): Promise<{ benchmarkId?: string; benchmarkName?: string }> {
+  if (!options.index) {
+    if (!options.benchmarkId && !options.benchmarkName) {
+      throw new Error(
+        "Provide --benchmark-id, --benchmark-name with --username, or --benchmark-name with --index.",
+      );
+    }
+    return {
+      benchmarkId: options.benchmarkId,
+      benchmarkName: options.benchmarkName,
+    };
+  }
+
+  const index = await loadBenchmarkIndex(options.index);
+  if (options.benchmarkId) {
+    const benchmark = index.benchmarks.find(
+      (item) => item.benchmarkId === String(options.benchmarkId),
+    );
+    return {
+      benchmarkId: String(options.benchmarkId),
+      benchmarkName: options.benchmarkName ?? benchmark?.benchmarkName,
+    };
+  }
+  if (!options.benchmarkName) {
+    throw new Error(
+      "Provide --benchmark-name when using --index without --benchmark-id.",
+    );
+  }
+  const exact = index.benchmarks.find(
+    (benchmark) =>
+      benchmark.benchmarkName.toLowerCase() ===
+      options.benchmarkName?.toLowerCase(),
+  );
+  const fuzzy = index.benchmarks.find((benchmark) =>
+    benchmark.benchmarkName
+      .toLowerCase()
+      .includes(options.benchmarkName?.toLowerCase() ?? ""),
+  );
+  const chosen = exact ?? fuzzy;
+  if (!chosen) {
+    throw new Error(
+      `No benchmark matching "${options.benchmarkName}" found in ${options.index}.`,
+    );
+  }
+  return chosen;
 }
 
 function formatUserOutput(output: UserComparisonOutput): string {
@@ -311,13 +904,17 @@ function formatUserOutput(output: UserComparisonOutput): string {
 
   for (const comparison of output.comparisons) {
     lines.push("");
-    lines.push(`${comparison.source.scenarioName} -> ${comparison.target.scenarioName}`);
+    lines.push(
+      `${comparison.source.scenarioName} -> ${comparison.target.scenarioName}`,
+    );
     lines.push(`Source leaderboard: ${comparison.source.leaderboardId}`);
     lines.push(`Target leaderboard: ${comparison.target.leaderboardId}`);
     lines.push(`Source score: ${formatScore(comparison.sourceScore)}`);
     lines.push(`Target score: ${formatScore(comparison.targetScore)}`);
     if (comparison.equivalentTargetScore !== undefined) {
-      lines.push(`Equivalent target score: ${formatNumber(comparison.equivalentTargetScore)}`);
+      lines.push(
+        `Equivalent target score: ${formatNumber(comparison.equivalentTargetScore)}`,
+      );
     }
     lines.push("Interpretation:");
     for (const item of comparison.interpretation) {
@@ -334,7 +931,11 @@ function formatUserOutput(output: UserComparisonOutput): string {
   return lines.join("\n");
 }
 
-function formatScore(score: { score: number | null; rank?: number; percentile?: number }): string {
+function formatScore(score: {
+  score: number | null;
+  rank?: number;
+  percentile?: number;
+}): string {
   if (score.score === null) {
     return "unavailable";
   }
@@ -379,12 +980,17 @@ function toCsv(output: UserComparisonOutput): string {
       comparison.targetScore.percentile,
       comparison.equivalentTargetScore,
       comparison.warnings.join(" | "),
-    ].map(csvCell).join(","),
+    ]
+      .map(csvCell)
+      .join(","),
   );
   return [header.join(","), ...rows].join("\n");
 }
 
-function formatCollectOutput(output: LeaderboardCollectOutput, dbPath: string): string {
+function formatCollectOutput(
+  output: LeaderboardCollectOutput,
+  dbPath: string,
+): string {
   const lines = [`Database: ${dbPath}`, "", "Collected:"];
   for (const item of output.scenarios) {
     lines.push(
@@ -394,13 +1000,17 @@ function formatCollectOutput(output: LeaderboardCollectOutput, dbPath: string): 
         `${item.complete ? "" : " (partial)"}`,
     );
     if (item.scenario.ambiguous) {
-      lines.push(`  warning: "${item.scenario.input}" was ambiguous; selected first/best match.`);
+      lines.push(
+        `  warning: "${item.scenario.input}" was ambiguous; selected first/best match.`,
+      );
     }
   }
   return lines.join("\n");
 }
 
-function formatLeaderboardCompareOutput(output: LeaderboardCompareOutput): string {
+function formatLeaderboardCompareOutput(
+  output: LeaderboardCompareOutput,
+): string {
   const lines = [
     `Source: ${output.source.scenarioName} (${output.source.leaderboardId})`,
     `Source players collected: ${output.source.playersCollected}`,
@@ -408,12 +1018,16 @@ function formatLeaderboardCompareOutput(output: LeaderboardCompareOutput): strin
 
   for (const target of output.targets) {
     lines.push("");
-    lines.push(`Target: ${target.target.scenarioName} (${target.target.leaderboardId})`);
+    lines.push(
+      `Target: ${target.target.scenarioName} (${target.target.leaderboardId})`,
+    );
     lines.push(`Target players collected: ${target.targetPlayersCollected}`);
     lines.push(`Comparison population: ${target.comparisonPopulation}`);
     lines.push(`Source players compared: ${target.sourcePlayersCompared}`);
     lines.push(`Target players compared: ${target.targetPlayersCompared}`);
-    lines.push(`Overlapping players: ${target.overlappingPlayers} (${target.overlapPercentage.toFixed(1)}%)`);
+    lines.push(
+      `Overlapping players: ${target.overlappingPlayers} (${target.overlapPercentage.toFixed(1)}%)`,
+    );
     lines.push(`Correlation: ${formatOptional(target.correlation, 4)}`);
     lines.push(`Log correlation: ${formatOptional(target.logCorrelation, 4)}`);
     if (target.regression) {
@@ -427,6 +1041,13 @@ function formatLeaderboardCompareOutput(output: LeaderboardCompareOutput): strin
         `Trimmed regression: target ~= ${target.trimmedRegression.slope.toFixed(4)} * source + ` +
           `${target.trimmedRegression.intercept.toFixed(2)} ` +
           `(R^2 ${target.trimmedRegression.rSquared.toFixed(4)}, n=${target.trimmedRegression.sampleSize})`,
+      );
+    }
+    if (target.logRegression) {
+      lines.push(
+        `Log-log regression: log(target) ~= ${target.logRegression.slope.toFixed(4)} * log(source) + ` +
+          `${target.logRegression.intercept.toFixed(4)} ` +
+          `(R^2 ${target.logRegression.rSquared.toFixed(4)}, n=${target.logRegression.sampleSize})`,
       );
     }
     lines.push("Percentile mapping:");
@@ -467,7 +1088,9 @@ function formatLeaderboardCompareOutput(output: LeaderboardCompareOutput): strin
   return lines.join("\n");
 }
 
-function formatLeaderboardCutoffsOutput(output: LeaderboardCutoffsOutput): string {
+function formatLeaderboardCutoffsOutput(
+  output: LeaderboardCutoffsOutput,
+): string {
   const lines = [
     `Source: ${output.source.scenarioName} (${output.source.leaderboardId})`,
     `Source players collected: ${output.source.playersCollected}`,
@@ -475,7 +1098,9 @@ function formatLeaderboardCutoffsOutput(output: LeaderboardCutoffsOutput): strin
 
   for (const target of output.targets) {
     lines.push("");
-    lines.push(`Target: ${target.target.scenarioName} (${target.target.leaderboardId})`);
+    lines.push(
+      `Target: ${target.target.scenarioName} (${target.target.leaderboardId})`,
+    );
     lines.push(`Target players collected: ${target.target.playersCollected}`);
     lines.push(`Overlapping players: ${target.overlappingPlayers}`);
     if (target.regression) {
@@ -491,6 +1116,13 @@ function formatLeaderboardCutoffsOutput(output: LeaderboardCutoffsOutput): strin
           `(R^2 ${target.trimmedRegression.rSquared.toFixed(4)}, n=${target.trimmedRegression.sampleSize})`,
       );
     }
+    if (target.logRegression) {
+      lines.push(
+        `Log-log regression: log(target) ~= ${target.logRegression.slope.toFixed(4)} * log(source) + ` +
+          `${target.logRegression.intercept.toFixed(4)} ` +
+          `(R^2 ${target.logRegression.rSquared.toFixed(4)}, n=${target.logRegression.sampleSize})`,
+      );
+    }
     lines.push("Cutoff mapping:");
     for (const row of target.cutoffs) {
       lines.push(
@@ -501,7 +1133,8 @@ function formatLeaderboardCutoffsOutput(output: LeaderboardCutoffsOutput): strin
           `(n=${row.pairedWindowSampleSize}, ${row.confidence}), ` +
           `monotonic ${formatOptional(row.pairedMonotonicTargetScore, 0)}, ` +
           `linear ${formatOptional(row.linearRegressionTargetScore, 0)}` +
-          `${row.trimmedRegressionTargetScore === undefined ? "" : `, trimmed ${formatOptional(row.trimmedRegressionTargetScore, 0)}`}`,
+          `${row.trimmedRegressionTargetScore === undefined ? "" : `, trimmed ${formatOptional(row.trimmedRegressionTargetScore, 0)}`}` +
+          `${row.logRegressionTargetScore === undefined ? "" : `, log ${formatOptional(row.logRegressionTargetScore, 0)}`}`,
       );
     }
     if (target.warnings.length > 0) {
@@ -536,6 +1169,9 @@ function leaderboardCompareToCsv(output: LeaderboardCompareOutput): string {
     "trimmed_regression_slope",
     "trimmed_regression_intercept",
     "trimmed_regression_r_squared",
+    "log_regression_slope",
+    "log_regression_intercept",
+    "log_regression_r_squared",
   ];
   const rows = output.targets.map((target) =>
     [
@@ -558,7 +1194,12 @@ function leaderboardCompareToCsv(output: LeaderboardCompareOutput): string {
       target.trimmedRegression?.slope,
       target.trimmedRegression?.intercept,
       target.trimmedRegression?.rSquared,
-    ].map(csvCell).join(","),
+      target.logRegression?.slope,
+      target.logRegression?.intercept,
+      target.logRegression?.rSquared,
+    ]
+      .map(csvCell)
+      .join(","),
   );
   return [header.join(","), ...rows].join("\n");
 }
@@ -578,6 +1219,7 @@ function leaderboardCutoffsToCsv(output: LeaderboardCutoffsOutput): string {
     "paired_window_sample_size",
     "linear_regression_target_score",
     "trimmed_regression_target_score",
+    "log_regression_target_score",
     "confidence",
   ];
   const rows = output.targets.flatMap((target) =>
@@ -596,15 +1238,20 @@ function leaderboardCutoffsToCsv(output: LeaderboardCutoffsOutput): string {
         row.pairedWindowSampleSize,
         row.linearRegressionTargetScore,
         row.trimmedRegressionTargetScore,
+        row.logRegressionTargetScore,
         row.confidence,
-      ].map(csvCell).join(","),
+      ]
+        .map(csvCell)
+        .join(","),
     ),
   );
   return [header.join(","), ...rows].join("\n");
 }
 
 function formatOptional(value: number | undefined, digits: number): string {
-  return value === undefined || !Number.isFinite(value) ? "n/a" : value.toFixed(digits);
+  return value === undefined || !Number.isFinite(value)
+    ? "n/a"
+    : value.toFixed(digits);
 }
 
 function csvCell(value: unknown): string {

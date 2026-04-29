@@ -1,4 +1,6 @@
 import type { KovaaksClient } from "./kovaaks-client.js";
+import type { AppDatabase } from "./database.js";
+import { scoreAtPercentile } from "./leaderboard.js";
 import type {
   ResolvedScenario,
   ScenarioPairComparison,
@@ -13,6 +15,7 @@ export interface UserComparisonInput {
   targetScenarios: string[];
   scoreMode: ScoreMode;
   maxPages?: number;
+  db?: AppDatabase;
 }
 
 export interface UserComparisonOutput {
@@ -56,6 +59,7 @@ export async function compareUserScenarios(
     const equivalentTargetScore = await getEquivalentTargetScore(client, {
       targetLeaderboardId: target.leaderboardId,
       sourcePercentile: sourceScore.percentile,
+      db: input.db,
     });
 
     comparisons.push({
@@ -138,10 +142,19 @@ async function getScore(
 
 async function getEquivalentTargetScore(
   client: KovaaksClient,
-  params: { targetLeaderboardId: string; sourcePercentile?: number },
+  params: { targetLeaderboardId: string; sourcePercentile?: number; db?: AppDatabase },
 ): Promise<number | undefined> {
   if (params.sourcePercentile === undefined) {
     return undefined;
+  }
+
+  if (params.db) {
+    const metadata = params.db.getCollectionMetadata(params.targetLeaderboardId);
+    if (metadata && metadata.complete) {
+      const stored = params.db.getScores(params.targetLeaderboardId);
+      const sorted = stored.map((entry) => entry.score).sort((a, b) => b - a);
+      return scoreAtPercentile(sorted, params.sourcePercentile);
+    }
   }
 
   const firstPage = await client.getLeaderboardScores({ leaderboardId: params.targetLeaderboardId, page: 0, max: 100 });

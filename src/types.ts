@@ -41,6 +41,19 @@ export interface ResolvedScenario {
   alternatives: ScenarioSearchResult[];
 }
 
+export interface BenchmarkSummary {
+  benchmarkId: string;
+  benchmarkName: string;
+}
+
+export interface BenchmarkScenario {
+  scenarioId: string;
+  scenarioName: string;
+  leaderboardId: string;
+  rankMaxes: Record<string, number>;
+  category?: string;
+}
+
 export interface ScoreResult {
   score: number | null;
   rank?: number;

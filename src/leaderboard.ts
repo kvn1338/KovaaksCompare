@@ -11,6 +11,14 @@ export interface LeaderboardCollectInput {
   onProgress?: (progress: CollectionProgress) => void;
 }
 
+export interface ResolvedLeaderboardCollectInput {
+  scenarios: ResolvedScenario[];
+  maxPages?: number;
+  refreshDb?: boolean;
+  maxAgeHours?: number;
+  onProgress?: (progress: CollectionProgress) => void;
+}
+
 export interface CollectionProgress {
   scenarioName: string;
   leaderboardId: string;
@@ -68,6 +76,7 @@ export interface TargetCutoffComparison {
   overlappingPlayers: number;
   regression?: LinearRegression;
   trimmedRegression?: LinearRegression;
+  logRegression?: LinearRegression;
   cutoffs: CutoffMappingRow[];
   warnings: string[];
 }
@@ -85,6 +94,7 @@ export interface TargetComparison {
   logCorrelation?: number;
   regression?: LinearRegression;
   trimmedRegression?: LinearRegression;
+  logRegression?: LinearRegression;
   percentileMapping: PercentileMappingRow[];
   pairedQuantileMapping: PairedQuantileMappingRow[];
   outliers: Outlier[];
@@ -118,6 +128,7 @@ export interface CutoffMappingRow {
   pairedWindowSampleSize: number;
   linearRegressionTargetScore?: number;
   trimmedRegressionTargetScore?: number;
+  logRegressionTargetScore?: number;
   confidence: "low" | "medium" | "high";
 }
 
@@ -148,9 +159,19 @@ export async function collectLeaderboards(
   input: LeaderboardCollectInput,
 ): Promise<LeaderboardCollectOutput> {
   const scenarios = await Promise.all(input.scenarios.map((scenario) => resolveScenario(client, scenario)));
+  return collectResolvedLeaderboards(client, db, {
+    ...input,
+    scenarios,
+  });
+}
 
+export async function collectResolvedLeaderboards(
+  client: KovaaksClient,
+  db: AppDatabase,
+  input: ResolvedLeaderboardCollectInput,
+): Promise<LeaderboardCollectOutput> {
   const collected: CollectedScenario[] = [];
-  for (const scenario of scenarios) {
+  for (const scenario of input.scenarios) {
     collected.push(await collectOne(client, db, scenario, {
       maxPages: input.maxPages,
       refreshDb: input.refreshDb ?? false,
@@ -237,6 +258,7 @@ function compareTarget(
     params.outlierTrimPercent > 0 && trimmedPairs.length < pairs.length
       ? linearRegression(trimmedPairs)
       : undefined;
+  const logRegression = logLogRegression(pairs);
   const correlation = pearson(
     pairs.map((pair) => pair.sourceScore),
     pairs.map((pair) => pair.targetScore),
@@ -249,11 +271,11 @@ function compareTarget(
   const overlapPercentage =
     params.sourceScores.length > 0 ? (pairs.length / params.sourceScores.length) * 100 : 0;
   const sourceComparisonScores = params.pairedOnly
-    ? pairs.map((pair) => pairedToStoredScore(pair, "source"))
-    : params.sourceScores;
+    ? pairs.map((pair) => pair.sourceScore)
+    : params.sourceScores.map((score) => score.score);
   const targetComparisonScores = params.pairedOnly
-    ? pairs.map((pair) => pairedToStoredScore(pair, "target"))
-    : params.targetScores;
+    ? pairs.map((pair) => pair.targetScore)
+    : params.targetScores.map((score) => score.score);
   const warnings: string[] = [];
   const sourceMetadata = db.getCollectionMetadata(params.sourceLeaderboardId);
   const targetMetadata = db.getCollectionMetadata(params.targetLeaderboardId);
@@ -296,6 +318,7 @@ function compareTarget(
     logCorrelation,
     regression,
     trimmedRegression,
+    logRegression,
     percentileMapping: buildPercentileMapping(
       sourceComparisonScores,
       targetComparisonScores,
@@ -334,9 +357,10 @@ function buildTargetCutoffs(
     params.outlierTrimPercent > 0 && trimmedPairs.length < pairs.length
       ? linearRegression(trimmedPairs)
       : undefined;
+  const logRegression = logLogRegression(pairs);
   const monotonicAnchors = buildMonotonicPairedAnchors(pairs);
-  const sourceSorted = [...params.sourceScores].sort((a, b) => b.score - a.score);
-  const targetSorted = [...params.targetScores].sort((a, b) => b.score - a.score);
+  const sourceSorted = params.sourceScores.map((score) => score.score).sort((a, b) => b - a);
+  const targetSorted = params.targetScores.map((score) => score.score).sort((a, b) => b - a);
   const warnings: string[] = [];
   const sourceMetadata = db.getCollectionMetadata(params.sourceLeaderboardId);
   const targetMetadata = db.getCollectionMetadata(params.targetLeaderboardId);
@@ -369,6 +393,7 @@ function buildTargetCutoffs(
     overlappingPlayers: pairs.length,
     regression,
     trimmedRegression,
+    logRegression,
     cutoffs: params.sourceCutoffs.map((sourceScore) => {
       const sourcePercentile = percentileForScore(sourceSorted, sourceScore);
       const pairedWindow = pairedWindowTargetScore(pairs, sourceScore);
@@ -386,6 +411,10 @@ function buildTargetCutoffs(
         trimmedRegressionTargetScore: trimmedRegression
           ? trimmedRegression.intercept + trimmedRegression.slope * sourceScore
           : undefined,
+        logRegressionTargetScore:
+          logRegression && sourceScore > 0
+            ? Math.exp(logRegression.intercept + logRegression.slope * Math.log(sourceScore))
+            : undefined,
         confidence: pairedWindowConfidence(pairedWindow.sampleSize, pairs.length),
       };
     }),
@@ -411,18 +440,6 @@ function buildPairs(
     });
   }
   return pairs;
-}
-
-function pairedToStoredScore(pair: PairedScore, side: "source" | "target"): StoredLeaderboardScore {
-  return {
-    leaderboardId: side,
-    playerId: pair.playerId,
-    steamId: pair.steamId,
-    username: pair.username,
-    webappUsername: undefined,
-    score: side === "source" ? pair.sourceScore : pair.targetScore,
-    fetchedAt: "",
-  };
 }
 
 async function collectOne(
@@ -558,13 +575,13 @@ function isFresh(fetchedAt: string, maxAgeHours: number | undefined): boolean {
 }
 
 function buildPercentileMapping(
-  sourceScores: StoredLeaderboardScore[],
-  targetScores: StoredLeaderboardScore[],
+  sourceScores: number[],
+  targetScores: number[],
   overlapCount: number,
   percentiles: number[],
 ): PercentileMappingRow[] {
-  const sourceSorted = [...sourceScores].sort((a, b) => b.score - a.score);
-  const targetSorted = [...targetScores].sort((a, b) => b.score - a.score);
+  const sourceSorted = [...sourceScores].sort((a, b) => b - a);
+  const targetSorted = [...targetScores].sort((a, b) => b - a);
 
   const rows: PercentileMappingRow[] = [];
   for (const percentile of percentiles) {
@@ -602,10 +619,10 @@ function buildPairedQuantileMapping(
   return rows;
 }
 
-function scoreAtPercentile(scores: StoredLeaderboardScore[], percentile: number): number | undefined {
+export function scoreAtPercentile(scores: number[], percentile: number): number | undefined {
   if (scores.length === 0) return undefined;
   const rank = Math.max(1, Math.ceil((1 - percentile / 100) * scores.length));
-  return scores[Math.min(scores.length - 1, rank - 1)]?.score;
+  return scores[Math.min(scores.length - 1, rank - 1)];
 }
 
 function pairedSourceScoreAtPercentile(sortedPairs: PairedScore[], percentile: number): number | undefined {
@@ -614,9 +631,9 @@ function pairedSourceScoreAtPercentile(sortedPairs: PairedScore[], percentile: n
   return sortedPairs[Math.min(sortedPairs.length - 1, rank - 1)]?.sourceScore;
 }
 
-function percentileForScore(sortedScores: StoredLeaderboardScore[], score: number): number | undefined {
+function percentileForScore(sortedScores: number[], score: number): number | undefined {
   if (sortedScores.length === 0) return undefined;
-  const betterCount = sortedScores.filter((entry) => entry.score > score).length;
+  const betterCount = sortedScores.filter((entry) => entry > score).length;
   return ((sortedScores.length - betterCount) / sortedScores.length) * 100;
 }
 
@@ -717,6 +734,19 @@ function linearRegression(pairs: PairedScore[]): LinearRegression | undefined {
     rSquared: ssTotal === 0 ? 0 : 1 - ssResidual / ssTotal,
     sampleSize: pairs.length,
   };
+}
+
+function logLogRegression(pairs: PairedScore[]): LinearRegression | undefined {
+  const positive = pairs.filter((pair) => pair.sourceScore > 0 && pair.targetScore > 0);
+  if (positive.length < 2) return undefined;
+  const transformed: PairedScore[] = positive.map((pair) => ({
+    playerId: pair.playerId,
+    steamId: pair.steamId,
+    username: pair.username,
+    sourceScore: Math.log(pair.sourceScore),
+    targetScore: Math.log(pair.targetScore),
+  }));
+  return linearRegression(transformed);
 }
 
 function trimPairsByRegressionResidual(pairs: PairedScore[], trimPercent: number): PairedScore[] {

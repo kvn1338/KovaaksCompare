@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { z } from "zod";
 import type {
+  BenchmarkScenario,
+  BenchmarkSummary,
   LeaderboardPage,
   PlayerScenarioScore,
   ScenarioSearchResult,
@@ -9,7 +11,7 @@ import type {
 
 const BASE_URL = "https://kovaaks.com";
 const REQUEST_DELAY_MS = 500;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 6;
 
 const scenarioSearchSchema = z.object({
   page: z.number(),
@@ -75,6 +77,13 @@ const accountNameSearchSchema = z.array(
     steamAccountName: z.string().optional(),
   }),
 );
+
+const genericPagedDataSchema = z.object({
+  page: z.number().optional(),
+  max: z.number().optional(),
+  total: z.number().optional(),
+  data: z.array(z.record(z.string(), z.unknown())).default([]),
+}).passthrough();
 
 interface KovaaksClientOptions {
   baseUrl?: string;
@@ -219,6 +228,63 @@ export class KovaaksClient {
     }
 
     return null;
+  }
+
+  async getBenchmarkSummariesForPlayer(params: {
+    username?: string;
+    pageSize?: number;
+  } = {}): Promise<BenchmarkSummary[]> {
+    const username = params.username ?? "KovaaksCompare";
+    const max = params.pageSize ?? 300;
+    const all: BenchmarkSummary[] = [];
+    for (let page = 0; ; page += 1) {
+      const json = await this.getJson(
+        "/webapp-backend/benchmarks/player-progress-rank",
+        { username, page, max },
+        `benchmark-progress-rank-${username}-${page}-${max}`,
+      );
+      if (json === null) {
+        throw new Error(`KovaaK's API returned no benchmark list data for ${username}.`);
+      }
+      const parsed = genericPagedDataSchema.parse(json);
+      const summaries = parsed.data
+        .map(extractBenchmarkSummary)
+        .filter((benchmark): benchmark is BenchmarkSummary => benchmark !== null);
+      all.push(...summaries);
+      const total = parsed.total ?? 0;
+      if (summaries.length === 0 || (page + 1) * max >= total) {
+        break;
+      }
+    }
+    return all;
+  }
+
+  async getBenchmarkScenarios(params: {
+    benchmarkId: string;
+    steamId: string;
+    page?: number;
+    max?: number;
+  }): Promise<BenchmarkScenario[]> {
+    const page = params.page ?? 0;
+    const max = params.max ?? 100;
+    const json = await this.getJson(
+      "/webapp-backend/benchmarks/player-progress-rank-benchmark",
+      { benchmarkId: params.benchmarkId, steamId: params.steamId, page, max },
+      `benchmark-scenarios-${params.benchmarkId}-${params.steamId}-${page}-${max}`,
+    );
+    if (json === null) {
+      throw new Error(`KovaaK's API returned no benchmark scenario data for benchmark ${params.benchmarkId}.`);
+    }
+    const parsed = genericPagedDataSchema.safeParse(json);
+    const dataScenarios = parsed.success
+      ? parsed.data.data
+        .map(extractBenchmarkScenario)
+        .filter((scenario): scenario is BenchmarkScenario => scenario !== null)
+      : [];
+    return uniqueBenchmarkScenarios([
+      ...dataScenarios,
+      ...extractBenchmarkScenariosFromCategories(json),
+    ]);
   }
 
   private async getPlayerBestFromUserScenarioList(params: {
@@ -582,6 +648,157 @@ function playerMatches(
   return [entry.steamId, entry.username, entry.webappUsername]
     .filter((value): value is string => Boolean(value))
     .some((value) => normalizedPlayers.has(value.toLowerCase()));
+}
+
+function extractBenchmarkSummary(row: Record<string, unknown>): BenchmarkSummary | null {
+  const benchmarkRecord = asRecord(row.benchmark);
+  const benchmarkId =
+    stringValue(row.benchmarkId) ??
+    stringValue(row.benchmark_id) ??
+    stringValue(row.id) ??
+    stringValue(benchmarkRecord?.id) ??
+    stringValue(benchmarkRecord?.benchmarkId);
+  const benchmarkName =
+    stringValue(row.benchmarkName) ??
+    stringValue(row.benchmark_name) ??
+    stringValue(row.name) ??
+    stringValue(row.title) ??
+    stringValue(benchmarkRecord?.name) ??
+    stringValue(benchmarkRecord?.title);
+
+  if (!benchmarkId || !benchmarkName) {
+    return null;
+  }
+  return { benchmarkId, benchmarkName };
+}
+
+function extractBenchmarkScenario(row: Record<string, unknown>): BenchmarkScenario | null {
+  const scenarioRecord = asRecord(row.scenario);
+  const leaderboardRecord = asRecord(row.leaderboard);
+  const scenarioName =
+    stringValue(row.scenarioName) ??
+    stringValue(row.scenario_name) ??
+    stringValue(row.name) ??
+    stringValue(scenarioRecord?.scenarioName) ??
+    stringValue(scenarioRecord?.name);
+  const leaderboardId =
+    stringValue(row.leaderboardId) ??
+    stringValue(row.leaderboard_id) ??
+    stringValue(leaderboardRecord?.id) ??
+    stringValue(leaderboardRecord?.leaderboardId) ??
+    stringValue(scenarioRecord?.leaderboardId);
+  const scenarioId =
+    stringValue(row.scenarioId) ??
+    stringValue(row.scenario_id) ??
+    stringValue(row.id) ??
+    stringValue(scenarioRecord?.id) ??
+    leaderboardId;
+
+  if (!scenarioName || !leaderboardId || !scenarioId) {
+    return null;
+  }
+
+  return {
+    scenarioId,
+    scenarioName,
+    leaderboardId,
+    rankMaxes: numericRecord(row.rank_maxes ?? row.rankMaxes ?? row.rank_max ?? row.rankMax),
+  };
+}
+
+function extractBenchmarkScenariosFromCategories(json: unknown): BenchmarkScenario[] {
+  const root = asRecord(json);
+  const categories = asRecord(root?.categories);
+  if (!categories) return [];
+  const rankNames = rankNamesFromResponse(root);
+  const scenarios: BenchmarkScenario[] = [];
+
+  for (const [categoryKey, category] of Object.entries(categories)) {
+    const categoryRecord = asRecord(category);
+    const categoryScenarios = asRecord(categoryRecord?.scenarios);
+    if (!categoryScenarios) continue;
+    const trimmedCategory = categoryKey.trim();
+    const categoryName = trimmedCategory.length > 0 ? trimmedCategory : undefined;
+
+    for (const [scenarioName, rawScenario] of Object.entries(categoryScenarios)) {
+      const scenario = asRecord(rawScenario);
+      const leaderboardId = stringValue(scenario?.leaderboard_id ?? scenario?.leaderboardId);
+      if (!leaderboardId) continue;
+      scenarios.push({
+        scenarioId: stringValue(scenario?.scenario_id ?? scenario?.scenarioId) ?? leaderboardId,
+        scenarioName,
+        leaderboardId,
+        rankMaxes: rankMaxesFromValue(scenario?.rank_maxes ?? scenario?.rankMaxes, rankNames),
+        category: categoryName,
+      });
+    }
+  }
+
+  return scenarios;
+}
+
+function rankNamesFromResponse(root: Record<string, unknown> | undefined): string[] {
+  const ranks = Array.isArray(root?.ranks) ? root.ranks : [];
+  return ranks
+    .map((rank) => stringValue(asRecord(rank)?.name))
+    .filter((name): name is string => Boolean(name));
+}
+
+function rankMaxesFromValue(value: unknown, rankNames: string[]): Record<string, number> {
+  if (Array.isArray(value)) {
+    const output: Record<string, number> = {};
+    value.forEach((raw, index) => {
+      const number = typeof raw === "number" ? raw : Number(raw);
+      if (!Number.isFinite(number)) return;
+      output[rankNames[index + 1] ?? `rank_${index + 1}`] = number;
+    });
+    return output;
+  }
+  return numericRecord(value);
+}
+
+function uniqueBenchmarkScenarios(scenarios: BenchmarkScenario[]): BenchmarkScenario[] {
+  const seen = new Set<string>();
+  return scenarios.filter((scenario) => {
+    if (seen.has(scenario.leaderboardId)) return false;
+    seen.add(scenario.leaderboardId);
+    return true;
+  });
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim() !== "") return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return undefined;
+}
+
+function numericRecord(value: unknown): Record<string, number> {
+  if (Array.isArray(value)) {
+    const output: Record<string, number> = {};
+    value.forEach((raw, index) => {
+      const number = typeof raw === "number" ? raw : Number(raw);
+      if (Number.isFinite(number)) {
+        output[`rank_${index + 1}`] = number;
+      }
+    });
+    return output;
+  }
+  const record = asRecord(value);
+  if (!record) return {};
+  const output: Record<string, number> = {};
+  for (const [key, raw] of Object.entries(record)) {
+    const number = typeof raw === "number" ? raw : Number(raw);
+    if (Number.isFinite(number)) {
+      output[key] = number;
+    }
+  }
+  return output;
 }
 
 function isSteamId(value: string): boolean {

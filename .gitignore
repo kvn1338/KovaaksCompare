@@ -5,3 +5,6 @@ data/
 .codex
 comparison.csv
 related-projects/
+config/
+configs/
+reports/
