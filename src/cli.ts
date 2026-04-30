@@ -29,6 +29,7 @@ import {
 
 const DEFAULT_INDEX_PATH = "configs/benchmark-index.json";
 const DEFAULT_BENCHMARKS_PATH = "configs/benchmarks.json";
+const DEFAULT_EVXL_BENCHMARKS_PATH = "data/evxl-benchmarks.json";
 import {
   buildLeaderboardCutoffs,
   collectLeaderboards,
@@ -39,6 +40,7 @@ import {
   type LeaderboardCompareOutput,
 } from "./leaderboard.js";
 import type { UserComparisonOutput } from "./comparison.js";
+import { loadEvxlBenchmarkCatalog, type EvxlBenchmarkCatalog } from "./evxl-catalog.js";
 
 const METRICS_GLOSSARY = [
   "Glossary:",
@@ -389,6 +391,24 @@ benchmarks
   });
 
 benchmarks
+  .command("evxl-cache")
+  .description("Download/cache EVXL benchmark metadata with parent category structure.")
+  .option("--out <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
+  .option("--max-age-hours <hours>", "Refresh cache if older than this many hours", parseNumber, 48)
+  .option("--refresh", "Redownload even when the cached catalog is fresh")
+  .action(async (options) => {
+    const catalog = await loadEvxlBenchmarkCatalog({
+      path: options.out,
+      refresh: options.refresh,
+      maxAgeHours: options.maxAgeHours,
+    });
+    console.log(
+      `EVXL benchmark catalog with ${catalog.benchmarks.length} benchmark(s) cached at ${options.out} ` +
+        `(fetchedAt ${catalog.fetchedAt})`,
+    );
+  });
+
+benchmarks
   .command("import")
   .description("Import one benchmark's scenarios and cutoff values.")
   .argument("<benchmark>", "Benchmark name or KovaaK benchmark ID")
@@ -398,6 +418,9 @@ benchmarks
   .option("--difficulty <label>", "Difficulty label to store in benchmark metadata")
   .option("--steam-id <steamId>", "Override dummy SteamID64 query parameter", "11111111111111111")
   .option("--username <username>", "Override username used for benchmark name lookup", "KovaaksCompare")
+  .option("--evxl-cache <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
+  .option("--evxl-max-age-hours <hours>", "Refresh EVXL cache if older than this many hours", parseNumber, 48)
+  .option("--no-evxl-metadata", "Do not use EVXL benchmark category metadata during import")
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (benchmark: string, options) => {
@@ -408,6 +431,13 @@ benchmarks
       benchmarkName: /^\d+$/.test(benchmark) ? undefined : benchmark,
     });
     const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
+    const evxlCatalog = options.evxlMetadata
+      ? await loadOptionalEvxlBenchmarkCatalog({
+        path: options.evxlCache,
+        refresh: options.refresh,
+        maxAgeHours: options.evxlMaxAgeHours,
+      })
+      : undefined;
     const imported = await importBenchmarkFromApi(client, {
       username: options.username,
       benchmarkId: target.benchmarkId,
@@ -415,6 +445,7 @@ benchmarks
       steamId: options.steamId,
       id: options.key,
       difficulty: options.difficulty,
+      evxlCatalog,
     });
     const existing = existsSync(options.out) ? await loadCalibrationConfig(options.out) : undefined;
     const updated = appendBenchmarkToConfig(existing, imported);
@@ -654,6 +685,9 @@ calibration
     "Local config benchmark ID; defaults to slugified benchmark name",
   )
   .option("--difficulty <label>", "Difficulty label to store in config")
+  .option("--evxl-cache <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
+  .option("--evxl-max-age-hours <hours>", "Refresh EVXL cache if older than this many hours", parseNumber, 48)
+  .option("--no-evxl-metadata", "Do not use EVXL benchmark category metadata during import")
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (options) => {
@@ -664,6 +698,13 @@ calibration
       refresh: options.refresh,
       debug: options.debug,
     });
+    const evxlCatalog = options.evxlMetadata
+      ? await loadOptionalEvxlBenchmarkCatalog({
+        path: options.evxlCache,
+        refresh: options.refresh,
+        maxAgeHours: options.evxlMaxAgeHours,
+      })
+      : undefined;
     const benchmark = await importBenchmarkFromApi(client, {
       username: options.username,
       benchmarkId: target.benchmarkId,
@@ -671,6 +712,7 @@ calibration
       steamId: options.steamId,
       id: options.benchmarkKey,
       difficulty: options.difficulty,
+      evxlCatalog,
     });
     const existing = configPath ? await loadCalibrationConfig(configPath) : undefined;
     const updated = appendBenchmarkToConfig(existing, benchmark);
@@ -981,6 +1023,19 @@ async function writeTextFile(path: string, content: string): Promise<void> {
   await writeFile(path, content);
 }
 
+async function loadOptionalEvxlBenchmarkCatalog(options: {
+  path: string;
+  refresh?: boolean;
+  maxAgeHours?: number;
+}): Promise<EvxlBenchmarkCatalog | undefined> {
+  try {
+    return await loadEvxlBenchmarkCatalog(options);
+  } catch (error) {
+    console.warn(`Warning: could not load EVXL benchmark metadata: ${errorMessage(error)}`);
+    return undefined;
+  }
+}
+
 function printMappingSuggestion(
   config: CalibrationConfig,
   suggestion: MappingSuggestion,
@@ -1063,8 +1118,28 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
   appendScenarioList(lines, "Unpaired target scenarios", result.unpairedTargets);
 
   if (result.categoryMismatches.length > 0) {
-    lines.push("", "Category/block mismatches:");
+    lines.push("", "Parent category mismatches:");
     for (const issue of result.categoryMismatches) {
+      lines.push(
+        `- ${issue.sourceScenario.name} [${formatCategoryBlock(issue.sourceCategory)}] -> ` +
+          `${issue.targetScenario.name} [${formatCategoryBlock(issue.targetCategory)}]`,
+      );
+    }
+  }
+
+  if (result.inferredParentRenames.length > 0) {
+    lines.push("", "Inferred parent category renames:");
+    for (const issue of result.inferredParentRenames) {
+      lines.push(
+        `- ${issue.sourceScenario.name} [${formatCategoryBlock(issue.sourceCategory)}] -> ` +
+          `${issue.targetScenario.name} [${formatCategoryBlock(issue.targetCategory)}]`,
+      );
+    }
+  }
+
+  if (result.subcategoryMismatches.length > 0) {
+    lines.push("", "Subcategory/block mismatches:");
+    for (const issue of result.subcategoryMismatches) {
       lines.push(
         `- ${issue.sourceScenario.name} [${formatCategoryBlock(issue.sourceCategory)}] -> ` +
           `${issue.targetScenario.name} [${formatCategoryBlock(issue.targetCategory)}]`,
@@ -1106,14 +1181,15 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
 function appendScenarioList(
   lines: string[],
   title: string,
-  scenarios: Array<{ id: string; name: string; category?: string; leaderboardId?: string }>,
+  scenarios: Array<{ id: string; name: string; category?: string; subcategory?: string; leaderboardId?: string }>,
 ): void {
   if (scenarios.length === 0) return;
   lines.push("", `${title}:`);
   for (const scenario of scenarios) {
+    const category = [scenario.category, scenario.subcategory].filter(Boolean).join(" / ");
     lines.push(
       `- ${scenario.name} (${scenario.id})` +
-        `${scenario.category ? `, category ${scenario.category}` : ""}` +
+        `${category ? `, category ${category}` : ""}` +
         `${scenario.leaderboardId ? `, leaderboard ${scenario.leaderboardId}` : ""}`,
     );
   }
@@ -1605,4 +1681,8 @@ function csvCell(value: unknown): string {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

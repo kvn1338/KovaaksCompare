@@ -30,7 +30,8 @@
             "Orca": 11400,
             "Seal": 12500
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "whisphere-80",
@@ -56,7 +57,8 @@
             "Orca": 13000,
             "Seal": 14500
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "smoothbot-invincible-goated-75",
@@ -82,7 +84,8 @@
             "Orca": 3650,
             "Seal": 4000
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "leaptrack-goated-60-larger",
@@ -108,7 +111,8 @@
             "Orca": 2250,
             "Seal": 2450
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "controlsphere-raim-easy-90",
@@ -134,7 +138,8 @@
             "Orca": 10500,
             "Seal": 11500
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "vt-controlsphere-intermediate-s5-80",
@@ -160,7 +165,8 @@
             "Orca": 3850,
             "Seal": 4100
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "air-angelic-4-voltaic-easy-80-good-version",
@@ -186,7 +192,8 @@
             "Orca": 3300,
             "Seal": 3600
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "cloverrawcontrol-easy-80-speed",
@@ -212,7 +219,8 @@
             "Orca": 7200,
             "Seal": 7700
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "controlsphere-far-far-larger-90",
@@ -238,7 +246,8 @@
             "Orca": 10900,
             "Seal": 11500
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "pgti-voltaic-easy-80",
@@ -264,7 +273,8 @@
             "Orca": 1900,
             "Seal": 2250
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "air-celestial-no-ufo-easy-slowed",
@@ -290,7 +300,8 @@
             "Orca": 884,
             "Seal": 890
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "whisphere-small-slow-55",
@@ -316,7 +327,8 @@
             "Orca": 12250,
             "Seal": 13500
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "air-voltaic-invincible-7-easy-80",
@@ -342,7 +354,8 @@
             "Orca": 2800,
             "Seal": 3200
           },
-          "category": "Control"
+          "category": "Reactive Tracking",
+          "subcategory": "Control"
         },
         {
           "id": "controlsphere-ow-long-strafes-90",
@@ -368,7 +381,8 @@
             "Orca": 8300,
             "Seal": 8700
           },
-          "category": "Control"
+          "category": "Reactive Tracking",
+          "subcategory": "Control"
         },
         {
           "id": "flicker-plaza-raim-easy-less-blinks",
@@ -394,7 +408,8 @@
             "Orca": 904,
             "Seal": 909
           },
-          "category": "Speed Track"
+          "category": "Reactive Tracking",
+          "subcategory": "Speed"
         },
         {
           "id": "polarized-hell-easy-40-slower",
@@ -420,7 +435,8 @@
             "Orca": 2150,
             "Seal": 2500
           },
-          "category": "Speed Track"
+          "category": "Reactive Tracking",
+          "subcategory": "Speed"
         },
         {
           "id": "air-pure-intermediate-slower-no-ufo",
@@ -446,7 +462,8 @@
             "Orca": 911,
             "Seal": 916
           },
-          "category": "Reading Track"
+          "category": "Reactive Tracking",
+          "subcategory": "Reading"
         },
         {
           "id": "air-voltaic-easy-invincible-4-80",
@@ -472,7 +489,8 @@
             "Orca": 3400,
             "Seal": 3800
           },
-          "category": "Reading Track"
+          "category": "Reactive Tracking",
+          "subcategory": "Reading"
         },
         {
           "id": "pokeball-frenzy-auto-te-wide",
@@ -498,7 +516,8 @@
             "Orca": 2300,
             "Seal": 2700
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "1w3ts-reload-larger",
@@ -524,7 +543,8 @@
             "Orca": 92,
             "Seal": 102
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "voxtargetswitch-2-large",
@@ -550,7 +570,8 @@
             "Orca": 117,
             "Seal": 123
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "beants-larger",
@@ -576,7 +597,8 @@
             "Orca": 130,
             "Seal": 142
           },
-          "category": "Stability"
+          "category": "Flick Tech",
+          "subcategory": "Stability"
         },
         {
           "id": "floatts-angelic-easy-larger",
@@ -602,7 +624,8 @@
             "Orca": 106,
             "Seal": 111
           },
-          "category": "Stability"
+          "category": "Flick Tech",
+          "subcategory": "Stability"
         },
         {
           "id": "waldots-novice",
@@ -628,7 +651,8 @@
             "Orca": 130,
             "Seal": 140
           },
-          "category": "Micro"
+          "category": "Flick Tech",
+          "subcategory": "Micro"
         },
         {
           "id": "devts-goated-nr-static-5bot",
@@ -654,7 +678,8 @@
             "Orca": 640,
             "Seal": 680
           },
-          "category": "Micro"
+          "category": "Flick Tech",
+          "subcategory": "Micro"
         },
         {
           "id": "domiswitch-easy-slower",
@@ -680,7 +705,8 @@
             "Orca": 5800,
             "Seal": 6300
           },
-          "category": "Evasive"
+          "category": "Flick Tech",
+          "subcategory": "Evasive"
         },
         {
           "id": "tamtargetswitch-smooth-easy",
@@ -706,7 +732,8 @@
             "Orca": 26,
             "Seal": 28
           },
-          "category": "Evasive"
+          "category": "Flick Tech",
+          "subcategory": "Evasive"
         },
         {
           "id": "1wall5targets-pasu-slow",
@@ -732,7 +759,8 @@
             "Orca": 140,
             "Seal": 150
           },
-          "category": "Reading"
+          "category": "Dynamic Clicking",
+          "subcategory": "Reading"
         },
         {
           "id": "b180-voltaic-easy-92",
@@ -758,7 +786,8 @@
             "Orca": 78,
             "Seal": 87
           },
-          "category": "Reading"
+          "category": "Dynamic Clicking",
+          "subcategory": "Reading"
         },
         {
           "id": "controlsphere-click-easy",
@@ -784,7 +813,8 @@
             "Orca": 50,
             "Seal": 55
           },
-          "category": "Reading"
+          "category": "Dynamic Clicking",
+          "subcategory": "Reading"
         },
         {
           "id": "popcorn-mv-novice",
@@ -810,7 +840,8 @@
             "Orca": 300,
             "Seal": 330
           },
-          "category": "Precision"
+          "category": "Dynamic Clicking",
+          "subcategory": "Precision"
         },
         {
           "id": "pasu-angelic-20-larger-80-speed",
@@ -836,7 +867,8 @@
             "Orca": 90,
             "Seal": 97
           },
-          "category": "Precision"
+          "category": "Dynamic Clicking",
+          "subcategory": "Precision"
         },
         {
           "id": "1w2ts-pasu-perfected-easy",
@@ -862,7 +894,8 @@
             "Orca": 105,
             "Seal": 110
           },
-          "category": "Precision"
+          "category": "Dynamic Clicking",
+          "subcategory": "Precision"
         },
         {
           "id": "1w3ts-pasu-perfected-micro-goated-larger-80",
@@ -888,7 +921,8 @@
             "Orca": 1200,
             "Seal": 1300
           },
-          "category": "Linear"
+          "category": "Dynamic Clicking",
+          "subcategory": "Linear"
         },
         {
           "id": "floating-heads-timing-400-larger",
@@ -914,7 +948,8 @@
             "Orca": 2400,
             "Seal": 2750
           },
-          "category": "Linear"
+          "category": "Dynamic Clicking",
+          "subcategory": "Linear"
         },
         {
           "id": "voxtargetswitch-click",
@@ -940,7 +975,8 @@
             "Orca": 94,
             "Seal": 100
           },
-          "category": "Linear"
+          "category": "Dynamic Clicking",
+          "subcategory": "Linear"
         }
       ]
     },
@@ -975,7 +1011,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "vt-controlsphere-viscose-easier",
@@ -1003,7 +1040,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "smoothbot-perfected-easier",
@@ -1031,7 +1069,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Arm"
+          "category": "Control Tracking",
+          "subcategory": "Arm"
         },
         {
           "id": "leapstrafes-control-wobin-easier",
@@ -1059,7 +1098,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "controlsphere-superbaim-viscose-easier",
@@ -1087,7 +1127,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "whisphere-viscose-easier",
@@ -1115,7 +1156,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Wrist"
+          "category": "Control Tracking",
+          "subcategory": "Wrist"
         },
         {
           "id": "air-angelic-4-voltaic-easy-70",
@@ -1143,7 +1185,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "cloverrawcontrol-viscose-easier-50cm",
@@ -1171,7 +1214,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "flower-easier-50cm",
@@ -1199,7 +1243,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Fingertip"
+          "category": "Control Tracking",
+          "subcategory": "Fingertip"
         },
         {
           "id": "pgti-voltaic-easy-smoother",
@@ -1227,7 +1272,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "air-celestial-no-ufo-easier",
@@ -1255,7 +1301,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "rawcontrolsphere-easier",
@@ -1283,7 +1330,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Blending"
+          "category": "Control Tracking",
+          "subcategory": "Blending"
         },
         {
           "id": "ground-plaza-sparky-v3-easy",
@@ -1311,7 +1359,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Control"
+          "category": "Reactive Tracking",
+          "subcategory": "Control"
         },
         {
           "id": "air-spectral-easy-85",
@@ -1339,7 +1388,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Control"
+          "category": "Reactive Tracking",
+          "subcategory": "Control"
         },
         {
           "id": "vt-aether-novice-s5-bot-1",
@@ -1367,7 +1417,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Speed"
+          "category": "Reactive Tracking",
+          "subcategory": "Speed"
         },
         {
           "id": "plink-palace-easy-less-blinks",
@@ -1395,7 +1446,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Speed"
+          "category": "Reactive Tracking",
+          "subcategory": "Speed"
         },
         {
           "id": "air-pure-easier-no-ufo",
@@ -1423,7 +1475,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Reading"
+          "category": "Reactive Tracking",
+          "subcategory": "Reading"
         },
         {
           "id": "air-voltaic-invincible-4-easier",
@@ -1451,7 +1504,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Reading"
+          "category": "Reactive Tracking",
+          "subcategory": "Reading"
         },
         {
           "id": "ww5t-voltaic-slightly-larger",
@@ -1479,7 +1533,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "voxtargetswitch-2-large",
@@ -1507,7 +1562,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "aimerz-static-switching-6-bot-slightly-larger",
@@ -1535,7 +1591,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Speed"
+          "category": "Flick Tech",
+          "subcategory": "Speed"
         },
         {
           "id": "1w6ts-reload-v2-20-bigger",
@@ -1563,7 +1620,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Flick Tech",
+          "subcategory": "Stability"
         },
         {
           "id": "beants-larger",
@@ -1591,7 +1649,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Flick Tech",
+          "subcategory": "Stability"
         },
         {
           "id": "staticswitchingvox",
@@ -1619,7 +1678,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Flick Tech",
+          "subcategory": "Stability"
         },
         {
           "id": "1w2ts-reload-smallflicks-larger",
@@ -1647,7 +1707,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Micro"
+          "category": "Flick Tech",
+          "subcategory": "Micro"
         },
         {
           "id": "eth-pasu-micro-easier",
@@ -1675,7 +1736,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Micro"
+          "category": "Flick Tech",
+          "subcategory": "Micro"
         },
         {
           "id": "waldots-novice",
@@ -1703,7 +1765,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Micro"
+          "category": "Flick Tech",
+          "subcategory": "Micro"
         },
         {
           "id": "kints-voltaic-easy-85",
@@ -1731,7 +1794,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Post-Flick"
+          "category": "Flick Tech",
+          "subcategory": "Post-Flick"
         },
         {
           "id": "domiswitch-easier",
@@ -1759,7 +1823,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Post-Flick"
+          "category": "Flick Tech",
+          "subcategory": "Post-Flick"
         },
         {
           "id": "b180t-voltaic-easy-slower",
@@ -1787,7 +1852,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Post-Flick"
+          "category": "Flick Tech",
+          "subcategory": "Post-Flick"
         },
         {
           "id": "pasu-voltaic-reload-easier",
@@ -1815,7 +1881,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Reading"
+          "category": "Click Timing",
+          "subcategory": "Reading"
         },
         {
           "id": "vt-bounceshot-viscose-easier",
@@ -1843,7 +1910,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Reading"
+          "category": "Click Timing",
+          "subcategory": "Reading"
         },
         {
           "id": "catclick-easier",
@@ -1871,7 +1939,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Reading"
+          "category": "Click Timing",
+          "subcategory": "Reading"
         },
         {
           "id": "1w3ts-pasu-perfected-micro-goated-larger-80",
@@ -1899,7 +1968,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Precision"
+          "category": "Click Timing",
+          "subcategory": "Precision"
         },
         {
           "id": "popcorn-mv-easier",
@@ -1927,7 +1997,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Precision"
+          "category": "Click Timing",
+          "subcategory": "Precision"
         },
         {
           "id": "skyclick-goated-easier",
@@ -1955,7 +2026,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Precision"
+          "category": "Click Timing",
+          "subcategory": "Precision"
         },
         {
           "id": "voxts-click-easier",
@@ -1983,7 +2055,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Click Timing",
+          "subcategory": "Stability"
         },
         {
           "id": "vt-floating-heads-viscose-easier",
@@ -2011,7 +2084,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Click Timing",
+          "subcategory": "Stability"
         },
         {
           "id": "psalmts-viscose-click-easier",
@@ -2039,7 +2113,8 @@
             "Orca": 8,
             "Seal": 9
           },
-          "category": "Stability"
+          "category": "Click Timing",
+          "subcategory": "Stability"
         }
       ]
     }

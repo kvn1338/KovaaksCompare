@@ -65,12 +65,24 @@
       "targetScenario": "vt-aether-novice-s5-bot-1"
     },
     {
-      "sourceScenario": "pokeball-frenzy-auto-te-wide",
-      "targetScenario": "ww5t-voltaic-slightly-larger"
+      "sourceScenario": "polarized-hell-easy-40-slower",
+      "targetScenario": "plink-palace-easy-less-blinks"
+    },
+    {
+      "sourceScenario": "air-pure-intermediate-slower-no-ufo",
+      "targetScenario": "air-pure-easier-no-ufo"
+    },
+    {
+      "sourceScenario": "air-voltaic-easy-invincible-4-80",
+      "targetScenario": "air-voltaic-invincible-4-easier"
     },
     {
       "sourceScenario": "voxtargetswitch-2-large",
       "targetScenario": "voxtargetswitch-2-large"
+    },
+    {
+      "sourceScenario": "pokeball-frenzy-auto-te-wide",
+      "targetScenario": "ww5t-voltaic-slightly-larger"
     },
     {
       "sourceScenario": "1w3ts-reload-larger",
@@ -78,19 +90,43 @@
     },
     {
       "sourceScenario": "beants-larger",
+      "targetScenario": "beants-larger"
+    },
+    {
+      "sourceScenario": "floatts-angelic-easy-larger",
       "targetScenario": "1w6ts-reload-v2-20-bigger"
     },
     {
-      "sourceScenario": "beants-larger",
-      "targetScenario": "beants-larger"
+      "sourceScenario": "floatts-angelic-easy-larger",
+      "targetScenario": "staticswitchingvox"
+    },
+    {
+      "sourceScenario": "waldots-novice",
+      "targetScenario": "waldots-novice"
+    },
+    {
+      "sourceScenario": "devts-goated-nr-static-5bot",
+      "targetScenario": "eth-pasu-micro-easier"
     },
     {
       "sourceScenario": "waldots-novice",
       "targetScenario": "1w2ts-reload-smallflicks-larger"
     },
     {
-      "sourceScenario": "devts-goated-nr-static-5bot",
-      "targetScenario": "eth-pasu-micro-easier"
+      "sourceScenario": "domiswitch-easy-slower",
+      "targetScenario": "domiswitch-easier"
+    },
+    {
+      "sourceScenario": "tamtargetswitch-smooth-easy",
+      "targetScenario": "kints-voltaic-easy-85"
+    },
+    {
+      "sourceScenario": "domiswitch-easy-slower",
+      "targetScenario": "b180t-voltaic-easy-slower"
+    },
+    {
+      "sourceScenario": "1w3ts-pasu-perfected-micro-goated-larger-80",
+      "targetScenario": "1w3ts-pasu-perfected-micro-goated-larger-80"
     },
     {
       "sourceScenario": "1wall5targets-pasu-slow",
@@ -110,23 +146,11 @@
     },
     {
       "sourceScenario": "pasu-angelic-20-larger-80-speed",
-      "targetScenario": "1w3ts-pasu-perfected-micro-goated-larger-80"
-    },
-    {
-      "sourceScenario": "1w2ts-pasu-perfected-easy",
       "targetScenario": "skyclick-goated-easier"
     },
     {
-      "sourceScenario": "domiswitch-easy-slower",
-      "targetScenario": "domiswitch-easier"
-    },
-    {
-      "sourceScenario": "tamtargetswitch-smooth-easy",
-      "targetScenario": "kints-voltaic-easy-85"
-    },
-    {
-      "sourceScenario": "1w3ts-pasu-perfected-micro-goated-larger-80",
-      "targetScenario": "voxts-click-easier"
+      "sourceScenario": "1w2ts-pasu-perfected-easy",
+      "targetScenario": "psalmts-viscose-click-easier"
     },
     {
       "sourceScenario": "floating-heads-timing-400-larger",
@@ -134,31 +158,7 @@
     },
     {
       "sourceScenario": "voxtargetswitch-click",
-      "targetScenario": "psalmts-viscose-click-easier"
-    },
-    {
-      "sourceScenario": "polarized-hell-easy-40-slower",
-      "targetScenario": "plink-palace-easy-less-blinks"
-    },
-    {
-      "sourceScenario": "air-pure-intermediate-slower-no-ufo",
-      "targetScenario": "air-pure-easier-no-ufo"
-    },
-    {
-      "sourceScenario": "air-voltaic-easy-invincible-4-80",
-      "targetScenario": "air-voltaic-invincible-4-easier"
-    },
-    {
-      "sourceScenario": "floatts-angelic-easy-larger",
-      "targetScenario": "staticswitchingvox"
-    },
-    {
-      "sourceScenario": "waldots-novice",
-      "targetScenario": "waldots-novice"
-    },
-    {
-      "sourceScenario": "tamtargetswitch-smooth-easy",
-      "targetScenario": "b180t-voltaic-easy-slower"
+      "targetScenario": "voxts-click-easier"
     }
   ]
 }

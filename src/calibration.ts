@@ -11,6 +11,7 @@ import {
   type LeaderboardCutoffsOutput,
 } from "./leaderboard.js";
 import type { ResolvedScenario } from "./types.js";
+import { enrichBenchmarkWithEvxlCategories, type EvxlBenchmarkCatalog } from "./evxl-catalog.js";
 
 const ScenarioConfigSchema = z.object({
   id: z.string().min(1),
@@ -19,6 +20,7 @@ const ScenarioConfigSchema = z.object({
   cutoffs: z.array(z.number().positive()).default([]),
   rankCutoffs: z.record(z.string(), z.number().positive()).optional(),
   category: z.string().min(1).optional(),
+  subcategory: z.string().min(1).optional(),
   notes: z.string().optional(),
 });
 
@@ -69,6 +71,7 @@ export interface ImportBenchmarkInput {
   steamId?: string;
   id?: string;
   difficulty?: string;
+  evxlCatalog?: EvxlBenchmarkCatalog;
 }
 
 const DEFAULT_BENCHMARK_USERNAME = "KovaaksCompare";
@@ -141,7 +144,7 @@ export async function importBenchmarkFromApi(
     max: 100,
   });
 
-  return {
+  const imported = {
     id: input.id ?? slugify(benchmark.benchmarkName),
     name: benchmark.benchmarkName,
     benchmarkId: benchmark.benchmarkId,
@@ -155,6 +158,8 @@ export async function importBenchmarkFromApi(
       category: scenario.category,
     })),
   };
+
+  return enrichBenchmarkWithEvxlCategories(imported, input.evxlCatalog).benchmark;
 }
 
 export function appendBenchmarkToConfig(
@@ -193,6 +198,8 @@ export interface MappingValidationResult {
   missingSourceScenarioIds: string[];
   missingTargetScenarioIds: string[];
   categoryMismatches: MappingValidationPairIssue[];
+  subcategoryMismatches: MappingValidationPairIssue[];
+  inferredParentRenames: MappingValidationPairIssue[];
   suspiciousPairs: MappingValidationPairIssue[];
   missingLeaderboardIds: Array<{ side: "source" | "target"; scenario: ScenarioConfig }>;
   missingScoreData: Array<{ side: "source" | "target"; scenario: ScenarioConfig; leaderboardId: string }>;
@@ -227,11 +234,17 @@ export function suggestMapping(input: {
   const sourceByCategory = groupByMatchingCategory(sourceBenchmark.scenarios);
   const targetByCategory = groupByMatchingCategory(targetBenchmark.scenarios);
   const allCategories = new Set([...sourceByCategory.keys(), ...targetByCategory.keys()]);
+  const sourceParentBlocks = scenarioParentCategoryBlockMap(sourceBenchmark.scenarios);
+  const targetParentBlocks = scenarioParentCategoryBlockMap(targetBenchmark.scenarios);
 
   const pairs: Array<{ sourceScenario: string; targetScenario: string }> = [];
   const unpairedSources: ScenarioConfig[] = [];
   const unpairedTargets: ScenarioConfig[] = [];
   const warnings: string[] = [];
+  const renameCandidateSourcesByParent = new Map<string, ScenarioConfig[]>();
+  const renameCandidateTargetsByParent = new Map<string, ScenarioConfig[]>();
+  const unmatchedSourceParents = new Map<string, ScenarioConfig[]>();
+  const unmatchedTargetParents = new Map<string, ScenarioConfig[]>();
   const categoryOrder = orderedCategories(sourceBenchmark.scenarios, targetBenchmark.scenarios, allCategories);
   const hasUncategorized = categoryOrder.some((category) => category.startsWith(UNCATEGORIZED));
   if (hasUncategorized) {
@@ -246,17 +259,11 @@ export function suggestMapping(input: {
     const label = categoryLabel(category);
 
     if (sources.length === 0) {
-      unpairedTargets.push(...targets);
-      warnings.push(
-        `Category ${label} present only in target (${targets.length} scenario(s)); no pairs created.`,
-      );
+      addLeftovers(renameCandidateTargetsByParent, targets, targetParentBlocks);
       continue;
     }
     if (targets.length === 0) {
-      unpairedSources.push(...sources);
-      warnings.push(
-        `Category ${label} present only in source (${sources.length} scenario(s)); no pairs created.`,
-      );
+      addLeftovers(renameCandidateSourcesByParent, sources, sourceParentBlocks);
       continue;
     }
     if (sources.length !== targets.length) {
@@ -265,19 +272,71 @@ export function suggestMapping(input: {
       );
     }
 
-    const pairCount = Math.min(sources.length, targets.length);
-    for (let index = 0; index < pairCount; index += 1) {
-      pairs.push({
-        sourceScenario: sources[index].id,
-        targetScenario: targets[index].id,
-      });
+    const paired = pairScenariosByNameThenOrder(sources, targets);
+    pairs.push(...paired.pairs);
+    unpairedSources.push(...paired.unpairedSources);
+    unpairedTargets.push(...paired.unpairedTargets);
+  }
+
+  const parentOrder = orderedParentCategories(sourceBenchmark.scenarios, targetBenchmark.scenarios);
+  for (const parent of parentOrder) {
+    const sources = renameCandidateSourcesByParent.get(parent) ?? [];
+    const targets = renameCandidateTargetsByParent.get(parent) ?? [];
+    if (sources.length === 0 && targets.length === 0) continue;
+
+    if (sources.length === 0) {
+      unmatchedTargetParents.set(parent, targets);
+      continue;
     }
-    if (sources.length > pairCount) {
-      unpairedSources.push(...sources.slice(pairCount));
+    if (targets.length === 0) {
+      unmatchedSourceParents.set(parent, sources);
+      continue;
     }
-    if (targets.length > pairCount) {
-      unpairedTargets.push(...targets.slice(pairCount));
+
+    warnings.push(
+      `Parent category ${categoryLabel(parent)} has source-only and target-only subcategory block(s); paired those blocks by order assuming a subcategory rename or restructure. Please verify.`,
+    );
+    if (sources.length !== targets.length) {
+      warnings.push(
+        `Parent category ${categoryLabel(parent)} has ${sources.length} leftover source vs ${targets.length} leftover target scenario(s); pairing best-effort.`,
+      );
     }
+
+    const paired = pairScenariosByNameThenOrder(sources, targets);
+    pairs.push(...paired.pairs);
+    unpairedSources.push(...paired.unpairedSources);
+    unpairedTargets.push(...paired.unpairedTargets);
+  }
+
+  const parentRenamePairs = suggestParentRenamePairs(parentOrder, unmatchedSourceParents, unmatchedTargetParents);
+  const remappedSourceParents = new Set<string>();
+  const remappedTargetParents = new Set<string>();
+  for (const item of parentRenamePairs) {
+    remappedSourceParents.add(item.sourceParent);
+    remappedTargetParents.add(item.targetParent);
+    warnings.push(
+      `Parent category ${categoryLabel(item.sourceParent)} may have been renamed to ${categoryLabel(item.targetParent)} ` +
+        `(similarity ${item.similarity.toFixed(2)}); paired by order. Please verify.`,
+    );
+    const paired = pairScenariosByNameThenOrder(item.sources, item.targets);
+    pairs.push(...paired.pairs);
+    unpairedSources.push(...paired.unpairedSources);
+    unpairedTargets.push(...paired.unpairedTargets);
+  }
+
+  for (const [parent, sources] of unmatchedSourceParents) {
+    if (remappedSourceParents.has(parent)) continue;
+    unpairedSources.push(...sources);
+    warnings.push(
+      `Parent category ${categoryLabel(parent)} has ${sources.length} source-only scenario(s); no pairs created.`,
+    );
+  }
+  for (const [parent, targets] of unmatchedTargetParents) {
+    if (remappedTargetParents.has(parent)) continue;
+    unpairedTargets.push(...targets);
+    warnings.push(
+      `Parent category ${categoryLabel(parent)} has ${targets.length} target-only scenario(s); no pairs created.`,
+    );
   }
 
   if (pairs.length === 0) {
@@ -317,6 +376,9 @@ export function validateMapping(input: {
   const targetUsage = countScenarioUsage(input.mapping.pairs.map((pair) => pair.targetScenario));
   const sourceBlocks = scenarioCategoryBlockMap(sourceBenchmark.scenarios);
   const targetBlocks = scenarioCategoryBlockMap(targetBenchmark.scenarios);
+  const sourceParentBlocks = scenarioParentCategoryBlockMap(sourceBenchmark.scenarios);
+  const targetParentBlocks = scenarioParentCategoryBlockMap(targetBenchmark.scenarios);
+  const inferredParentRenames = inferredParentRenameMap(sourceBenchmark.scenarios, targetBenchmark.scenarios);
   const similarityThreshold = input.suspiciousSimilarityThreshold ?? 0.08;
 
   const duplicateSources = [...sourceUsage.entries()]
@@ -335,6 +397,8 @@ export function validateMapping(input: {
   const unpairedSources = sourceBenchmark.scenarios.filter((scenario) => !pairedSourceIds.has(scenario.id));
   const unpairedTargets = targetBenchmark.scenarios.filter((scenario) => !pairedTargetIds.has(scenario.id));
   const categoryMismatches: MappingValidationPairIssue[] = [];
+  const subcategoryMismatches: MappingValidationPairIssue[] = [];
+  const inferredParentRenameIssues: MappingValidationPairIssue[] = [];
   const suspiciousPairs: MappingValidationPairIssue[] = [];
   const missingLeaderboardIds: Array<{ side: "source" | "target"; scenario: ScenarioConfig }> = [];
   const missingScoreData: Array<{ side: "source" | "target"; scenario: ScenarioConfig; leaderboardId: string }> = [];
@@ -352,13 +416,34 @@ export function validateMapping(input: {
     if (!sourceScenario || !targetScenario) continue;
     const sourceCategory = sourceBlocks.get(sourceScenario.id);
     const targetCategory = targetBlocks.get(targetScenario.id);
-    if (sourceCategory !== targetCategory) {
-      categoryMismatches.push({
+    const sourceParentCategory = sourceParentBlocks.get(sourceScenario.id);
+    const targetParentCategory = targetParentBlocks.get(targetScenario.id);
+    if (sourceParentCategory !== targetParentCategory) {
+      const inferredTarget = sourceParentCategory ? inferredParentRenames.get(sourceParentCategory) : undefined;
+      if (inferredTarget === targetParentCategory) {
+        inferredParentRenameIssues.push({
+          sourceScenario,
+          targetScenario,
+          sourceCategory: sourceParentCategory,
+          targetCategory: targetParentCategory,
+          reason: "Paired scenarios cross parent categories that look like an inferred rename.",
+        });
+      } else {
+        categoryMismatches.push({
+          sourceScenario,
+          targetScenario,
+          sourceCategory: sourceParentCategory,
+          targetCategory: targetParentCategory,
+          reason: "Paired scenarios are in different parent category blocks.",
+        });
+      }
+    } else if (sourceCategory !== targetCategory) {
+      subcategoryMismatches.push({
         sourceScenario,
         targetScenario,
         sourceCategory,
         targetCategory,
-        reason: "Paired scenarios are in different category blocks.",
+        reason: "Paired scenarios are in different subcategory blocks within the same parent category.",
       });
     }
     const similarity = jaccard(tokenize(sourceScenario.name), tokenize(targetScenario.name));
@@ -394,7 +479,9 @@ export function validateMapping(input: {
   if (duplicateTargets.length > 0) warnings.push(`${duplicateTargets.length} target scenario(s) are mapped more than once.`);
   if (missingSourceScenarioIds.length > 0) warnings.push(`${missingSourceScenarioIds.length} source scenario ID(s) do not exist in the source benchmark.`);
   if (missingTargetScenarioIds.length > 0) warnings.push(`${missingTargetScenarioIds.length} target scenario ID(s) do not exist in the target benchmark.`);
-  if (categoryMismatches.length > 0) warnings.push(`${categoryMismatches.length} pair(s) cross category blocks.`);
+  if (categoryMismatches.length > 0) warnings.push(`${categoryMismatches.length} pair(s) cross parent category blocks.`);
+  if (inferredParentRenameIssues.length > 0) warnings.push(`${inferredParentRenameIssues.length} pair(s) cross inferred renamed parent categories.`);
+  if (subcategoryMismatches.length > 0) warnings.push(`${subcategoryMismatches.length} pair(s) cross subcategory blocks within the same parent category.`);
   if (suspiciousPairs.length > 0) warnings.push(`${suspiciousPairs.length} pair(s) have low name similarity and should be reviewed.`);
   if (missingLeaderboardIds.length > 0) warnings.push(`${missingLeaderboardIds.length} scenario(s) are missing leaderboard IDs.`);
   if (missingScoreData.length > 0) warnings.push(`${missingScoreData.length} scenario(s) have no scores stored in the provided database.`);
@@ -413,6 +500,8 @@ export function validateMapping(input: {
     missingSourceScenarioIds,
     missingTargetScenarioIds,
     categoryMismatches,
+    subcategoryMismatches,
+    inferredParentRenames: inferredParentRenameIssues,
     suspiciousPairs,
     missingLeaderboardIds,
     missingScoreData,
@@ -427,7 +516,7 @@ function groupByMatchingCategory(scenarios: ScenarioConfig[]): Map<string, Scena
   let currentKey: string | undefined;
 
   for (const scenario of scenarios) {
-    const baseKey = normalizedCategoryKey(scenario.category);
+    const baseKey = normalizedCategoryKey(scenario);
     if (baseKey !== previousBaseKey) {
       const nextOccurrence = (occurrences.get(baseKey) ?? 0) + 1;
       occurrences.set(baseKey, nextOccurrence);
@@ -455,6 +544,116 @@ function scenarioCategoryBlockMap(scenarios: ScenarioConfig[]): Map<string, stri
   return output;
 }
 
+function scenarioParentCategoryBlockMap(scenarios: ScenarioConfig[]): Map<string, string> {
+  const output = new Map<string, string>();
+  for (const [category, categoryScenarios] of groupByParentCategory(scenarios)) {
+    for (const scenario of categoryScenarios) {
+      output.set(scenario.id, category);
+    }
+  }
+  return output;
+}
+
+function groupByParentCategory(scenarios: ScenarioConfig[]): Map<string, ScenarioConfig[]> {
+  const groups = new Map<string, ScenarioConfig[]>();
+  const occurrences = new Map<string, number>();
+  let previousBaseKey: string | undefined;
+  let currentKey: string | undefined;
+
+  for (const scenario of scenarios) {
+    const baseKey = normalizedParentCategoryKey(scenario);
+    if (baseKey !== previousBaseKey) {
+      const nextOccurrence = (occurrences.get(baseKey) ?? 0) + 1;
+      occurrences.set(baseKey, nextOccurrence);
+      currentKey = categoryBucketKey(baseKey, nextOccurrence);
+      previousBaseKey = baseKey;
+    }
+    const key = currentKey ?? categoryBucketKey(baseKey, 1);
+    const bucket = groups.get(key);
+    if (bucket) {
+      bucket.push(scenario);
+    } else {
+      groups.set(key, [scenario]);
+    }
+  }
+  return groups;
+}
+
+function addLeftovers(
+  target: Map<string, ScenarioConfig[]>,
+  scenarios: ScenarioConfig[],
+  parentBlocks: Map<string, string>,
+): void {
+  for (const scenario of scenarios) {
+    const parent = parentBlocks.get(scenario.id) ?? categoryBucketKey(UNCATEGORIZED, 1);
+    const bucket = target.get(parent);
+    if (bucket) {
+      bucket.push(scenario);
+    } else {
+      target.set(parent, [scenario]);
+    }
+  }
+}
+
+function pairScenariosByNameThenOrder(
+  sources: ScenarioConfig[],
+  targets: ScenarioConfig[],
+): {
+  pairs: Array<{ sourceScenario: string; targetScenario: string }>;
+  unpairedSources: ScenarioConfig[];
+  unpairedTargets: ScenarioConfig[];
+} {
+  const pairs: Array<{ sourceScenario: string; targetScenario: string }> = [];
+  const usedSourceIndexes = new Set<number>();
+  const usedTargetIndexes = new Set<number>();
+  const targetsByName = new Map<string, number[]>();
+
+  targets.forEach((target, index) => {
+    const key = normalizedScenarioName(target.name);
+    const bucket = targetsByName.get(key);
+    if (bucket) {
+      bucket.push(index);
+    } else {
+      targetsByName.set(key, [index]);
+    }
+  });
+
+  sources.forEach((source, sourceIndex) => {
+    const targetIndexes = targetsByName.get(normalizedScenarioName(source.name)) ?? [];
+    const targetIndex = targetIndexes.find((index) => !usedTargetIndexes.has(index));
+    if (targetIndex === undefined) return;
+    usedSourceIndexes.add(sourceIndex);
+    usedTargetIndexes.add(targetIndex);
+    pairs.push({
+      sourceScenario: source.id,
+      targetScenario: targets[targetIndex].id,
+    });
+  });
+
+  const remainingSources = sources
+    .map((source, index) => ({ source, index }))
+    .filter((item) => !usedSourceIndexes.has(item.index));
+  const remainingTargets = targets
+    .map((target, index) => ({ target, index }))
+    .filter((item) => !usedTargetIndexes.has(item.index));
+  const orderedPairCount = Math.min(remainingSources.length, remainingTargets.length);
+
+  for (let index = 0; index < orderedPairCount; index += 1) {
+    pairs.push({
+      sourceScenario: remainingSources[index].source.id,
+      targetScenario: remainingTargets[index].target.id,
+    });
+    usedSourceIndexes.add(remainingSources[index].index);
+    usedTargetIndexes.add(remainingTargets[index].index);
+  }
+
+  return {
+    pairs,
+    unpairedSources: sources.filter((_, index) => !usedSourceIndexes.has(index)),
+    unpairedTargets: targets.filter((_, index) => !usedTargetIndexes.has(index)),
+  };
+}
+
 function orderedCategories(
   sourceScenarios: ScenarioConfig[],
   targetScenarios: ScenarioConfig[],
@@ -475,10 +674,134 @@ function orderedCategories(
   return ordered;
 }
 
-function normalizedCategoryKey(category: string | undefined): string {
-  const trimmed = category?.trim();
-  if (!trimmed) return UNCATEGORIZED;
-  return trimmed.replace(/\s+track$/i, "");
+function orderedParentCategories(
+  sourceScenarios: ScenarioConfig[],
+  targetScenarios: ScenarioConfig[],
+): string[] {
+  const ordered: string[] = [];
+  for (const category of [
+    ...groupByParentCategory(sourceScenarios).keys(),
+    ...groupByParentCategory(targetScenarios).keys(),
+  ]) {
+    if (!ordered.includes(category)) ordered.push(category);
+  }
+  return ordered;
+}
+
+function suggestParentRenamePairs(
+  parentOrder: string[],
+  sourceParents: Map<string, ScenarioConfig[]>,
+  targetParents: Map<string, ScenarioConfig[]>,
+): Array<{
+  sourceParent: string;
+  targetParent: string;
+  sources: ScenarioConfig[];
+  targets: ScenarioConfig[];
+  similarity: number;
+}> {
+  const output: Array<{
+    sourceParent: string;
+    targetParent: string;
+    sources: ScenarioConfig[];
+    targets: ScenarioConfig[];
+    similarity: number;
+  }> = [];
+  const usedTargets = new Set<string>();
+  const targetKeys = [...targetParents.keys()];
+
+  for (const sourceParent of sourceParents.keys()) {
+    const sources = sourceParents.get(sourceParent) ?? [];
+    const sourceIndex = parentOrder.indexOf(sourceParent);
+    const candidates = targetKeys
+      .filter((targetParent) => !usedTargets.has(targetParent))
+      .map((targetParent) => {
+        const targets = targetParents.get(targetParent) ?? [];
+        return {
+          sourceParent,
+          targetParent,
+          sources,
+          targets,
+          similarity: parentCategorySimilarity(sourceParent, targetParent),
+          distance: Math.abs(sourceIndex - parentOrder.indexOf(targetParent)),
+        };
+      })
+      .filter((item) =>
+        item.sources.length === item.targets.length &&
+        item.sources.length > 0 &&
+        item.distance <= 1 &&
+        item.similarity >= 0.2,
+      )
+      .sort((a, b) => b.similarity - a.similarity || a.distance - b.distance);
+
+    const best = candidates[0];
+    if (!best) continue;
+    usedTargets.add(best.targetParent);
+    output.push(best);
+  }
+
+  return output;
+}
+
+function inferredParentRenameMap(
+  sourceScenarios: ScenarioConfig[],
+  targetScenarios: ScenarioConfig[],
+): Map<string, string> {
+  const sourceParents = groupByParentCategory(sourceScenarios);
+  const targetParents = groupByParentCategory(targetScenarios);
+  const sourceOnly = new Map([...sourceParents].filter(([key]) => !targetParents.has(key)));
+  const targetOnly = new Map([...targetParents].filter(([key]) => !sourceParents.has(key)));
+  const parentOrder = orderedParentCategories(sourceScenarios, targetScenarios);
+  const output = new Map<string, string>();
+  for (const item of suggestParentRenamePairs(parentOrder, sourceOnly, targetOnly)) {
+    output.set(item.sourceParent, item.targetParent);
+  }
+  return output;
+}
+
+function parentCategorySimilarity(sourceParent: string, targetParent: string): number {
+  const sourceName = parentCategoryName(sourceParent);
+  const targetName = parentCategoryName(targetParent);
+  const lexical = jaccard(tokenize(sourceName), tokenize(targetName));
+  const sourceKeywords = categorySemanticTokens(sourceName);
+  const targetKeywords = categorySemanticTokens(targetName);
+  const semantic = jaccard(sourceKeywords, targetKeywords);
+  return Math.max(lexical, semantic);
+}
+
+function parentCategoryName(key: string): string {
+  return key.split(CATEGORY_OCCURRENCE_SEPARATOR)[0] ?? key;
+}
+
+function categorySemanticTokens(name: string): Set<string> {
+  const tokens = tokenize(name);
+  const expanded = new Set(tokens);
+  if (tokens.has("dynamic")) expanded.add("timing");
+  if (tokens.has("clicking")) expanded.add("click");
+  if (tokens.has("click")) expanded.add("clicking");
+  if (tokens.has("timing")) expanded.add("dynamic");
+  if (tokens.has("switching")) expanded.add("switch");
+  if (tokens.has("switch")) expanded.add("switching");
+  return expanded;
+}
+
+function normalizedScenarioName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizedCategoryKey(scenario: ScenarioConfig): string {
+  const parts = scenarioCategoryParts(scenario);
+  if (!parts.category) return UNCATEGORIZED;
+  return [parts.category, parts.subcategory].filter(Boolean).join(" / ");
+}
+
+function normalizedParentCategoryKey(scenario: ScenarioConfig): string {
+  const parts = scenarioCategoryParts(scenario);
+  return parts.category ?? UNCATEGORIZED;
 }
 
 function categoryBucketKey(baseKey: string, occurrence: number): string {
@@ -489,6 +812,22 @@ function categoryLabel(key: string): string {
   const [baseKey, occurrence] = key.split(CATEGORY_OCCURRENCE_SEPARATOR);
   if (baseKey === UNCATEGORIZED) return "(uncategorized)";
   return occurrence && occurrence !== "1" ? `"${baseKey}" block ${occurrence}` : `"${baseKey}"`;
+}
+
+function scenarioCategoryParts(scenario: ScenarioConfig): { category?: string; subcategory?: string } {
+  const category = scenario.category?.trim();
+  const subcategory = scenario.subcategory?.trim();
+  if (category?.includes(" / ") && !subcategory) {
+    const [parent, ...rest] = category.split(" / ");
+    return {
+      category: parent.trim() || undefined,
+      subcategory: rest.join(" / ").trim() || undefined,
+    };
+  }
+  return {
+    category: category || undefined,
+    subcategory: subcategory || undefined,
+  };
 }
 
 function countScenarioUsage(ids: string[]): Map<string, number> {

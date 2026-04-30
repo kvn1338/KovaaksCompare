@@ -12,6 +12,7 @@ import type {
 const BASE_URL = "https://kovaaks.com";
 const REQUEST_DELAY_MS = 500;
 const MAX_RETRIES = 6;
+const nullableString = z.string().nullable().optional();
 
 const scenarioSearchSchema = z.object({
   page: z.number(),
@@ -45,11 +46,11 @@ const leaderboardPageSchema = z.object({
   total: z.number(),
   data: z.array(
     z.object({
-      steamId: z.string().optional(),
+      steamId: nullableString,
       score: z.number(),
       rank: z.number().optional(),
-      steamAccountName: z.string().optional(),
-      webappUsername: z.string().nullable().optional(),
+      steamAccountName: nullableString,
+      webappUsername: nullableString,
       attributes: z.record(z.string(), z.unknown()).optional(),
     }),
   ),
@@ -72,9 +73,9 @@ const userScenarioPageSchema = z.object({
 
 const accountNameSearchSchema = z.array(
   z.object({
-    steamId: z.string().optional(),
-    username: z.string().nullable().optional(),
-    steamAccountName: z.string().optional(),
+    steamId: nullableString,
+    username: nullableString,
+    steamAccountName: nullableString,
   }),
 );
 
@@ -171,10 +172,10 @@ export class KovaaksClient {
       max: parsed.max,
       total: parsed.total,
       scores: parsed.data.map((score) => ({
-        playerId: score.steamId ?? score.webappUsername ?? score.steamAccountName ?? "unknown",
-        steamId: score.steamId,
-        username: score.steamAccountName,
-        webappUsername: score.webappUsername,
+        playerId: score.steamId ?? score.webappUsername ?? score.steamAccountName ?? "",
+        steamId: score.steamId ?? undefined,
+        username: score.steamAccountName ?? undefined,
+        webappUsername: score.webappUsername ?? undefined,
         score: score.score,
         rank: score.rank,
         runTimestamp: normalizeEpoch(score.attributes?.epoch),
@@ -421,9 +422,9 @@ export class KovaaksClient {
   }
 
   private async searchAccountNames(username: string): Promise<Array<{
-    steamId?: string;
+    steamId?: string | null;
     username?: string | null;
-    steamAccountName?: string;
+    steamAccountName?: string | null;
   }>> {
     const json = await this.getJson(
       "/webapp-backend/leaderboard/global/search/account-names",
