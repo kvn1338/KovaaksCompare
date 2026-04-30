@@ -203,7 +203,11 @@ The most useful cutoff estimates are usually:
 - **log-log regression**: useful when score scaling is multiplicative or tail-heavy
 - **global percentile**: simple population percentile mapping, useful when both leaderboards are fully collected
 
-Large disagreement between estimators usually means the data is sparse, the scenarios measure different skills, or outliers are affecting the fit.
+For new or test-heavy benchmark scenarios, treat **global percentile** estimates carefully. If mostly highly involved players have played a new scenario, the target leaderboard population can be stronger than the older source leaderboard population. In that case, the target score at the same global percentile may be too high for a final public cutoff.
+
+The paired estimates mitigate this by comparing only players who appear in both leaderboards. For early calibration, prefer **paired-window** or **monotonic paired** as the primary recommendation when overlap is healthy, and use **global percentile** as supporting context. The report warns when global percentile cutoff estimates differ from paired-window estimates by 15% or more, because that usually means target-population skew, sparse paired data, or a scenario that measures a meaningfully different skill.
+
+Large disagreement between estimators usually means the data is sparse, the scenarios measure different skills, the target leaderboard population is skewed, or outliers are affecting the fit.
 
 ## Data Collection Safety
 
@@ -307,7 +311,6 @@ Main tables:
 
 ## Next TODO
 
-- Validate reports on complete Viscose S1/S2 leaderboard pulls.
 - Add tests for statistics and report generation helpers.
 - Add richer CSV exports for percentile rows, cutoff rows, and outlier rows.
 - Add saved report snapshots for repeatability.

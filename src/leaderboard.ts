@@ -154,6 +154,7 @@ interface PairedScore {
 
 const DEFAULT_PERCENTILES = [50, 60, 75, 88, 95];
 const DEFAULT_OUTLIER_LIMIT = 10;
+const GLOBAL_VS_PAIRED_SKEW_WARNING_THRESHOLD = 0.15;
 
 export async function collectLeaderboards(
   client: KovaaksClient,
@@ -387,6 +388,32 @@ function buildTargetCutoffs(
     );
   }
 
+  const cutoffRows = params.sourceCutoffs.map((sourceScore) => {
+    const sourcePercentile = percentileForScore(sourceSorted, sourceScore);
+    const pairedWindow = pairedWindowTargetScore(pairs, sourceScore);
+    return {
+      sourceScore,
+      sourcePercentile,
+      globalPercentileTargetScore:
+        sourcePercentile === undefined ? undefined : scoreAtPercentile(targetSorted, sourcePercentile),
+      pairedWindowTargetScore: pairedWindow.targetScore,
+      pairedMonotonicTargetScore: interpolateMonotonicTarget(monotonicAnchors, sourceScore),
+      pairedWindowSampleSize: pairedWindow.sampleSize,
+      linearRegressionTargetScore: regression
+        ? regression.intercept + regression.slope * sourceScore
+        : undefined,
+      trimmedRegressionTargetScore: trimmedRegression
+        ? trimmedRegression.intercept + trimmedRegression.slope * sourceScore
+        : undefined,
+      logRegressionTargetScore:
+        logRegression && sourceScore > 0
+          ? Math.exp(logRegression.intercept + logRegression.slope * Math.log(sourceScore))
+          : undefined,
+      confidence: pairedWindowConfidence(pairedWindow.sampleSize, pairs.length),
+    };
+  });
+  warnings.push(...globalVsPairedSkewWarnings(cutoffRows));
+
   return {
     target: {
       leaderboardId: params.targetLeaderboardId,
@@ -397,32 +424,52 @@ function buildTargetCutoffs(
     regression,
     trimmedRegression,
     logRegression,
-    cutoffs: params.sourceCutoffs.map((sourceScore) => {
-      const sourcePercentile = percentileForScore(sourceSorted, sourceScore);
-      const pairedWindow = pairedWindowTargetScore(pairs, sourceScore);
-      return {
-        sourceScore,
-        sourcePercentile,
-        globalPercentileTargetScore:
-          sourcePercentile === undefined ? undefined : scoreAtPercentile(targetSorted, sourcePercentile),
-        pairedWindowTargetScore: pairedWindow.targetScore,
-        pairedMonotonicTargetScore: interpolateMonotonicTarget(monotonicAnchors, sourceScore),
-        pairedWindowSampleSize: pairedWindow.sampleSize,
-        linearRegressionTargetScore: regression
-          ? regression.intercept + regression.slope * sourceScore
-          : undefined,
-        trimmedRegressionTargetScore: trimmedRegression
-          ? trimmedRegression.intercept + trimmedRegression.slope * sourceScore
-          : undefined,
-        logRegressionTargetScore:
-          logRegression && sourceScore > 0
-            ? Math.exp(logRegression.intercept + logRegression.slope * Math.log(sourceScore))
-            : undefined,
-        confidence: pairedWindowConfidence(pairedWindow.sampleSize, pairs.length),
-      };
-    }),
+    cutoffs: cutoffRows,
     warnings,
   };
+}
+
+function globalVsPairedSkewWarnings(cutoffs: CutoffMappingRow[]): string[] {
+  const divergentRows = cutoffs
+    .map((row) => {
+      if (
+        row.globalPercentileTargetScore === undefined ||
+        row.pairedWindowTargetScore === undefined ||
+        row.pairedWindowTargetScore <= 0
+      ) {
+        return undefined;
+      }
+      const relativeDifference =
+        (row.globalPercentileTargetScore - row.pairedWindowTargetScore) / row.pairedWindowTargetScore;
+      return {
+        row,
+        relativeDifference,
+        absoluteRelativeDifference: Math.abs(relativeDifference),
+      };
+    })
+    .filter((item): item is {
+      row: CutoffMappingRow;
+      relativeDifference: number;
+      absoluteRelativeDifference: number;
+    } => Boolean(item))
+    .filter((item) => item.absoluteRelativeDifference >= GLOBAL_VS_PAIRED_SKEW_WARNING_THRESHOLD);
+
+  if (divergentRows.length === 0) return [];
+
+  const largest = divergentRows.reduce((best, item) =>
+    item.absoluteRelativeDifference > best.absoluteRelativeDifference ? item : best,
+  );
+  const direction = largest.relativeDifference > 0 ? "above" : "below";
+  return [
+    `Global percentile cutoff estimates differ from paired-window estimates by at least ` +
+      `${Math.round(GLOBAL_VS_PAIRED_SKEW_WARNING_THRESHOLD * 100)}% on ${divergentRows.length} cutoff row(s); ` +
+      `largest difference is ${Math.round(largest.absoluteRelativeDifference * 100)}% ${direction} paired-window ` +
+      `at source cutoff ${formatCompactNumber(largest.row.sourceScore)}. This may indicate target leaderboard population skew or sparse paired data.`,
+  ];
+}
+
+function formatCompactNumber(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
 function buildPairs(
