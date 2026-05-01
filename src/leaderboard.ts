@@ -2,6 +2,7 @@ import type { KovaaksClient } from "./kovaaks-client.js";
 import { resolveScenario } from "./comparison.js";
 import { AppDatabase, type StoredLeaderboardScore } from "./database.js";
 import type { ResolvedScenario } from "./types.js";
+import { COLLECTION_CONFIG, KOVAAKS_API_CONFIG } from "./config.js";
 
 export interface LeaderboardCollectInput {
   scenarios: string[];
@@ -42,6 +43,8 @@ export interface CollectedScenario {
   pagesFetched: number;
   pagesSkipped: number;
   pagesFailed: number;
+  pagesTotal: number;
+  uniquePlayersStored: number;
   scoresStored: number;
   totalAvailable: number;
   complete: boolean;
@@ -587,7 +590,9 @@ async function collectOne(
       pagesSkipped += 1;
       totalAvailable = existingPage.totalAvailable;
       totalPages =
-        totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : undefined;
+        totalAvailable > 0
+          ? Math.ceil(totalAvailable / KOVAAKS_API_CONFIG.leaderboardPageSize)
+          : undefined;
       stride = collectionPageStride(options.sampleRate, totalPages);
       lastPlannedPage = plannedLastPage(totalPages, options.maxPages);
       options.onProgress?.({
@@ -612,7 +617,7 @@ async function collectOne(
       const leaderboard = await client.getLeaderboardScores({
         leaderboardId: scenario.leaderboardId,
         page,
-        max: 100,
+        max: KOVAAKS_API_CONFIG.leaderboardPageSize,
       });
       pagesFetched += 1;
       totalAvailable = leaderboard.total;
@@ -667,7 +672,9 @@ async function collectOne(
         page,
         pagesFetched,
         totalPages:
-          totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : undefined,
+          totalAvailable > 0
+            ? Math.ceil(totalAvailable / KOVAAKS_API_CONFIG.leaderboardPageSize)
+            : undefined,
         scoresStored: db.getScoreCount(scenario.leaderboardId),
         totalAvailable,
         status: "failed",
@@ -680,7 +687,9 @@ async function collectOne(
   const scoresStored = db.getScoreCount(scenario.leaderboardId);
   const pageStats = db.getCollectionPageStats(scenario.leaderboardId);
   const finalTotalPages =
-    totalAvailable > 0 ? Math.ceil(totalAvailable / 100) : 0;
+    totalAvailable > 0
+      ? Math.ceil(totalAvailable / KOVAAKS_API_CONFIG.leaderboardPageSize)
+      : 0;
   const complete =
     finalTotalPages > 0 && pageStats.successfulPages >= finalTotalPages;
   db.upsertCollectionMetadata({
@@ -697,6 +706,8 @@ async function collectOne(
     pagesFetched,
     pagesSkipped,
     pagesFailed,
+    pagesTotal: finalTotalPages,
+    uniquePlayersStored: scoresStored,
     scoresStored,
     totalAvailable,
     complete,
@@ -711,7 +722,7 @@ function collectionPageStride(
     sampleRate === undefined ||
     sampleRate >= 1 ||
     totalPages === undefined ||
-    totalPages <= 50
+    totalPages <= COLLECTION_CONFIG.sampleRateMinPages
   ) {
     return 1;
   }

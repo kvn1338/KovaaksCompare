@@ -1,6 +1,7 @@
 import type { KovaaksClient } from "./kovaaks-client.js";
 import type { AppDatabase } from "./database.js";
 import { scoreAtPercentile } from "./leaderboard.js";
+import { KOVAAKS_API_CONFIG } from "./config.js";
 import type {
   ResolvedScenario,
   ScenarioPairComparison,
@@ -157,7 +158,11 @@ async function getEquivalentTargetScore(
     }
   }
 
-  const firstPage = await client.getLeaderboardScores({ leaderboardId: params.targetLeaderboardId, page: 0, max: 100 });
+  const firstPage = await client.getLeaderboardScores({
+    leaderboardId: params.targetLeaderboardId,
+    page: 0,
+    max: KOVAAKS_API_CONFIG.leaderboardPageSize,
+  });
   if (firstPage.total <= 0) {
     return undefined;
   }

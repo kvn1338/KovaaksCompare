@@ -6,6 +6,8 @@ The main workflow is benchmark-to-benchmark calibration: import benchmark scenar
 
 KovaaK's webapp API is unofficial and unstable. API calls are isolated behind `KovaaksClient`, cached locally, retried conservatively, and collected into SQLite so repeated analysis can run locally.
 
+For concrete generated output, see [`example_reports/`](example_reports/). That directory includes Markdown and CSV reports plus a detailed guide to interpreting the generated metrics, cutoff estimates, warnings, and `--paired-only` output.
+
 ## Setup
 
 ```bash
@@ -96,7 +98,9 @@ node dist/cli.js collect \
   --db /tmp/kovaaks-smoke.sqlite
 ```
 
-Collection is resumable. Successful pages are skipped on later runs unless you pass `--refresh-db` or `--max-age-hours`.
+Collection is resumable. Successful pages are reused from the SQLite page cache on later runs unless you pass `--refresh-db` or `--max-age-hours`.
+
+Collection summaries distinguish page coverage from stored player rows. For example, `1302/1302 pages covered` means every planned leaderboard page was fetched or reused, while `130106 unique players stored, API total 130113` means the API-reported row total differs slightly from the number of unique joinable players stored locally. Small gaps can happen because leaderboard totals drift during long pulls, rows can collapse to the same stable identity, or some rows lack usable identity data.
 
 For faster exploratory reports on large leaderboards, collect a rank-stratified page sample:
 
@@ -124,7 +128,7 @@ Useful report flags:
 
 ```bash
 --paired-only
---percentiles 50,60,75,88,95
+--percentiles 25,50,60,75,88,95
 --outlier-trim-percent 5
 --outlier-limit 20
 --explain
@@ -189,7 +193,7 @@ The report uses source benchmark cutoff values from `configs/benchmarks.json` an
 
 For each matched scenario pair, the report includes:
 
-- source and target leaderboard population counts
+- source and target leaderboard IDs
 - overlapping players matched by stable ID/SteamID where available
 - overlap percentage
 - Pearson correlation
@@ -199,7 +203,7 @@ For each matched scenario pair, the report includes:
 - log-log regression
 - percentile-equivalent score rows
 - source cutoff mapping estimates
-- largest regression outliers
+- warnings for partial data, population skew, sparse overlap, and estimator disagreement
 
 The most useful cutoff estimates are usually:
 

@@ -2,10 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { z } from "zod";
 import type { BenchmarkConfig } from "./calibration.js";
-
-const EVXL_BENCHMARKS_URL = "https://evxl.app/data/benchmarks";
-const DEFAULT_EVXL_CACHE_PATH = "data/evxl-benchmarks.json";
-const DEFAULT_MAX_AGE_HOURS = 48;
+import { EVXL_CATALOG_CONFIG } from "./config.js";
 
 const EvxlSubcategorySchema = z.object({
   subcategoryName: z.string(),
@@ -50,14 +47,14 @@ export interface LoadEvxlBenchmarkCatalogOptions {
 export async function loadEvxlBenchmarkCatalog(
   options: LoadEvxlBenchmarkCatalogOptions = {},
 ): Promise<EvxlBenchmarkCatalog> {
-  const path = options.path ?? DEFAULT_EVXL_CACHE_PATH;
-  const maxAgeHours = options.maxAgeHours ?? DEFAULT_MAX_AGE_HOURS;
+  const path = options.path ?? EVXL_CATALOG_CONFIG.cachePath;
+  const maxAgeHours = options.maxAgeHours ?? EVXL_CATALOG_CONFIG.maxAgeHours;
 
   if (!options.refresh && await isFresh(path, maxAgeHours)) {
     return readEvxlBenchmarkCatalog(path);
   }
 
-  const response = await fetch(EVXL_BENCHMARKS_URL, {
+  const response = await fetch(EVXL_CATALOG_CONFIG.sourceUrl, {
     headers: { "user-agent": "KovaaksCompare/0.1" },
   });
   if (!response.ok) {
@@ -68,7 +65,7 @@ export async function loadEvxlBenchmarkCatalog(
   const benchmarks = EvxlBenchmarkArraySchema.parse(json);
   const catalog: EvxlBenchmarkCatalog = {
     fetchedAt: new Date().toISOString(),
-    sourceUrl: EVXL_BENCHMARKS_URL,
+    sourceUrl: EVXL_CATALOG_CONFIG.sourceUrl,
     benchmarks,
   };
 
@@ -77,7 +74,7 @@ export async function loadEvxlBenchmarkCatalog(
   return catalog;
 }
 
-export async function readEvxlBenchmarkCatalog(path = DEFAULT_EVXL_CACHE_PATH): Promise<EvxlBenchmarkCatalog> {
+export async function readEvxlBenchmarkCatalog(path: string = EVXL_CATALOG_CONFIG.cachePath): Promise<EvxlBenchmarkCatalog> {
   const raw = await readFile(path, "utf8");
   return EvxlCatalogCacheSchema.parse(JSON.parse(raw));
 }

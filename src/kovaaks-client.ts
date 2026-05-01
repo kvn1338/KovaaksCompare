@@ -8,10 +8,8 @@ import type {
   PlayerScenarioScore,
   ScenarioSearchResult,
 } from "./types.js";
+import { KOVAAKS_API_CONFIG } from "./config.js";
 
-const BASE_URL = "https://kovaaks.com";
-const REQUEST_DELAY_MS = 500;
-const MAX_RETRIES = 6;
 const nullableString = z.string().nullable().optional();
 
 const scenarioSearchSchema = z.object({
@@ -117,14 +115,14 @@ export class KovaaksClient {
   private readonly playerIdentityCache = new Map<string, PlayerIdentity>();
 
   constructor(options: KovaaksClientOptions = {}) {
-    this.baseUrl = options.baseUrl ?? BASE_URL;
+    this.baseUrl = options.baseUrl ?? KOVAAKS_API_CONFIG.baseUrl;
     this.cacheDir = options.cacheDir ?? ".cache/kovaaks";
     this.refresh = options.refresh ?? false;
     this.debug = options.debug ?? false;
-    this.minRequestDelayMs = options.requestDelayMs ?? REQUEST_DELAY_MS;
-    this.maxRequestDelayMs = options.maxRequestDelayMs ?? 10000;
+    this.minRequestDelayMs = options.requestDelayMs ?? KOVAAKS_API_CONFIG.requestDelayMs;
+    this.maxRequestDelayMs = options.maxRequestDelayMs ?? KOVAAKS_API_CONFIG.maxRequestDelayMs;
     this.currentRequestDelayMs = this.minRequestDelayMs;
-    this.maxRetries = options.maxRetries ?? MAX_RETRIES;
+    this.maxRetries = options.maxRetries ?? KOVAAKS_API_CONFIG.maxRetries;
   }
 
   async searchScenarios(query: string): Promise<ScenarioSearchResult[]> {
@@ -156,7 +154,7 @@ export class KovaaksClient {
     usernameSearch?: string;
   }): Promise<LeaderboardPage> {
     const page = params.page ?? 0;
-    const max = params.max ?? 100;
+    const max = params.max ?? KOVAAKS_API_CONFIG.leaderboardPageSize;
     const json = await this.getJson(
       "/webapp-backend/leaderboard/scores/global",
       { leaderboardId: params.leaderboardId, page, max, usernameSearch: params.usernameSearch },
@@ -195,7 +193,7 @@ export class KovaaksClient {
       const leaderboard = await this.getLeaderboardScores({
         leaderboardId: params.leaderboardId,
         page: 0,
-        max: 20,
+        max: KOVAAKS_API_CONFIG.accountSearchPageSize,
         usernameSearch: searchTerm,
       });
       const score = leaderboard.scores.find((entry) => playerMatches(entry, playerIdentity));
@@ -211,12 +209,12 @@ export class KovaaksClient {
       return fromUserScenarioList;
     }
 
-    const maxPages = params.maxPages ?? 20;
+    const maxPages = params.maxPages ?? KOVAAKS_API_CONFIG.playerScanMaxPages;
     for (let page = 0; page < maxPages; page += 1) {
       const leaderboard = await this.getLeaderboardScores({
         leaderboardId: params.leaderboardId,
         page,
-        max: 100,
+        max: KOVAAKS_API_CONFIG.leaderboardPageSize,
       });
       const score = leaderboard.scores.find((entry) => playerMatches(entry, playerIdentity));
       if (score) {
@@ -296,10 +294,10 @@ export class KovaaksClient {
     const searchTerms = identity.directUsernames.filter((term) => !isSteamId(term));
 
     for (const username of searchTerms) {
-      for (let page = 0; page < 20; page += 1) {
+      for (let page = 0; page < KOVAAKS_API_CONFIG.playerScanMaxPages; page += 1) {
         const json = await this.getJson(
           "/webapp-backend/user/scenario/total-play",
-          { username, page, max: 100, "sort_param[]": "count" },
+          { username, page, max: KOVAAKS_API_CONFIG.userScenarioPageSize, "sort_param[]": "count" },
           `user-scenarios-${username}-${page}`,
         );
         if (json === null) {
@@ -580,7 +578,7 @@ export class KovaaksClient {
     }
     this.currentRequestDelayMs = Math.max(
       this.minRequestDelayMs,
-      Math.floor(this.currentRequestDelayMs * 0.85),
+      Math.floor(this.currentRequestDelayMs * KOVAAKS_API_CONFIG.adaptiveDelayRelaxMultiplier),
     );
     if (this.debug) {
       console.error(`Adaptive delay relaxed to ${this.currentRequestDelayMs}ms`);
@@ -593,7 +591,10 @@ export class KovaaksClient {
     }
     this.currentRequestDelayMs = Math.min(
       this.maxRequestDelayMs,
-      Math.max(this.currentRequestDelayMs + 500, Math.floor(this.currentRequestDelayMs * 1.8)),
+      Math.max(
+        this.currentRequestDelayMs + KOVAAKS_API_CONFIG.adaptiveDelayIncreaseStepMs,
+        Math.floor(this.currentRequestDelayMs * KOVAAKS_API_CONFIG.adaptiveDelayIncreaseMultiplier),
+      ),
     );
     if (this.debug) {
       console.error(`Adaptive delay increased to ${this.currentRequestDelayMs}ms`);
@@ -614,7 +615,7 @@ class HttpStatusError extends Error {
 
 function shouldRetry(error: unknown): boolean {
   if (error instanceof HttpStatusError) {
-    return error.status === 408 || error.status === 429 || error.status >= 500;
+    return KOVAAKS_API_CONFIG.retryableStatusCodes.includes(error.status) || error.status >= 500;
   }
   return true;
 }
@@ -623,7 +624,11 @@ function retryDelayMs(error: unknown, attempt: number, maxDelayMs: number): numb
   if (error instanceof HttpStatusError && error.retryAfterMs !== undefined) {
     return Math.min(maxDelayMs, error.retryAfterMs);
   }
-  return Math.min(maxDelayMs, 1500 * 2 ** attempt + Math.floor(Math.random() * 500));
+  return Math.min(
+    maxDelayMs,
+    KOVAAKS_API_CONFIG.retryBaseDelayMs * 2 ** attempt +
+      Math.floor(Math.random() * KOVAAKS_API_CONFIG.retryJitterMs),
+  );
 }
 
 function retryAfterToMs(value: string | null): number | undefined {

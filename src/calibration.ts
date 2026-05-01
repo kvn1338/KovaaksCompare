@@ -1,3 +1,4 @@
+import { KOVAAKS_API_CONFIG } from "./config.js";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { resolveScenario } from "./comparison.js";
@@ -141,7 +142,7 @@ export async function importBenchmarkFromApi(
   const scenarios = await client.getBenchmarkScenarios({
     benchmarkId: benchmark.benchmarkId,
     steamId: input.steamId ?? DEFAULT_BENCHMARK_STEAM_ID,
-    max: 100,
+    max: KOVAAKS_API_CONFIG.leaderboardPageSize,
   });
 
   const imported = {

@@ -27,9 +27,6 @@ import {
   type MappingValidationResult,
 } from "./calibration.js";
 
-const DEFAULT_INDEX_PATH = "configs/benchmark-index.json";
-const DEFAULT_BENCHMARKS_PATH = "configs/benchmarks.json";
-const DEFAULT_EVXL_BENCHMARKS_PATH = "data/evxl-benchmarks.json";
 import {
   buildLeaderboardCutoffs,
   collectLeaderboards,
@@ -40,7 +37,20 @@ import {
   type LeaderboardCompareOutput,
 } from "./leaderboard.js";
 import type { UserComparisonOutput } from "./comparison.js";
-import { loadEvxlBenchmarkCatalog, type EvxlBenchmarkCatalog } from "./evxl-catalog.js";
+import {
+  loadEvxlBenchmarkCatalog,
+  type EvxlBenchmarkCatalog,
+} from "./evxl-catalog.js";
+import {
+  COLLECTION_CONFIG,
+  KOVAAKS_API_CONFIG,
+  PATH_CONFIG,
+  REPORT_CONFIG,
+} from "./config.js";
+
+const DEFAULT_INDEX_PATH = PATH_CONFIG.benchmarkIndex;
+const DEFAULT_BENCHMARKS_PATH = PATH_CONFIG.benchmarks;
+const DEFAULT_EVXL_BENCHMARKS_PATH = PATH_CONFIG.evxlBenchmarks;
 
 const METRICS_GLOSSARY = [
   "Glossary:",
@@ -162,7 +172,7 @@ leaderboard
     "--targets <scenarios>",
     "Compatibility alias: comma-separated target scenario names or leaderboard IDs",
   )
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
   .option(
     "--max-pages <count>",
     "Optional max pages per leaderboard; omit to collect all pages",
@@ -186,19 +196,19 @@ leaderboard
     "--request-delay-ms <ms>",
     "Initial delay between API requests",
     parseInteger,
-    750,
+    COLLECTION_CONFIG.requestDelayMs,
   )
   .option(
     "--max-request-delay-ms <ms>",
     "Maximum adaptive delay between API requests",
     parseInteger,
-    15000,
+    KOVAAKS_API_CONFIG.maxRequestDelayMs,
   )
   .option(
     "--max-retries <count>",
     "Retry attempts for retryable API errors",
     parseInteger,
-    6,
+    KOVAAKS_API_CONFIG.maxRetries,
   )
   .option("--json", "Print JSON instead of terminal text")
   .option("--refresh", "Bypass local API response cache")
@@ -255,7 +265,7 @@ leaderboard
     "--targets <leaderboardIds>",
     "Comma-separated collected target leaderboard IDs",
   )
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
   .option(
     "--paired-only",
     "Restrict percentile mapping and compared distributions to overlapping Steam IDs",
@@ -263,7 +273,7 @@ leaderboard
   .option(
     "--percentiles <values>",
     "Comma-separated percentile rows to report",
-    "50,60,75,88,95",
+    REPORT_CONFIG.leaderboardComparePercentiles,
   )
   .option(
     "--outlier-trim-percent <percent>",
@@ -329,7 +339,7 @@ leaderboard
     "--source-cutoffs <scores>",
     "Comma-separated source cutoff scores to map",
   )
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
   .option(
     "--outlier-trim-percent <percent>",
     "Trim this percentage of largest residual outliers for robust regression",
@@ -380,21 +390,41 @@ benchmarks
   .command("download")
   .description("Download the benchmark name-to-ID index.")
   .option("--out <path>", "Path for benchmark index JSON", DEFAULT_INDEX_PATH)
-  .option("--username <username>", "Override username used for the API request cache key", "KovaaksCompare")
+  .option(
+    "--username <username>",
+    "Override username used for the API request cache key",
+    "KovaaksCompare",
+  )
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (options) => {
-    const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
     const index = await downloadBenchmarkIndex(client, options.username);
     await writeTextFile(options.out, `${JSON.stringify(index, null, 2)}\n`);
-    console.log(`Benchmark index with ${index.benchmarks.length} benchmark(s) written to ${options.out}`);
+    console.log(
+      `Benchmark index with ${index.benchmarks.length} benchmark(s) written to ${options.out}`,
+    );
   });
 
 benchmarks
   .command("evxl-cache")
-  .description("Download/cache EVXL benchmark metadata with parent category structure.")
-  .option("--out <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
-  .option("--max-age-hours <hours>", "Refresh cache if older than this many hours", parseNumber, 48)
+  .description(
+    "Download/cache EVXL benchmark metadata with parent category structure.",
+  )
+  .option(
+    "--out <path>",
+    "Path for cached EVXL benchmark metadata JSON",
+    DEFAULT_EVXL_BENCHMARKS_PATH,
+  )
+  .option(
+    "--max-age-hours <hours>",
+    "Refresh cache if older than this many hours",
+    parseNumber,
+    48,
+  )
   .option("--refresh", "Redownload even when the cached catalog is fresh")
   .action(async (options) => {
     const catalog = await loadEvxlBenchmarkCatalog({
@@ -412,31 +442,69 @@ benchmarks
   .command("import")
   .description("Import one benchmark's scenarios and cutoff values.")
   .argument("<benchmark>", "Benchmark name or KovaaK benchmark ID")
-  .option("--out <path>", "Path for updated benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--index <path>", "Benchmark index JSON for name lookup; auto-detected by default")
-  .option("--key <id>", "Local benchmark ID; defaults to slugified benchmark name")
-  .option("--difficulty <label>", "Difficulty label to store in benchmark metadata")
-  .option("--steam-id <steamId>", "Override dummy SteamID64 query parameter", "11111111111111111")
-  .option("--username <username>", "Override username used for benchmark name lookup", "KovaaksCompare")
-  .option("--evxl-cache <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
-  .option("--evxl-max-age-hours <hours>", "Refresh EVXL cache if older than this many hours", parseNumber, 48)
-  .option("--no-evxl-metadata", "Do not use EVXL benchmark category metadata during import")
+  .option(
+    "--out <path>",
+    "Path for updated benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option(
+    "--index <path>",
+    "Benchmark index JSON for name lookup; auto-detected by default",
+  )
+  .option(
+    "--key <id>",
+    "Local benchmark ID; defaults to slugified benchmark name",
+  )
+  .option(
+    "--difficulty <label>",
+    "Difficulty label to store in benchmark metadata",
+  )
+  .option(
+    "--steam-id <steamId>",
+    "Override dummy SteamID64 query parameter",
+    "11111111111111111",
+  )
+  .option(
+    "--username <username>",
+    "Override username used for benchmark name lookup",
+    "KovaaksCompare",
+  )
+  .option(
+    "--evxl-cache <path>",
+    "Path for cached EVXL benchmark metadata JSON",
+    DEFAULT_EVXL_BENCHMARKS_PATH,
+  )
+  .option(
+    "--evxl-max-age-hours <hours>",
+    "Refresh EVXL cache if older than this many hours",
+    parseNumber,
+    48,
+  )
+  .option(
+    "--no-evxl-metadata",
+    "Do not use EVXL benchmark category metadata during import",
+  )
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (benchmark: string, options) => {
-    const indexPath = options.index ?? (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
+    const indexPath =
+      options.index ??
+      (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
     const target = await resolveImportBenchmarkOptions({
       index: indexPath,
       benchmarkId: /^\d+$/.test(benchmark) ? benchmark : undefined,
       benchmarkName: /^\d+$/.test(benchmark) ? undefined : benchmark,
     });
-    const client = new KovaaksClient({ refresh: options.refresh, debug: options.debug });
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
     const evxlCatalog = options.evxlMetadata
       ? await loadOptionalEvxlBenchmarkCatalog({
-        path: options.evxlCache,
-        refresh: options.refresh,
-        maxAgeHours: options.evxlMaxAgeHours,
-      })
+          path: options.evxlCache,
+          refresh: options.refresh,
+          maxAgeHours: options.evxlMaxAgeHours,
+        })
       : undefined;
     const imported = await importBenchmarkFromApi(client, {
       username: options.username,
@@ -447,10 +515,14 @@ benchmarks
       difficulty: options.difficulty,
       evxlCatalog,
     });
-    const existing = existsSync(options.out) ? await loadCalibrationConfig(options.out) : undefined;
+    const existing = existsSync(options.out)
+      ? await loadCalibrationConfig(options.out)
+      : undefined;
     const updated = appendBenchmarkToConfig(existing, imported);
     await writeTextFile(options.out, `${JSON.stringify(updated, null, 2)}\n`);
-    console.log(`Imported ${imported.scenarios.length} scenario(s) from ${imported.name} to ${options.out}`);
+    console.log(
+      `Imported ${imported.scenarios.length} scenario(s) from ${imported.name} to ${options.out}`,
+    );
   });
 
 const match = program
@@ -459,11 +531,20 @@ const match = program
 
 match
   .command("create")
-  .description("Create configs/<match-id>.json by pairing scenarios sequentially within categories.")
+  .description(
+    "Create configs/<match-id>.json by pairing scenarios sequentially within categories.",
+  )
   .argument("<source>", "Source benchmark id, name, or KovaaK benchmarkId")
   .argument("<target>", "Target benchmark id, name, or KovaaK benchmarkId")
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--out <path>", "Path to write the match JSON; defaults to configs/<match-id>.json")
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option(
+    "--out <path>",
+    "Path to write the match JSON; defaults to configs/<match-id>.json",
+  )
   .option("--id <id>", "Override the match id; defaults to source__to__target")
   .option("--name <name>", "Override the match display name")
   .action(async (source: string, target: string, options) => {
@@ -476,16 +557,28 @@ match
       name: options.name,
     });
     const outPath = options.out ?? mappingPathForId(suggestion.mapping.id);
-    await writeTextFile(outPath, `${JSON.stringify(suggestion.mapping, null, 2)}\n`);
+    await writeTextFile(
+      outPath,
+      `${JSON.stringify(suggestion.mapping, null, 2)}\n`,
+    );
     printMappingSuggestion(config, suggestion, outPath);
   });
 
 match
   .command("validate")
-  .description("Validate a standalone match file before collection or reporting.")
+  .description(
+    "Validate a standalone match file before collection or reporting.",
+  )
   .argument("<match>", "Match ID or match JSON path")
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--db <path>", "Optional SQLite database path to check collected score coverage")
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option(
+    "--db <path>",
+    "Optional SQLite database path to check collected score coverage",
+  )
   .option(
     "--suspicious-similarity <value>",
     "Name similarity threshold below which pairs are flagged for review",
@@ -495,7 +588,9 @@ match
   .option("--json", "Print JSON instead of terminal text")
   .action(async (matchInput: string, options) => {
     const config = await loadCalibrationConfig(options.benchmarks);
-    const mapping = await loadCalibrationMapping(mappingPathFromInput(matchInput));
+    const mapping = await loadCalibrationMapping(
+      mappingPathFromInput(matchInput),
+    );
     const db = options.db ? new AppDatabase(options.db) : undefined;
     try {
       const validation = validateMapping({
@@ -519,27 +614,61 @@ match
 
 program
   .command("collect")
-  .description("Collect leaderboard scores for both benchmarks in a match file.")
+  .description(
+    "Collect leaderboard scores for both benchmarks in a match file.",
+  )
   .requiredOption("--match <id>", "Match ID or match JSON path")
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
-  .option("--max-pages <count>", "Optional max pages per leaderboard; omit to collect all pages", parseInteger)
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
+  .option(
+    "--max-pages <count>",
+    "Optional max pages per leaderboard; omit to collect all pages",
+    parseInteger,
+  )
   .option(
     "--sample-rate <rate>",
     "Fetch a rank-stratified sample of pages, e.g. 0.2 fetches roughly every 5th page; ignored for leaderboards with 50 pages or fewer",
     parseSampleRate,
   )
-  .option("--refresh-db", "Refetch pages even when successful page records already exist")
-  .option("--max-age-hours <hours>", "Refetch successful page records older than this many hours", parseNumber)
-  .option("--request-delay-ms <ms>", "Initial delay between API requests", parseInteger, 750)
-  .option("--max-request-delay-ms <ms>", "Maximum adaptive delay between API requests", parseInteger, 15000)
-  .option("--max-retries <count>", "Retry attempts for retryable API errors", parseInteger, 6)
+  .option(
+    "--refresh-db",
+    "Refetch pages even when successful page records already exist",
+  )
+  .option(
+    "--max-age-hours <hours>",
+    "Refetch successful page records older than this many hours",
+    parseNumber,
+  )
+  .option(
+    "--request-delay-ms <ms>",
+    "Initial delay between API requests",
+    parseInteger,
+    COLLECTION_CONFIG.requestDelayMs,
+  )
+  .option(
+    "--max-request-delay-ms <ms>",
+    "Maximum adaptive delay between API requests",
+    parseInteger,
+    KOVAAKS_API_CONFIG.maxRequestDelayMs,
+  )
+  .option(
+    "--max-retries <count>",
+    "Retry attempts for retryable API errors",
+    parseInteger,
+    KOVAAKS_API_CONFIG.maxRetries,
+  )
   .option("--json", "Print JSON instead of terminal text")
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (options) => {
     const benchmarksConfig = await loadCalibrationConfig(options.benchmarks);
-    const mapping = await loadCalibrationMapping(mappingPathFromInput(options.match));
+    const mapping = await loadCalibrationMapping(
+      mappingPathFromInput(options.match),
+    );
     const scenarios = resolvedScenariosForBenchmarks(benchmarksConfig, [
       mapping.sourceBenchmark,
       mapping.targetBenchmark,
@@ -575,16 +704,40 @@ program
   .command("report")
   .description("Generate a Markdown/CSV calibration report for a match file.")
   .requiredOption("--match <id>", "Match ID or match JSON path")
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
-  .option("--paired-only", "Restrict percentile mapping and compared distributions to overlapping Steam IDs")
-  .option("--percentiles <values>", "Comma-separated percentile rows to report", "50,60,75,88,95")
-  .option("--outlier-trim-percent <percent>", "Trim this percentage of largest residual outliers for robust regression", parseTrimPercent, 0)
-  .option("--outlier-limit <count>", "Number of residual outliers to include in output", parseNonNegativeInteger, 10)
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
+  .option(
+    "--paired-only",
+    "Restrict percentile mapping and compared distributions to overlapping Steam IDs",
+  )
+  .option(
+    "--percentiles <values>",
+    "Comma-separated percentile rows to report",
+    REPORT_CONFIG.calibrationReportPercentiles,
+  )
+  .option(
+    "--outlier-trim-percent <percent>",
+    "Trim this percentage of largest residual outliers for robust regression",
+    parseTrimPercent,
+    0,
+  )
+  .option(
+    "--outlier-limit <count>",
+    "Number of residual outliers to include in output",
+    parseNonNegativeInteger,
+    10,
+  )
   .option("--markdown <path>", "Write a Markdown report")
   .option("--csv <path>", "Write cutoff-focused CSV rows")
   .option("--json", "Print JSON instead of Markdown text")
-  .option("--explain", "Append a short glossary describing each reported metric")
+  .option(
+    "--explain",
+    "Append a short glossary describing each reported metric",
+  )
   .action(async (options) => {
     await runReportCommand(options);
   });
@@ -630,11 +783,7 @@ calibration
   .description(
     "Download a benchmark name-to-ID index. Username only matters for cache key; benchmark list is the same for any account.",
   )
-  .option(
-    "--out <path>",
-    "Path for benchmark index JSON",
-    DEFAULT_INDEX_PATH,
-  )
+  .option("--out <path>", "Path for benchmark index JSON", DEFAULT_INDEX_PATH)
   .option(
     "--username <username>",
     "Override username used for the API request and cache key",
@@ -659,7 +808,11 @@ calibration
   .description(
     "Import scenarios and rank cutoffs for one benchmark from KovaaK's benchmark API. Benchmark structure is account-independent; defaults are used unless overridden.",
   )
-  .option("--out <path>", "Path for updated benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option(
+    "--out <path>",
+    "Path for updated benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
   .option(
     "--steam-id <steamId>",
     "Override the SteamID64 query parameter (any valid 17-digit value works for benchmark structure)",
@@ -685,25 +838,43 @@ calibration
     "Local config benchmark ID; defaults to slugified benchmark name",
   )
   .option("--difficulty <label>", "Difficulty label to store in config")
-  .option("--evxl-cache <path>", "Path for cached EVXL benchmark metadata JSON", DEFAULT_EVXL_BENCHMARKS_PATH)
-  .option("--evxl-max-age-hours <hours>", "Refresh EVXL cache if older than this many hours", parseNumber, 48)
-  .option("--no-evxl-metadata", "Do not use EVXL benchmark category metadata during import")
+  .option(
+    "--evxl-cache <path>",
+    "Path for cached EVXL benchmark metadata JSON",
+    DEFAULT_EVXL_BENCHMARKS_PATH,
+  )
+  .option(
+    "--evxl-max-age-hours <hours>",
+    "Refresh EVXL cache if older than this many hours",
+    parseNumber,
+    48,
+  )
+  .option(
+    "--no-evxl-metadata",
+    "Do not use EVXL benchmark category metadata during import",
+  )
   .option("--refresh", "Bypass local API response cache")
   .option("--debug", "Print API requests to stderr")
   .action(async (options) => {
-    const indexPath = options.index ?? (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
-    const configPath = options.config ?? (existsSync(options.out) ? options.out : undefined);
-    const target = await resolveImportBenchmarkOptions({ ...options, index: indexPath });
+    const indexPath =
+      options.index ??
+      (existsSync(DEFAULT_INDEX_PATH) ? DEFAULT_INDEX_PATH : undefined);
+    const configPath =
+      options.config ?? (existsSync(options.out) ? options.out : undefined);
+    const target = await resolveImportBenchmarkOptions({
+      ...options,
+      index: indexPath,
+    });
     const client = new KovaaksClient({
       refresh: options.refresh,
       debug: options.debug,
     });
     const evxlCatalog = options.evxlMetadata
       ? await loadOptionalEvxlBenchmarkCatalog({
-        path: options.evxlCache,
-        refresh: options.refresh,
-        maxAgeHours: options.evxlMaxAgeHours,
-      })
+          path: options.evxlCache,
+          refresh: options.refresh,
+          maxAgeHours: options.evxlMaxAgeHours,
+        })
       : undefined;
     const benchmark = await importBenchmarkFromApi(client, {
       username: options.username,
@@ -714,7 +885,9 @@ calibration
       difficulty: options.difficulty,
       evxlCatalog,
     });
-    const existing = configPath ? await loadCalibrationConfig(configPath) : undefined;
+    const existing = configPath
+      ? await loadCalibrationConfig(configPath)
+      : undefined;
     const updated = appendBenchmarkToConfig(existing, benchmark);
     await writeTextFile(options.out, `${JSON.stringify(updated, null, 2)}\n`);
     console.log(
@@ -726,16 +899,36 @@ calibration
 
 const mapping = calibration
   .command("mapping")
-  .description("Create or edit calibration mappings between imported benchmarks.");
+  .description(
+    "Create or edit calibration mappings between imported benchmarks.",
+  );
 
 mapping
   .command("create")
-  .description("Auto-pair scenarios between two imported benchmarks and write a standalone mapping file.")
-  .requiredOption("--source <benchmark>", "Source benchmark id, name, or KovaaK benchmarkId")
-  .requiredOption("--target <benchmark>", "Target benchmark id, name, or KovaaK benchmarkId")
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
-  .option("--out <path>", "Path to write the mapping JSON; defaults to configs/<mapping-id>.json")
-  .option("--id <id>", "Override the mapping id; defaults to source__to__target")
+  .description(
+    "Auto-pair scenarios between two imported benchmarks and write a standalone mapping file.",
+  )
+  .requiredOption(
+    "--source <benchmark>",
+    "Source benchmark id, name, or KovaaK benchmarkId",
+  )
+  .requiredOption(
+    "--target <benchmark>",
+    "Target benchmark id, name, or KovaaK benchmarkId",
+  )
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option(
+    "--out <path>",
+    "Path to write the mapping JSON; defaults to configs/<mapping-id>.json",
+  )
+  .option(
+    "--id <id>",
+    "Override the mapping id; defaults to source__to__target",
+  )
   .option("--name <name>", "Override the mapping display name")
   .action(async (options) => {
     const config = await loadCalibrationConfig(options.benchmarks);
@@ -747,7 +940,10 @@ mapping
       name: options.name,
     });
     const outPath = options.out ?? mappingPathForId(suggestion.mapping.id);
-    await writeTextFile(outPath, `${JSON.stringify(suggestion.mapping, null, 2)}\n`);
+    await writeTextFile(
+      outPath,
+      `${JSON.stringify(suggestion.mapping, null, 2)}\n`,
+    );
     printMappingSuggestion(config, suggestion, outPath);
   });
 
@@ -756,12 +952,16 @@ calibration
   .description(
     "Collect all scenarios from selected calibration config benchmarks.",
   )
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
   .option(
     "--benchmark-ids <ids>",
     "Comma-separated benchmark IDs; defaults to all benchmarks",
   )
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
   .option(
     "--max-pages <count>",
     "Optional max pages per leaderboard; omit to collect all pages",
@@ -785,19 +985,19 @@ calibration
     "--request-delay-ms <ms>",
     "Initial delay between API requests",
     parseInteger,
-    750,
+    COLLECTION_CONFIG.requestDelayMs,
   )
   .option(
     "--max-request-delay-ms <ms>",
     "Maximum adaptive delay between API requests",
     parseInteger,
-    15000,
+    KOVAAKS_API_CONFIG.maxRequestDelayMs,
   )
   .option(
     "--max-retries <count>",
     "Retry attempts for retryable API errors",
     parseInteger,
-    6,
+    KOVAAKS_API_CONFIG.maxRetries,
   )
   .option("--json", "Print JSON instead of terminal text")
   .option("--refresh", "Bypass local API response cache")
@@ -806,7 +1006,9 @@ calibration
     const config = await loadCalibrationConfig(options.benchmarks);
     const scenarios = resolvedScenariosForBenchmarks(
       config,
-      options.benchmarkIds ? parseScenarioList(options.benchmarkIds) : undefined,
+      options.benchmarkIds
+        ? parseScenarioList(options.benchmarkIds)
+        : undefined,
     );
     const client = new KovaaksClient({
       refresh: options.refresh,
@@ -840,9 +1042,13 @@ calibration
   .description(
     "Generate a multi-pair calibration report from configured benchmark mappings.",
   )
-  .option("--benchmarks <path>", "Imported benchmark metadata JSON", DEFAULT_BENCHMARKS_PATH)
+  .option(
+    "--benchmarks <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
   .requiredOption("--mapping <id>", "Mapping ID or mapping JSON path")
-  .option("--db <path>", "SQLite database path", "data/kovaaks-compare.sqlite")
+  .option("--db <path>", "SQLite database path", PATH_CONFIG.database)
   .option(
     "--paired-only",
     "Restrict percentile mapping and compared distributions to overlapping Steam IDs",
@@ -850,7 +1056,7 @@ calibration
   .option(
     "--percentiles <values>",
     "Comma-separated percentile rows to report",
-    "50,60,75,88,95",
+    REPORT_CONFIG.legacyCalibrationReportPercentiles,
   )
   .option(
     "--outlier-trim-percent <percent>",
@@ -1010,10 +1216,11 @@ function collectionProgressLogger(progress: {
 }): void {
   const totalPages =
     progress.totalPages === undefined ? "?" : String(progress.totalPages);
+  const status = progress.status === "skipped" ? "cached" : progress.status;
   console.error(
     `[collect] ${progress.scenarioName} (${progress.leaderboardId}) ` +
-      `page ${progress.page + 1}/${totalPages} ${progress.status}, stored ` +
-      `${progress.scoresStored}/${progress.totalAvailable}` +
+      `page ${progress.page + 1}/${totalPages} ${status}, unique players stored ` +
+      `${progress.scoresStored}, API total ${progress.totalAvailable}` +
       `${progress.error ? `, error: ${progress.error}` : ""}`,
   );
 }
@@ -1031,7 +1238,9 @@ async function loadOptionalEvxlBenchmarkCatalog(options: {
   try {
     return await loadEvxlBenchmarkCatalog(options);
   } catch (error) {
-    console.warn(`Warning: could not load EVXL benchmark metadata: ${errorMessage(error)}`);
+    console.warn(
+      `Warning: could not load EVXL benchmark metadata: ${errorMessage(error)}`,
+    );
     return undefined;
   }
 }
@@ -1041,11 +1250,20 @@ function printMappingSuggestion(
   suggestion: MappingSuggestion,
   outPath: string,
 ): void {
-  const sourceBenchmarkConfig = config.benchmarks.find((b) => b.id === suggestion.mapping.sourceBenchmark);
-  const targetBenchmarkConfig = config.benchmarks.find((b) => b.id === suggestion.mapping.targetBenchmark);
-  const findScenarioName = (benchmarkId: string, scenarioId: string): string => {
+  const sourceBenchmarkConfig = config.benchmarks.find(
+    (b) => b.id === suggestion.mapping.sourceBenchmark,
+  );
+  const targetBenchmarkConfig = config.benchmarks.find(
+    (b) => b.id === suggestion.mapping.targetBenchmark,
+  );
+  const findScenarioName = (
+    benchmarkId: string,
+    scenarioId: string,
+  ): string => {
     const benchmark = config.benchmarks.find((b) => b.id === benchmarkId);
-    return benchmark?.scenarios.find((s) => s.id === scenarioId)?.name ?? scenarioId;
+    return (
+      benchmark?.scenarios.find((s) => s.id === scenarioId)?.name ?? scenarioId
+    );
   };
 
   console.log(
@@ -1083,7 +1301,10 @@ function printMappingSuggestion(
   }
 }
 
-function formatMappingValidation(result: MappingValidationResult, checkedDb: boolean): string {
+function formatMappingValidation(
+  result: MappingValidationResult,
+  checkedDb: boolean,
+): string {
   const lines = [
     `Match: ${result.mappingId}`,
     `Source: ${result.sourceBenchmark.name} (${result.sourceBenchmark.id})`,
@@ -1102,8 +1323,16 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
     }
   }
 
-  appendScenarioList(lines, "Duplicate source scenarios", result.duplicateSources);
-  appendScenarioList(lines, "Duplicate target scenarios", result.duplicateTargets);
+  appendScenarioList(
+    lines,
+    "Duplicate source scenarios",
+    result.duplicateSources,
+  );
+  appendScenarioList(
+    lines,
+    "Duplicate target scenarios",
+    result.duplicateTargets,
+  );
 
   if (result.missingSourceScenarioIds.length > 0) {
     lines.push("", "Missing source scenario IDs:");
@@ -1114,8 +1343,16 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
     for (const id of result.missingTargetScenarioIds) lines.push(`- ${id}`);
   }
 
-  appendScenarioList(lines, "Unpaired source scenarios", result.unpairedSources);
-  appendScenarioList(lines, "Unpaired target scenarios", result.unpairedTargets);
+  appendScenarioList(
+    lines,
+    "Unpaired source scenarios",
+    result.unpairedSources,
+  );
+  appendScenarioList(
+    lines,
+    "Unpaired target scenarios",
+    result.unpairedTargets,
+  );
 
   if (result.categoryMismatches.length > 0) {
     lines.push("", "Parent category mismatches:");
@@ -1168,7 +1405,9 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
     if (result.missingScoreData.length > 0) {
       lines.push("", "Scenarios with no stored scores in DB:");
       for (const item of result.missingScoreData) {
-        lines.push(`- ${item.side}: ${item.scenario.name} (${item.leaderboardId})`);
+        lines.push(
+          `- ${item.side}: ${item.scenario.name} (${item.leaderboardId})`,
+        );
       }
     } else {
       lines.push("", "DB score coverage: OK");
@@ -1181,12 +1420,20 @@ function formatMappingValidation(result: MappingValidationResult, checkedDb: boo
 function appendScenarioList(
   lines: string[],
   title: string,
-  scenarios: Array<{ id: string; name: string; category?: string; subcategory?: string; leaderboardId?: string }>,
+  scenarios: Array<{
+    id: string;
+    name: string;
+    category?: string;
+    subcategory?: string;
+    leaderboardId?: string;
+  }>,
 ): void {
   if (scenarios.length === 0) return;
   lines.push("", `${title}:`);
   for (const scenario of scenarios) {
-    const category = [scenario.category, scenario.subcategory].filter(Boolean).join(" / ");
+    const category = [scenario.category, scenario.subcategory]
+      .filter(Boolean)
+      .join(" / ");
     lines.push(
       `- ${scenario.name} (${scenario.id})` +
         `${category ? `, category ${category}` : ""}` +
@@ -1199,7 +1446,9 @@ function formatCategoryBlock(category: string | undefined): string {
   if (!category) return "unknown";
   const [name, occurrence] = category.split("@@");
   if (name === "__uncategorized__") return "uncategorized";
-  return occurrence && occurrence !== "1" ? `${name} block ${occurrence}` : name;
+  return occurrence && occurrence !== "1"
+    ? `${name} block ${occurrence}`
+    : name;
 }
 
 async function runReportCommand(options: {
@@ -1221,7 +1470,9 @@ async function runReportCommand(options: {
     throw new Error("Provide --match or --mapping.");
   }
   const benchmarks = await loadCalibrationConfig(options.benchmarks);
-  const mapping = await loadCalibrationMapping(mappingPathFromInput(mappingInput));
+  const mapping = await loadCalibrationMapping(
+    mappingPathFromInput(mappingInput),
+  );
   const config = withMapping(benchmarks, mapping);
   const db = new AppDatabase(options.db);
   try {
@@ -1263,7 +1514,9 @@ function mappingPathForId(id: string): string {
 }
 
 function mappingPathFromInput(value: string): string {
-  return value.endsWith(".json") || value.includes("/") ? value : mappingPathForId(value);
+  return value.endsWith(".json") || value.includes("/")
+    ? value
+    : mappingPathForId(value);
 }
 
 async function resolveImportBenchmarkOptions(options: {
@@ -1411,12 +1664,24 @@ function formatCollectOutput(
 ): string {
   const lines = [`Database: ${dbPath}`, "", "Collected:"];
   for (const item of output.scenarios) {
+    const uniqueGap = item.totalAvailable - item.uniquePlayersStored;
     lines.push(
       `- ${item.scenario.scenarioName} (${item.scenario.leaderboardId}): ` +
-        `${item.scoresStored}/${item.totalAvailable} stored, ` +
-        `${item.pagesFetched} fetched, ${item.pagesSkipped} skipped, ${item.pagesFailed} failed` +
+        `${item.pagesFetched} fetched, ${item.pagesSkipped} cached, ${item.pagesFailed} failed; ` +
+        `${item.uniquePlayersStored} unique players stored` +
+        `${item.totalAvailable > 0 ? `, API total ${item.totalAvailable}` : ""}` +
+        `${item.pagesTotal > 0 ? `, ${item.pagesFetched + item.pagesSkipped}/${item.pagesTotal} pages covered` : ""}` +
         `${item.complete ? "" : " (partial)"}`,
     );
+    if (uniqueGap !== 0 && item.complete) {
+      const direction =
+        uniqueGap > 0
+          ? `exceeds stored unique players by ${uniqueGap}`
+          : `is lower than stored unique players by ${Math.abs(uniqueGap)}`;
+      lines.push(
+        `  warning: API total ${direction}; this can happen from duplicate identities, missing identities, or leaderboard drift during collection.`,
+      );
+    }
     if (item.scenario.ambiguous) {
       lines.push(
         `  warning: "${item.scenario.input}" was ambiguous; selected first/best match.`,
