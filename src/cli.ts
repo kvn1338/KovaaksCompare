@@ -47,6 +47,10 @@ import {
   PATH_CONFIG,
   REPORT_CONFIG,
 } from "./config.js";
+import {
+  compareUserBenchmarks,
+  type UserBenchmarkOutput,
+} from "./user-benchmark.js";
 
 const DEFAULT_INDEX_PATH = PATH_CONFIG.benchmarkIndex;
 const DEFAULT_BENCHMARKS_PATH = PATH_CONFIG.benchmarks;
@@ -78,20 +82,20 @@ program
   )
   .version("0.1.0");
 
-program
+const user = program
   .command("user")
   .description(
     "Compare one player across one source scenario and 1-3 target scenarios.",
   )
-  .requiredOption(
+  .option(
     "--player <player>",
     "Steam ID, webapp username, or display username",
   )
-  .requiredOption(
+  .option(
     "--source <scenario>",
     "Source scenario name or leaderboard ID",
   )
-  .requiredOption(
+  .option(
     "--targets <scenarios>",
     "Comma-separated target scenario names or leaderboard IDs",
   )
@@ -110,6 +114,11 @@ program
     "Use a previously collected SQLite leaderboard to compute equivalent target scores locally",
   )
   .action(async (options) => {
+    if (!options.player || !options.source || !options.targets) {
+      throw new Error(
+        "Provide --player, --source, and --targets for scenario comparison, or use `user benchmark` for benchmark progress.",
+      );
+    }
     const targets = String(options.targets)
       .split(",")
       .map((value) => value.trim())
@@ -150,6 +159,64 @@ program
       }
     } finally {
       db?.close();
+    }
+  });
+
+user
+  .command("benchmark")
+  .description("Compare one Steam user's scores across imported benchmark configs.")
+  .requiredOption(
+    "--steam-id <steamId>",
+    "SteamID64 or Steam vanity ID, e.g. 76561198409458631 or kyuri",
+  )
+  .option(
+    "--benchmarks <ids>",
+    "Comma-separated imported benchmark IDs/names/KovaaK benchmark IDs to summarize",
+  )
+  .option(
+    "--match <id>",
+    "Match ID or match JSON path for side-by-side mapped benchmark comparison",
+  )
+  .option(
+    "--benchmarks-file <path>",
+    "Imported benchmark metadata JSON",
+    DEFAULT_BENCHMARKS_PATH,
+  )
+  .option("--json", "Print JSON instead of terminal text")
+  .option("--csv <path>", "Export user benchmark rows as CSV")
+  .option("--refresh", "Bypass local API response cache")
+  .option("--debug", "Print API requests to stderr")
+  .action(async (options) => {
+    if (!options.benchmarks && !options.match) {
+      throw new Error("Provide --benchmarks x,y or --match <id>.");
+    }
+    const config = await loadCalibrationConfig(options.benchmarksFile);
+    const mapping = options.match
+      ? await loadCalibrationMapping(mappingPathFromInput(options.match))
+      : undefined;
+    const benchmarkIds = options.benchmarks
+      ? parseScenarioList(options.benchmarks)
+      : [];
+    const client = new KovaaksClient({
+      refresh: options.refresh,
+      debug: options.debug,
+    });
+    const output = await compareUserBenchmarks(client, config, {
+      steamId: options.steamId,
+      benchmarkIds,
+      mapping,
+    });
+
+    if (options.csv) {
+      await writeTextFile(options.csv, userBenchmarkToCsv(output));
+    }
+    if (options.json) {
+      console.log(JSON.stringify(output, null, 2));
+    } else {
+      console.log(formatUserBenchmarkOutput(output));
+      if (options.csv) {
+        console.log(`\nCSV written to ${options.csv}`);
+      }
     }
   });
 
@@ -1602,6 +1669,62 @@ function formatUserOutput(output: UserComparisonOutput): string {
   return lines.join("\n");
 }
 
+function formatUserBenchmarkOutput(output: UserBenchmarkOutput): string {
+  const lines = [
+    `Player input: ${output.playerInput}`,
+    `Resolved SteamID64: ${output.steamId}`,
+  ];
+
+  for (const benchmark of output.benchmarks) {
+    lines.push("");
+    lines.push(`${benchmark.benchmarkName} (${benchmark.benchmarkId})`);
+    lines.push(
+      `Scores found: ${benchmark.scenariosWithScores}/${benchmark.scenarioCount}` +
+        `${benchmark.averagePercentToNextCutoff === undefined ? "" : `, average cutoff progress ${benchmark.averagePercentToNextCutoff.toFixed(1)}%`}`,
+    );
+    for (const warning of benchmark.warnings) {
+      lines.push(`Warning: ${warning}`);
+    }
+    for (const scenario of benchmark.scenarios) {
+      const category = [scenario.category, scenario.subcategory].filter(Boolean).join(" / ");
+      lines.push(
+        `- ${scenario.scenarioName}` +
+          `${category ? ` [${category}]` : ""}: ` +
+          `${scenario.score === undefined ? "no score" : formatNumber(scenario.score)}` +
+          `${scenario.rank === undefined ? "" : `, rank ${scenario.rank}`}` +
+          `${scenario.percentile === undefined ? "" : `, ${scenario.percentile.toFixed(1)}th percentile`}` +
+          `${scenario.achievedCutoff === undefined ? "" : `, cutoff ${scenario.achievedCutoff.label}`}` +
+          `${scenario.nextCutoff === undefined ? "" : `, next ${scenario.nextCutoff.label} in ${formatNumber(scenario.nextCutoff.remaining)}`}`,
+      );
+      for (const warning of scenario.warnings) {
+        lines.push(`  warning: ${warning}`);
+      }
+    }
+  }
+
+  if (output.mappedComparisons.length > 0) {
+    lines.push("");
+    lines.push("Mapped Scenario Comparison:");
+    for (const comparison of output.mappedComparisons) {
+      lines.push(
+        `- ${comparison.sourceScenario.scenarioName} -> ${comparison.targetScenario.scenarioName}: ` +
+          `${comparison.sourceScenario.score === undefined ? "no source score" : formatNumber(comparison.sourceScenario.score)} -> ` +
+          `${comparison.targetScenario.score === undefined ? "no target score" : formatNumber(comparison.targetScenario.score)}` +
+          `${comparison.rankLabelChange === undefined ? "" : ` (${comparison.rankLabelChange})`}`,
+      );
+      for (const warning of comparison.warnings) {
+        lines.push(`  warning: ${warning}`);
+      }
+    }
+  }
+
+  for (const warning of output.warnings) {
+    lines.push(`Warning: ${warning}`);
+  }
+
+  return lines.join("\n");
+}
+
 function formatScore(score: {
   score: number | null;
   rank?: number;
@@ -1654,6 +1777,56 @@ function toCsv(output: UserComparisonOutput): string {
     ]
       .map(csvCell)
       .join(","),
+  );
+  return [header.join(","), ...rows].join("\n");
+}
+
+function userBenchmarkToCsv(output: UserBenchmarkOutput): string {
+  const header = [
+    "player_input",
+    "steam_id",
+    "benchmark_id",
+    "benchmark_name",
+    "scenario_id",
+    "scenario_name",
+    "leaderboard_id",
+    "category",
+    "subcategory",
+    "score",
+    "rank",
+    "percentile",
+    "achieved_cutoff_label",
+    "achieved_cutoff_score",
+    "next_cutoff_label",
+    "next_cutoff_score",
+    "next_cutoff_remaining",
+    "percent_to_next_cutoff",
+    "warnings",
+  ];
+  const rows = output.benchmarks.flatMap((benchmark) =>
+    benchmark.scenarios.map((scenario) =>
+      [
+        output.playerInput,
+        output.steamId,
+        benchmark.benchmarkId,
+        benchmark.benchmarkName,
+        scenario.scenarioId,
+        scenario.scenarioName,
+        scenario.leaderboardId,
+        scenario.category,
+        scenario.subcategory,
+        scenario.score,
+        scenario.rank,
+        scenario.percentile,
+        scenario.achievedCutoff?.label,
+        scenario.achievedCutoff?.score,
+        scenario.nextCutoff?.label,
+        scenario.nextCutoff?.score,
+        scenario.nextCutoff?.remaining,
+        scenario.percentToNextCutoff,
+        scenario.warnings.join(" | "),
+      ].map(csvCell).join(","),
+    ),
   );
   return [header.join(","), ...rows].join("\n");
 }

@@ -27,6 +27,12 @@ During development, use:
 npm run dev -- --help
 ```
 
+Run the regression tests:
+
+```bash
+npm test
+```
+
 ## Recommended Workflow
 
 ### 1. Download the benchmark index
@@ -243,6 +249,25 @@ Useful collection flags:
 ```
 
 ## Single-User Comparison
+
+For imported benchmarks, use `user benchmark` to fetch one Steam user's benchmark progress directly through KovaaK's benchmark progress endpoint:
+
+```bash
+node dist/cli.js user benchmark \
+  --steam-id 76561198409458631 \
+  --match viscose-easier-s1-to-s2
+```
+
+You can also summarize one or more imported benchmarks without a match file:
+
+```bash
+node dist/cli.js user benchmark \
+  --steam-id 76561198409458631 \
+  --benchmarks "viscose-benchmark-easier,viscose-benchmark-s2-easier" \
+  --csv reports/user-benchmark.csv
+```
+
+`--steam-id` accepts a SteamID64 or Steam vanity ID. The examples use `76561198409458631`, the same Steam user used in the `kovaaks-api-wrapper` examples. The command reports scenario scores, rank/cutoff progress where available, and mapped source-target scenario rows when `--match` is used.
 
 The original single-player comparison command is still available:
 

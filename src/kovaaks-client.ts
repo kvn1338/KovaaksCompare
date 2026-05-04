@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import type {
   BenchmarkScenario,
+  BenchmarkPlayerScenarioProgress,
   BenchmarkSummary,
   LeaderboardPage,
   PlayerScenarioScore,
@@ -284,6 +285,50 @@ export class KovaaksClient {
       ...dataScenarios,
       ...extractBenchmarkScenariosFromCategories(json),
     ]);
+  }
+
+  async getBenchmarkPlayerProgress(params: {
+    benchmarkId: string;
+    steamId: string;
+    page?: number;
+    max?: number;
+  }): Promise<BenchmarkPlayerScenarioProgress[]> {
+    const page = params.page ?? 0;
+    const max = params.max ?? 100;
+    const json = await this.getJson(
+      "/webapp-backend/benchmarks/player-progress-rank-benchmark",
+      { benchmarkId: params.benchmarkId, steamId: params.steamId, page, max },
+      `benchmark-player-progress-${params.benchmarkId}-${params.steamId}-${page}-${max}`,
+    );
+    if (json === null) {
+      throw new Error(`KovaaK's API returned no benchmark progress data for benchmark ${params.benchmarkId}.`);
+    }
+    const parsed = genericPagedDataSchema.safeParse(json);
+    const dataScenarios = parsed.success
+      ? parsed.data.data
+        .map(extractBenchmarkPlayerScenarioProgress)
+        .filter((scenario): scenario is BenchmarkPlayerScenarioProgress => scenario !== null)
+      : [];
+    return uniqueBenchmarkPlayerScenarioProgress([
+      ...dataScenarios,
+      ...extractBenchmarkPlayerProgressFromCategories(json),
+    ]);
+  }
+
+  async resolveSteamId(input: string): Promise<string> {
+    const trimmed = input.trim();
+    if (isSteamId(trimmed)) {
+      return trimmed;
+    }
+    const vanity = steamVanityFromInput(trimmed);
+    if (!vanity) {
+      throw new Error(`Expected a SteamID64 or Steam vanity ID, got "${input}".`);
+    }
+    const profile = await this.resolveSteamVanity(vanity);
+    if (!profile?.steamId64) {
+      throw new Error(`Could not resolve Steam vanity ID "${vanity}" to a SteamID64.`);
+    }
+    return profile.steamId64;
   }
 
   private async getPlayerBestFromUserScenarioList(params: {
@@ -712,6 +757,45 @@ function extractBenchmarkScenario(row: Record<string, unknown>): BenchmarkScenar
   };
 }
 
+function extractBenchmarkPlayerScenarioProgress(
+  row: Record<string, unknown>,
+): BenchmarkPlayerScenarioProgress | null {
+  const scenario = extractBenchmarkScenario(row);
+  if (!scenario) return null;
+  return {
+    ...scenario,
+    score: firstNumber(
+      row.score,
+      row.bestScore,
+      row.best_score,
+      row.highScore,
+      row.high_score,
+      row.playerScore,
+      row.player_score,
+      asRecord(row.progress)?.score,
+      asRecord(row.progress)?.bestScore,
+      asRecord(row.playerProgress)?.score,
+      asRecord(row.player_progress)?.score,
+    ),
+    rank: firstNumber(
+      row.rank,
+      row.playerRank,
+      row.player_rank,
+      asRecord(row.progress)?.rank,
+      asRecord(row.playerProgress)?.rank,
+      asRecord(row.player_progress)?.rank,
+    ),
+    percentile: firstNumber(
+      row.percentile,
+      row.playerPercentile,
+      row.player_percentile,
+      asRecord(row.progress)?.percentile,
+      asRecord(row.playerProgress)?.percentile,
+      asRecord(row.player_progress)?.percentile,
+    ),
+  };
+}
+
 function extractBenchmarkScenariosFromCategories(json: unknown): BenchmarkScenario[] {
   const root = asRecord(json);
   const categories = asRecord(root?.categories);
@@ -736,6 +820,65 @@ function extractBenchmarkScenariosFromCategories(json: unknown): BenchmarkScenar
         leaderboardId,
         rankMaxes: rankMaxesFromValue(scenario?.rank_maxes ?? scenario?.rankMaxes, rankNames),
         category: categoryName,
+      });
+    }
+  }
+
+  return scenarios;
+}
+
+function extractBenchmarkPlayerProgressFromCategories(json: unknown): BenchmarkPlayerScenarioProgress[] {
+  const root = asRecord(json);
+  const categories = asRecord(root?.categories);
+  if (!categories) return [];
+  const rankNames = rankNamesFromResponse(root);
+  const scenarios: BenchmarkPlayerScenarioProgress[] = [];
+
+  for (const [categoryKey, category] of Object.entries(categories)) {
+    const categoryRecord = asRecord(category);
+    const categoryScenarios = asRecord(categoryRecord?.scenarios);
+    if (!categoryScenarios) continue;
+    const trimmedCategory = categoryKey.trim();
+    const categoryName = trimmedCategory.length > 0 ? trimmedCategory : undefined;
+
+    for (const [scenarioName, rawScenario] of Object.entries(categoryScenarios)) {
+      const scenario = asRecord(rawScenario);
+      const leaderboardId = stringValue(scenario?.leaderboard_id ?? scenario?.leaderboardId);
+      if (!leaderboardId) continue;
+      scenarios.push({
+        scenarioId: stringValue(scenario?.scenario_id ?? scenario?.scenarioId) ?? leaderboardId,
+        scenarioName,
+        leaderboardId,
+        rankMaxes: rankMaxesFromValue(scenario?.rank_maxes ?? scenario?.rankMaxes, rankNames),
+        category: categoryName,
+        score: firstNumber(
+          scenario?.score,
+          scenario?.bestScore,
+          scenario?.best_score,
+          scenario?.highScore,
+          scenario?.high_score,
+          scenario?.playerScore,
+          scenario?.player_score,
+          asRecord(scenario?.progress)?.score,
+          asRecord(scenario?.playerProgress)?.score,
+          asRecord(scenario?.player_progress)?.score,
+        ),
+        rank: firstNumber(
+          scenario?.rank,
+          scenario?.playerRank,
+          scenario?.player_rank,
+          asRecord(scenario?.progress)?.rank,
+          asRecord(scenario?.playerProgress)?.rank,
+          asRecord(scenario?.player_progress)?.rank,
+        ),
+        percentile: firstNumber(
+          scenario?.percentile,
+          scenario?.playerPercentile,
+          scenario?.player_percentile,
+          asRecord(scenario?.progress)?.percentile,
+          asRecord(scenario?.playerProgress)?.percentile,
+          asRecord(scenario?.player_progress)?.percentile,
+        ),
       });
     }
   }
@@ -772,6 +915,17 @@ function uniqueBenchmarkScenarios(scenarios: BenchmarkScenario[]): BenchmarkScen
   });
 }
 
+function uniqueBenchmarkPlayerScenarioProgress(
+  scenarios: BenchmarkPlayerScenarioProgress[],
+): BenchmarkPlayerScenarioProgress[] {
+  const seen = new Set<string>();
+  return scenarios.filter((scenario) => {
+    if (seen.has(scenario.leaderboardId)) return false;
+    seen.add(scenario.leaderboardId);
+    return true;
+  });
+}
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>
@@ -781,6 +935,16 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 function stringValue(value: unknown): string | undefined {
   if (typeof value === "string" && value.trim() !== "") return value.trim();
   if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return undefined;
+}
+
+function firstNumber(...values: unknown[]): number | undefined {
+  for (const value of values) {
+    const number = typeof value === "number" ? value : Number(value);
+    if (Number.isFinite(number)) {
+      return number;
+    }
+  }
   return undefined;
 }
 

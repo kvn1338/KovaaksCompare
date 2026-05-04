@@ -54,6 +54,12 @@ export interface BenchmarkScenario {
   category?: string;
 }
 
+export interface BenchmarkPlayerScenarioProgress extends BenchmarkScenario {
+  score?: number;
+  rank?: number;
+  percentile?: number;
+}
+
 export interface ScoreResult {
   score: number | null;
   rank?: number;

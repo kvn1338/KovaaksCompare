@@ -7,25 +7,25 @@ Target benchmark: Viscose Benchmark S2 Easier
 
 ## WhisphereRawControl Larger + Slowed -> Smoothsphere Viscose Easier
 
-Source leaderboard: 128696
-Target leaderboard: 185342
-Overlapping players: 1764 (2.7%)
-Correlation: 0.8332
-Log correlation: 0.8187
-Linear regression: target ~= 0.7649 * source + 3786.44 (R^2 0.6942)
-Trimmed regression: target ~= 0.7783 * source + 3669.73 (R^2 0.7689, n=1676)
-Log-log regression: log(target) ~= 0.6409 * log(source) + 3.4484 (R^2 0.6703, n=1764)
+- Source leaderboard: 128696
+- Target leaderboard: 185342
+- Overlapping players: 1764 (2.7%)
+- Correlation: 0.8332
+- Log correlation: 0.8187
+- Linear regression: target ~= 0.7649 * source + 3786.44 (R^2 0.6942)
+- Trimmed regression: target ~= 0.7783 * source + 3669.73 (R^2 0.7689, n=1676)
+- Log-log regression: log(target) ~= 0.6409 * log(source) + 3.4484 (R^2 0.6703, n=1764)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 10536 | 25% | 11481 | high |
-| 12234 | 50% | 12858 | high |
-| 12612 | 60% | 13329 | high |
-| 12999 | 75% | 14160 | high |
-| 13827 | 88% | 15084 | high |
-| 15012 | 95% | 15891 | high |
+| 7002 | 25% | 11277 | low |
+| 9369 | 50% | 12738 | low |
+| 10200 | 60% | 13263 | low |
+| 11454 | 75% | 14103 | low |
+| 12648 | 88% | 15036 | low |
+| 13239 | 95% | 15846 | low |
 
 ### Configured Cutoffs
 
@@ -42,31 +42,30 @@ Log-log regression: log(target) ~= 0.6409 * log(source) + 3.4484 (R^2 0.6703, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 19% above paired-window at source cutoff 7800. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Whisphere 80% -> VT Controlsphere Viscose Easier
 
-Source leaderboard: 55382
-Target leaderboard: 184157
-Overlapping players: 1605 (2.5%)
-Correlation: 0.8801
-Log correlation: 0.8785
-Linear regression: target ~= 0.2390 * source + 356.35 (R^2 0.7745)
-Trimmed regression: target ~= 0.2409 * source + 334.36 (R^2 0.8295, n=1525)
-Log-log regression: log(target) ~= 0.9024 * log(source) + -0.4023 (R^2 0.7718, n=1605)
+- Source leaderboard: 55382
+- Target leaderboard: 184157
+- Overlapping players: 1605 (2.5%)
+- Correlation: 0.8801
+- Log correlation: 0.8785
+- Linear regression: target ~= 0.2390 * source + 356.35 (R^2 0.7745)
+- Trimmed regression: target ~= 0.2409 * source + 334.36 (R^2 0.8295, n=1525)
+- Log-log regression: log(target) ~= 0.9024 * log(source) + -0.4023 (R^2 0.7718, n=1605)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 12770 | 25% | 3289 | high |
-| 14750 | 50% | 3854 | high |
-| 15080 | 60% | 4044 | high |
-| 16100 | 75% | 4358 | high |
-| 17680 | 88% | 4712 | high |
-| 19220 | 95% | 5016 | high |
+| 8920 | 25% | 3186 | low |
+| 11451 | 50% | 3800 | low |
+| 12370 | 60% | 3997 | low |
+| 13900 | 75% | 4314 | low |
+| 15180 | 88% | 4687 | low |
+| 16480 | 95% | 4988 | low |
 
 ### Configured Cutoffs
 
@@ -83,31 +82,30 @@ Log-log regression: log(target) ~= 0.9024 * log(source) + -0.4023 (R^2 0.7718, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 7 cutoff row(s); largest difference is 29% above paired-window at source cutoff 9000. This may indicate target leaderboard population skew or sparse paired data.
 
 ## SmoothBot Invincible Goated 75% -> SmoothBot Perfected Easier
 
-Source leaderboard: 75962
-Target leaderboard: 184652
-Overlapping players: 1560 (2.7%)
-Correlation: 0.8589
-Log correlation: 0.8422
-Linear regression: target ~= 1.0827 * source + 806.78 (R^2 0.7378)
-Trimmed regression: target ~= 1.1162 * source + 694.93 (R^2 0.8068, n=1482)
-Log-log regression: log(target) ~= 0.7776 * log(source) + 2.0873 (R^2 0.7094, n=1560)
+- Source leaderboard: 75962
+- Target leaderboard: 184652
+- Overlapping players: 1560 (2.7%)
+- Correlation: 0.8589
+- Log correlation: 0.8422
+- Linear regression: target ~= 1.0827 * source + 806.78 (R^2 0.7378)
+- Trimmed regression: target ~= 1.1162 * source + 694.93 (R^2 0.8068, n=1482)
+- Log-log regression: log(target) ~= 0.7776 * log(source) + 2.0873 (R^2 0.7094, n=1560)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 3234 | 25% | 4214 | high |
-| 3708 | 50% | 4786 | high |
-| 3906 | 60% | 4983 | high |
-| 4056 | 75% | 5263 | high |
-| 4182 | 88% | 5573 | high |
-| 4410 | 95% | 5854 | high |
+| 2352 | 25% | 4093 | low |
+| 2940 | 50% | 4719 | low |
+| 3156 | 60% | 4936 | low |
+| 3486 | 75% | 5225 | low |
+| 3882 | 88% | 5556 | low |
+| 4092 | 95% | 5833 | low |
 
 ### Configured Cutoffs
 
@@ -124,31 +122,30 @@ Log-log regression: log(target) ~= 0.7776 * log(source) + 2.0873 (R^2 0.7094, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 4 cutoff row(s); largest difference is 20% above paired-window at source cutoff 2900. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Leaptrack Goated 60% Larger -> Leapstrafes Control wobin Easier
 
-Source leaderboard: 128691
-Target leaderboard: 185344
-Overlapping players: 1375 (2.4%)
-Correlation: 0.8203
-Log correlation: 0.8190
-Linear regression: target ~= 1.6176 * source + -811.45 (R^2 0.6729)
-Trimmed regression: target ~= 1.6528 * source + -899.40 (R^2 0.7470, n=1307)
-Log-log regression: log(target) ~= 1.2251 * log(source) + -1.5137 (R^2 0.6707, n=1375)
+- Source leaderboard: 128691
+- Target leaderboard: 185344
+- Overlapping players: 1375 (2.4%)
+- Correlation: 0.8203
+- Log correlation: 0.8190
+- Linear regression: target ~= 1.6176 * source + -811.45 (R^2 0.6729)
+- Trimmed regression: target ~= 1.6528 * source + -899.40 (R^2 0.7470, n=1307)
+- Log-log regression: log(target) ~= 1.2251 * log(source) + -1.5137 (R^2 0.6707, n=1375)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 2357 | 25% | 2806 | high |
-| 2534 | 50% | 3262 | high |
-| 2592 | 60% | 3448 | high |
-| 2707 | 75% | 3685 | high |
-| 2867 | 88% | 4059 | high |
-| 3046 | 95% | 4351 | high |
+| 1942 | 25% | 2739 | low |
+| 2250 | 50% | 3213 | low |
+| 2355 | 60% | 3410 | low |
+| 2496 | 75% | 3663 | low |
+| 2616 | 88% | 4053 | low |
+| 2756 | 95% | 4327 | low |
 
 ### Configured Cutoffs
 
@@ -165,31 +162,30 @@ Log-log regression: log(target) ~= 1.2251 * log(source) + -1.5137 (R^2 0.6707, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 4 cutoff row(s); largest difference is 40% below paired-window at source cutoff 850. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Controlsphere rAim Easy 90% -> Controlsphere SuperbAim Viscose Easier
 
-Source leaderboard: 83485
-Target leaderboard: 185345
-Overlapping players: 1306 (2.3%)
-Correlation: 0.8870
-Log correlation: 0.8876
-Linear regression: target ~= 1.0054 * source + -197.34 (R^2 0.7868)
-Trimmed regression: target ~= 1.0248 * source + -421.38 (R^2 0.8437, n=1241)
-Log-log regression: log(target) ~= 1.0025 * log(source) + -0.0408 (R^2 0.7879, n=1306)
+- Source leaderboard: 83485
+- Target leaderboard: 185345
+- Overlapping players: 1306 (2.3%)
+- Correlation: 0.8870
+- Log correlation: 0.8876
+- Linear regression: target ~= 1.0054 * source + -197.34 (R^2 0.7868)
+- Trimmed regression: target ~= 1.0248 * source + -421.38 (R^2 0.8437, n=1241)
+- Log-log regression: log(target) ~= 1.0025 * log(source) + -0.0408 (R^2 0.7879, n=1306)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 10056 | 25% | 9573 | high |
-| 11586 | 50% | 11271 | high |
-| 11799 | 60% | 11781 | high |
-| 12258 | 75% | 12657 | high |
-| 13281 | 88% | 13710 | high |
-| 14277 | 95% | 14493 | high |
+| 7338 | 25% | 9258 | low |
+| 9282 | 50% | 11100 | low |
+| 9942 | 60% | 11664 | low |
+| 10959 | 75% | 12546 | low |
+| 11841 | 88% | 13668 | low |
+| 12525 | 95% | 14493 | low |
 
 ### Configured Cutoffs
 
@@ -206,31 +202,30 @@ Log-log regression: log(target) ~= 1.0025 * log(source) + -0.0408 (R^2 0.7879, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 7 cutoff row(s); largest difference is 27% above paired-window at source cutoff 9100. This may indicate target leaderboard population skew or sparse paired data.
 
 ## VT Controlsphere Intermediate S5 80% -> Whisphere Viscose Easier
 
-Source leaderboard: 107281
-Target leaderboard: 185346
-Overlapping players: 1214 (2.2%)
-Correlation: 0.8523
-Log correlation: 0.8444
-Linear regression: target ~= 4.8643 * source + -1682.38 (R^2 0.7263)
-Trimmed regression: target ~= 5.0221 * source + -2265.90 (R^2 0.7940, n=1154)
-Log-log regression: log(target) ~= 1.0191 * log(source) + 1.3220 (R^2 0.7131, n=1214)
+- Source leaderboard: 107281
+- Target leaderboard: 185346
+- Overlapping players: 1214 (2.2%)
+- Correlation: 0.8523
+- Log correlation: 0.8444
+- Linear regression: target ~= 4.8643 * source + -1682.38 (R^2 0.7263)
+- Trimmed regression: target ~= 5.0221 * source + -2265.90 (R^2 0.7940, n=1154)
+- Log-log regression: log(target) ~= 1.0191 * log(source) + 1.3220 (R^2 0.7131, n=1214)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 3600 | 25% | 14800 | high |
-| 4112 | 50% | 17740 | high |
-| 4178 | 60% | 18710 | high |
-| 4316 | 75% | 20270 | high |
-| 4580 | 88% | 22000 | high |
-| 4891 | 95% | 23520 | high |
+| 2641 | 25% | 14270 | low |
+| 3314 | 50% | 17350 | low |
+| 3553 | 60% | 18500 | low |
+| 3897 | 75% | 20090 | low |
+| 4193 | 88% | 21890 | low |
+| 4399 | 95% | 23430 | low |
 
 ### Configured Cutoffs
 
@@ -247,31 +242,30 @@ Log-log regression: log(target) ~= 1.0191 * log(source) + 1.3220 (R^2 0.7131, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 6 cutoff row(s); largest difference is 26% above paired-window at source cutoff 3300. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Air Angelic 4 Voltaic Easy 80% (Good Version) -> Air Angelic 4 Voltaic Easy 70%
 
-Source leaderboard: 13681
-Target leaderboard: 14155
-Overlapping players: 2307 (3.1%)
-Correlation: 0.8769
-Log correlation: 0.8671
-Linear regression: target ~= 0.9724 * source + 1429.39 (R^2 0.7689)
-Trimmed regression: target ~= 0.9753 * source + 1449.89 (R^2 0.8628, n=2192)
-Log-log regression: log(target) ~= 0.6640 * log(source) + 3.0644 (R^2 0.7518, n=2307)
+- Source leaderboard: 13681
+- Target leaderboard: 14155
+- Overlapping players: 2307 (3.1%)
+- Correlation: 0.8769
+- Log correlation: 0.8671
+- Linear regression: target ~= 0.9724 * source + 1429.39 (R^2 0.7689)
+- Trimmed regression: target ~= 0.9753 * source + 1449.89 (R^2 0.8628, n=2192)
+- Log-log regression: log(target) ~= 0.6640 * log(source) + 3.0644 (R^2 0.7518, n=2307)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 3078 | 25% | 4383 | high |
-| 3518 | 50% | 4848 | high |
-| 3632 | 60% | 4977 | high |
-| 3774 | 75% | 5194 | high |
-| 3960 | 88% | 5388 | high |
-| 4156 | 95% | 5524 | high |
+| 2772 | 25% | 4300 | low |
+| 3165 | 50% | 4788 | low |
+| 3307 | 60% | 4927 | low |
+| 3528 | 75% | 5154 | low |
+| 3715 | 88% | 5369 | low |
+| 3886 | 95% | 5510 | low |
 
 ### Configured Cutoffs
 
@@ -288,31 +282,30 @@ Log-log regression: log(target) ~= 0.6640 * log(source) + 3.0644 (R^2 0.7518, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 2 cutoff row(s); largest difference is 38% below paired-window at source cutoff 1050. This may indicate target leaderboard population skew or sparse paired data.
 
 ## cloverRawControl Easy 80% Speed -> cloverRawControl Viscose Easier 50cm
 
-Source leaderboard: 98867
-Target leaderboard: 185349
-Overlapping players: 1109 (2.0%)
-Correlation: 0.8480
-Log correlation: 0.8459
-Linear regression: target ~= 1.2110 * source + 1571.84 (R^2 0.7192)
-Trimmed regression: target ~= 1.2289 * source + 1430.63 (R^2 0.7966, n=1054)
-Log-log regression: log(target) ~= 0.8539 * log(source) + 1.6501 (R^2 0.7155, n=1109)
+- Source leaderboard: 98867
+- Target leaderboard: 185349
+- Overlapping players: 1109 (2.0%)
+- Correlation: 0.8480
+- Log correlation: 0.8459
+- Linear regression: target ~= 1.2110 * source + 1571.84 (R^2 0.7192)
+- Trimmed regression: target ~= 1.2289 * source + 1430.63 (R^2 0.7966, n=1054)
+- Log-log regression: log(target) ~= 0.8539 * log(source) + 1.6501 (R^2 0.7155, n=1109)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 6879 | 25% | 9504 | high |
-| 7845 | 50% | 11079 | high |
-| 8091 | 60% | 11742 | high |
-| 8556 | 75% | 12579 | high |
-| 9306 | 88% | 13539 | high |
-| 10437 | 95% | 14340 | high |
+| 4785 | 25% | 9096 | low |
+| 6261 | 50% | 10887 | low |
+| 6777 | 60% | 11589 | low |
+| 7560 | 75% | 12474 | low |
+| 8160 | 88% | 13515 | low |
+| 8829 | 95% | 14319 | low |
 
 ### Configured Cutoffs
 
@@ -329,31 +322,30 @@ Log-log regression: log(target) ~= 0.8539 * log(source) + 1.6501 (R^2 0.7155, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 6 cutoff row(s); largest difference is 30% above paired-window at source cutoff 5200. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Controlsphere Far, Far Larger 90% -> Flower Easier 50cm
 
-Source leaderboard: 128692
-Target leaderboard: 185354
-Overlapping players: 1044 (2.0%)
-Correlation: 0.7698
-Log correlation: 0.7628
-Linear regression: target ~= 0.3830 * source + -1247.61 (R^2 0.5925)
-Trimmed regression: target ~= 0.3997 * source + -1424.39 (R^2 0.6747, n=992)
-Log-log regression: log(target) ~= 1.3102 * log(source) + -4.2230 (R^2 0.5819, n=1044)
+- Source leaderboard: 128692
+- Target leaderboard: 185354
+- Overlapping players: 1044 (2.0%)
+- Correlation: 0.7698
+- Log correlation: 0.7628
+- Linear regression: target ~= 0.3830 * source + -1247.61 (R^2 0.5925)
+- Trimmed regression: target ~= 0.3997 * source + -1424.39 (R^2 0.6747, n=992)
+- Log-log regression: log(target) ~= 1.3102 * log(source) + -4.2230 (R^2 0.5819, n=1044)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 10239 | 25% | 2378 | high |
-| 11541 | 50% | 2974 | high |
-| 11652 | 60% | 3176 | high |
-| 11946 | 75% | 3533 | high |
-| 12468 | 88% | 3970 | high |
-| 13077 | 95% | 4351 | high |
+| 7794 | 25% | 2288 | low |
+| 9540 | 50% | 2919 | low |
+| 10125 | 60% | 3137 | low |
+| 10953 | 75% | 3508 | low |
+| 11694 | 88% | 3961 | low |
+| 12096 | 95% | 4333 | low |
 
 ### Configured Cutoffs
 
@@ -370,31 +362,30 @@ Log-log regression: log(target) ~= 1.3102 * log(source) + -4.2230 (R^2 0.5819, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 7 cutoff row(s); largest difference is 36% above paired-window at source cutoff 8150. This may indicate target leaderboard population skew or sparse paired data.
 
 ## PGTI Voltaic Easy 80% -> PGTI Voltaic Easy Smoother
 
-Source leaderboard: 2107
-Target leaderboard: 184878
-Overlapping players: 967 (2.0%)
-Correlation: 0.8979
-Log correlation: 0.8992
-Linear regression: target ~= 1.1361 * source + 62.22 (R^2 0.8061)
-Trimmed regression: target ~= 1.1430 * source + 50.51 (R^2 0.8601, n=919)
-Log-log regression: log(target) ~= 0.9454 * log(source) + 0.5607 (R^2 0.8085, n=967)
+- Source leaderboard: 2107
+- Target leaderboard: 184878
+- Overlapping players: 967 (2.0%)
+- Correlation: 0.8979
+- Log correlation: 0.8992
+- Linear regression: target ~= 1.1361 * source + 62.22 (R^2 0.8061)
+- Trimmed regression: target ~= 1.1430 * source + 50.51 (R^2 0.8601, n=919)
+- Log-log regression: log(target) ~= 0.9454 * log(source) + 0.5607 (R^2 0.8085, n=967)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 1576 | 25% | 1780 | high |
-| 2048 | 50% | 2298 | high |
-| 2258 | 60% | 2468 | high |
-| 2360 | 75% | 2800 | high |
-| 2493 | 88% | 3135 | high |
-| 2877 | 95% | 3487 | high |
+| 993 | 25% | 1715 | low |
+| 1385 | 50% | 2230 | low |
+| 1555 | 60% | 2420 | low |
+| 1816 | 75% | 2765 | low |
+| 2235 | 88% | 3116 | low |
+| 2403 | 95% | 3459 | low |
 
 ### Configured Cutoffs
 
@@ -411,31 +402,30 @@ Log-log regression: log(target) ~= 0.9454 * log(source) + 0.5607 (R^2 0.8085, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 7 cutoff row(s); largest difference is 46% below paired-window at source cutoff 350. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Air CELESTIAL No UFO Easy Slowed -> Air CELESTIAL No UFO Easier
 
-Source leaderboard: 131872
-Target leaderboard: 185640
-Overlapping players: 906 (2.0%)
-Correlation: 0.8657
-Log correlation: 0.8615
-Linear regression: target ~= 1.2012 * source + -184.19 (R^2 0.7495)
-Trimmed regression: target ~= 1.1726 * source + -157.78 (R^2 0.8411, n=861)
-Log-log regression: log(target) ~= 1.2135 * log(source) + -1.4561 (R^2 0.7421, n=906)
+- Source leaderboard: 131872
+- Target leaderboard: 185640
+- Overlapping players: 906 (2.0%)
+- Correlation: 0.8657
+- Log correlation: 0.8615
+- Linear regression: target ~= 1.2012 * source + -184.19 (R^2 0.7495)
+- Trimmed regression: target ~= 1.1726 * source + -157.78 (R^2 0.8411, n=861)
+- Log-log regression: log(target) ~= 1.2135 * log(source) + -1.4561 (R^2 0.7421, n=906)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 885.27 | 25% | 877 | high |
-| 894.04 | 50% | 893 | high |
-| 896.31 | 60% | 896 | high |
-| 902.13 | 75% | 903 | high |
-| 907.63 | 88% | 908 | high |
-| 912.95 | 95% | 913 | high |
+| 863.06 | 25% | 874 | low |
+| 880.75 | 50% | 891 | low |
+| 885.89 | 60% | 895 | low |
+| 892.27 | 75% | 902 | low |
+| 897.72 | 88% | 908 | low |
+| 903.50 | 95% | 913 | low |
 
 ### Configured Cutoffs
 
@@ -452,30 +442,29 @@ Log-log regression: log(target) ~= 1.2135 * log(source) + -1.4561 (R^2 0.7421, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## Whisphere Small & Slow 55% -> RawControlSphere Easier
 
-Source leaderboard: 128693
-Target leaderboard: 185356
-Overlapping players: 935 (1.9%)
-Correlation: 0.8491
-Log correlation: 0.8539
-Linear regression: target ~= 1.3175 * source + -5482.62 (R^2 0.7209)
-Trimmed regression: target ~= 1.3507 * source + -5879.59 (R^2 0.7888, n=889)
-Log-log regression: log(target) ~= 1.5034 * log(source) + -4.8909 (R^2 0.7292, n=935)
+- Source leaderboard: 128693
+- Target leaderboard: 185356
+- Overlapping players: 935 (1.9%)
+- Correlation: 0.8491
+- Log correlation: 0.8539
+- Linear regression: target ~= 1.3175 * source + -5482.62 (R^2 0.7209)
+- Trimmed regression: target ~= 1.3507 * source + -5879.59 (R^2 0.7888, n=889)
+- Log-log regression: log(target) ~= 1.5034 * log(source) + -4.8909 (R^2 0.7292, n=935)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 12390 | 25% | 10323 | high |
-| 13610 | 50% | 12162 | high |
-| 13780 | 60% | 12795 | high |
-| 14140 | 75% | 13545 | high |
-| 14650 | 88% | 14502 | high |
-| 15270 | 95% | 15492 | high |
+| 10340 | 25% | 10083 | low |
+| 11870 | 50% | 11958 | low |
+| 12390 | 60% | 12663 | low |
+| 13250 | 75% | 13512 | low |
+| 13830 | 88% | 14481 | low |
+| 14280 | 95% | 15402 | low |
 
 ### Configured Cutoffs
 
@@ -492,31 +481,30 @@ Log-log regression: log(target) ~= 1.5034 * log(source) + -4.8909 (R^2 0.7292, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 5 cutoff row(s); largest difference is 33% below paired-window at source cutoff 6000. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Air Voltaic Invincible 7 Easy 80% -> Ground Plaza Sparky v3 Easy
 
-Source leaderboard: 128694
-Target leaderboard: 134502
-Overlapping players: 1196 (2.5%)
-Correlation: 0.8160
-Log correlation: n/a
-Linear regression: target ~= 0.0403 * source + 761.02 (R^2 0.6659)
-Trimmed regression: target ~= 0.0385 * source + 767.35 (R^2 0.7597, n=1137)
-Log-log regression: log(target) ~= 0.1364 * log(source) + 5.6910 (R^2 0.7155, n=1195)
+- Source leaderboard: 128694
+- Target leaderboard: 134502
+- Overlapping players: 1196 (2.5%)
+- Correlation: 0.8160
+- Log correlation: n/a
+- Linear regression: target ~= 0.0403 * source + 761.02 (R^2 0.6659)
+- Trimmed regression: target ~= 0.0385 * source + 767.35 (R^2 0.7597, n=1137)
+- Log-log regression: log(target) ~= 0.1364 * log(source) + 5.6910 (R^2 0.7155, n=1195)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 2770 | 25% | 874 | high |
-| 3156 | 50% | 888 | high |
-| 3225 | 60% | 892 | high |
-| 3301 | 75% | 899 | high |
-| 3457 | 88% | 904 | high |
-| 3614 | 95% | 908 | high |
+| 2274 | 25% | 870 | low |
+| 2611 | 50% | 887 | low |
+| 2734 | 60% | 891 | low |
+| 2940 | 75% | 899 | low |
+| 3212 | 88% | 904 | low |
+| 3309 | 95% | 908 | low |
 
 ### Configured Cutoffs
 
@@ -533,30 +521,29 @@ Log-log regression: log(target) ~= 0.1364 * log(source) + 5.6910 (R^2 0.7155, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## Controlsphere OW Long Strafes 90% -> Air Spectral Easy 85%
 
-Source leaderboard: 128697
-Target leaderboard: 185693
-Overlapping players: 779 (1.7%)
-Correlation: 0.7192
-Log correlation: 0.7209
-Linear regression: target ~= 0.0055 * source + 879.90 (R^2 0.5173)
-Trimmed regression: target ~= 0.0047 * source + 887.36 (R^2 0.6020, n=741)
-Log-log regression: log(target) ~= 0.0460 * log(source) + 6.4153 (R^2 0.5197, n=779)
+- Source leaderboard: 128697
+- Target leaderboard: 185693
+- Overlapping players: 779 (1.7%)
+- Correlation: 0.7192
+- Log correlation: 0.7209
+- Linear regression: target ~= 0.0055 * source + 879.90 (R^2 0.5173)
+- Trimmed regression: target ~= 0.0047 * source + 887.36 (R^2 0.6020, n=741)
+- Log-log regression: log(target) ~= 0.0460 * log(source) + 6.4153 (R^2 0.5197, n=779)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 8163 | 25% | 924 | high |
-| 8871 | 50% | 930 | high |
-| 9051 | 60% | 932 | high |
-| 9381 | 75% | 934 | high |
-| 9936 | 88% | 936 | high |
-| 10761 | 95% | 939 | high |
+| 6177 | 25% | 922 | low |
+| 7647 | 50% | 929 | low |
+| 8079 | 60% | 931 | low |
+| 8709 | 75% | 934 | low |
+| 9144 | 88% | 936 | low |
+| 9642 | 95% | 939 | low |
 
 ### Configured Cutoffs
 
@@ -573,30 +560,29 @@ Log-log regression: log(target) ~= 0.0460 * log(source) + 6.4153 (R^2 0.5197, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## Flicker Plaza rAim Easy Less Blinks -> VT Aether Novice S5 Bot 1
 
-Source leaderboard: 128774
-Target leaderboard: 108042
-Overlapping players: 2133 (4.9%)
-Correlation: 0.5751
-Log correlation: 0.5576
-Linear regression: target ~= 34.1294 * source + -28419.40 (R^2 0.3307)
-Trimmed regression: target ~= 38.2751 * source + -32208.79 (R^2 0.4118, n=2027)
-Log-log regression: log(target) ~= 12.1166 * log(source) + -74.7131 (R^2 0.3109, n=2133)
+- Source leaderboard: 128774
+- Target leaderboard: 108042
+- Overlapping players: 2133 (4.9%)
+- Correlation: 0.5751
+- Log correlation: 0.5576
+- Linear regression: target ~= 34.1294 * source + -28419.40 (R^2 0.3307)
+- Trimmed regression: target ~= 38.2751 * source + -32208.79 (R^2 0.4118, n=2027)
+- Log-log regression: log(target) ~= 12.1166 * log(source) + -74.7131 (R^2 0.3109, n=2133)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 904.34 | 25% | 2150 | high |
-| 910.96 | 50% | 2525 | high |
-| 912.84 | 60% | 2694 | high |
-| 916.21 | 75% | 3049 | high |
-| 920.12 | 88% | 3491 | high |
-| 923.84 | 95% | 3890 | high |
+| 898.73 | 25% | 2065 | low |
+| 907.91 | 50% | 2415 | low |
+| 910.40 | 60% | 2549 | low |
+| 913.71 | 75% | 2827 | low |
+| 917.50 | 88% | 3258 | low |
+| 921.01 | 95% | 3715 | low |
 
 ### Configured Cutoffs
 
@@ -613,31 +599,30 @@ Log-log regression: log(target) ~= 12.1166 * log(source) + -74.7131 (R^2 0.3109,
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 42% below paired-window at source cutoff 858. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Polarized Hell Easy 40% Slower -> Plink Palace Easy Less Blinks
 
-Source leaderboard: 128775
-Target leaderboard: 184534
-Overlapping players: 734 (1.6%)
-Correlation: 0.7739
-Log correlation: 0.7795
-Linear regression: target ~= 1.1494 * source + 123.12 (R^2 0.5990)
-Trimmed regression: target ~= 1.1676 * source + 81.98 (R^2 0.6799, n=698)
-Log-log regression: log(target) ~= 0.9282 * log(source) + 0.7362 (R^2 0.6077, n=734)
+- Source leaderboard: 128775
+- Target leaderboard: 184534
+- Overlapping players: 734 (1.6%)
+- Correlation: 0.7739
+- Log correlation: 0.7795
+- Linear regression: target ~= 1.1494 * source + 123.12 (R^2 0.5990)
+- Trimmed regression: target ~= 1.1676 * source + 81.98 (R^2 0.6799, n=698)
+- Log-log regression: log(target) ~= 0.9282 * log(source) + 0.7362 (R^2 0.6077, n=734)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 2223 | 25% | 2586 | high |
-| 2518 | 50% | 2950 | high |
-| 2552 | 60% | 3063 | high |
-| 2615 | 75% | 3247 | high |
-| 2708 | 88% | 3423 | high |
-| 2829 | 95% | 3620 | high |
+| 1792 | 25% | 2532 | low |
+| 2121 | 50% | 2925 | low |
+| 2228 | 60% | 3052 | low |
+| 2411 | 75% | 3244 | low |
+| 2564 | 88% | 3429 | low |
+| 2660 | 95% | 3641 | low |
 
 ### Configured Cutoffs
 
@@ -654,31 +639,30 @@ Log-log regression: log(target) ~= 0.9282 * log(source) + 0.7362 (R^2 0.6077, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 2 cutoff row(s); largest difference is 50% below paired-window at source cutoff 750. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Air Pure Intermediate Slower No UFO -> Air Pure Easier No UFO
 
-Source leaderboard: 128776
-Target leaderboard: 185405
-Overlapping players: 746 (1.8%)
-Correlation: 0.8574
-Log correlation: 0.8574
-Linear regression: target ~= 0.7279 * source + 269.00 (R^2 0.7351)
-Trimmed regression: target ~= 0.7346 * source + 263.29 (R^2 0.8056, n=709)
-Log-log regression: log(target) ~= 0.7088 * log(source) + 2.0075 (R^2 0.7351, n=746)
+- Source leaderboard: 128776
+- Target leaderboard: 185405
+- Overlapping players: 746 (1.8%)
+- Correlation: 0.8574
+- Log correlation: 0.8574
+- Linear regression: target ~= 0.7279 * source + 269.00 (R^2 0.7351)
+- Trimmed regression: target ~= 0.7346 * source + 263.29 (R^2 0.8056, n=709)
+- Log-log regression: log(target) ~= 0.7088 * log(source) + 2.0075 (R^2 0.7351, n=746)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 911.49 | 25% | 931 | high |
-| 917.71 | 50% | 938 | high |
-| 919.38 | 60% | 940 | high |
-| 922.77 | 75% | 943 | high |
-| 927.44 | 88% | 946 | high |
-| 931.70 | 95% | 948 | high |
+| 895.09 | 25% | 929 | low |
+| 908.03 | 50% | 937 | low |
+| 911.64 | 60% | 940 | low |
+| 916.87 | 75% | 943 | low |
+| 920.62 | 88% | 946 | low |
+| 924.77 | 95% | 949 | low |
 
 ### Configured Cutoffs
 
@@ -695,30 +679,29 @@ Log-log regression: log(target) ~= 0.7088 * log(source) + 2.0075 (R^2 0.7351, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## Air Voltaic Easy Invincible 4 80% -> Air Voltaic Invincible 4 Easier
 
-Source leaderboard: 128781
-Target leaderboard: 185406
-Overlapping players: 730 (1.7%)
-Correlation: 0.8581
-Log correlation: 0.8557
-Linear regression: target ~= 1.2133 * source + -215.58 (R^2 0.7363)
-Trimmed regression: target ~= 1.2629 * source + -373.65 (R^2 0.8160, n=694)
-Log-log regression: log(target) ~= 1.0428 * log(source) + -0.2123 (R^2 0.7322, n=730)
+- Source leaderboard: 128781
+- Target leaderboard: 185406
+- Overlapping players: 730 (1.7%)
+- Correlation: 0.8581
+- Log correlation: 0.8557
+- Linear regression: target ~= 1.2133 * source + -215.58 (R^2 0.7363)
+- Trimmed regression: target ~= 1.2629 * source + -373.65 (R^2 0.8160, n=694)
+- Log-log regression: log(target) ~= 1.0428 * log(source) + -0.2123 (R^2 0.7322, n=730)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 3212 | 25% | 3590 | high |
-| 3587 | 50% | 4085 | high |
-| 3751 | 60% | 4258 | high |
-| 3834 | 75% | 4514 | high |
-| 3906 | 88% | 4723 | high |
-| 4045 | 95% | 4988 | high |
+| 2698 | 25% | 3513 | low |
+| 3081 | 50% | 4038 | low |
+| 3212 | 60% | 4226 | low |
+| 3430 | 75% | 4487 | low |
+| 3760 | 88% | 4721 | low |
+| 3863 | 95% | 4994 | low |
 
 ### Configured Cutoffs
 
@@ -735,20 +718,19 @@ Log-log regression: log(target) ~= 1.0428 * log(source) + -0.2123 (R^2 0.7322, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 2 cutoff row(s); largest difference is 41% below paired-window at source cutoff 1100. This may indicate target leaderboard population skew or sparse paired data.
 
 ## voxTargetSwitch 2 Large -> voxTargetSwitch 2 Large
 
-Source leaderboard: 84880
-Target leaderboard: 84880
-Overlapping players: 47704 (100.0%)
-Correlation: 1.0000
-Log correlation: 1.0000
-Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
-Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45319)
-Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=47702)
+- Source leaderboard: 84880
+- Target leaderboard: 84880
+- Overlapping players: 47704 (100.0%)
+- Correlation: 1.0000
+- Log correlation: 1.0000
+- Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
+- Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45319)
+- Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=47702)
 
 ### Percentile Mapping
 
@@ -776,30 +758,29 @@ Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## Pokeball Frenzy Auto TE Wide -> ww5t Voltaic Slightly Larger
 
-Source leaderboard: 783
-Target leaderboard: 185378
-Overlapping players: 902 (1.2%)
-Correlation: 0.8294
-Log correlation: 0.8101
-Linear regression: target ~= 0.0330 * source + 22.39 (R^2 0.6878)
-Trimmed regression: target ~= 0.0332 * source + 21.42 (R^2 0.7686, n=857)
-Log-log regression: log(target) ~= 0.7602 * log(source) + -1.2907 (R^2 0.6563, n=902)
+- Source leaderboard: 783
+- Target leaderboard: 185378
+- Overlapping players: 902 (1.2%)
+- Correlation: 0.8294
+- Log correlation: 0.8101
+- Linear regression: target ~= 0.0330 * source + 22.39 (R^2 0.6878)
+- Trimmed regression: target ~= 0.0332 * source + 21.42 (R^2 0.7686, n=857)
+- Log-log regression: log(target) ~= 0.7602 * log(source) + -1.2907 (R^2 0.6563, n=902)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 2700 | 25% | 107 | high |
-| 2970 | 50% | 119 | high |
-| 3090 | 60% | 125 | high |
-| 3300 | 75% | 132 | high |
-| 3540 | 88% | 142 | high |
-| 3810 | 95% | 154 | high |
+| 2190 | 25% | 106 | low |
+| 2610 | 50% | 118 | low |
+| 2730 | 60% | 123 | low |
+| 2940 | 75% | 131 | low |
+| 3180 | 88% | 142 | low |
+| 3450 | 95% | 153 | low |
 
 ### Configured Cutoffs
 
@@ -816,31 +797,30 @@ Log-log regression: log(target) ~= 0.7602 * log(source) + -1.2907 (R^2 0.6563, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 43% below paired-window at source cutoff 650. This may indicate target leaderboard population skew or sparse paired data.
 
 ## 1w3ts reload Larger -> aimerz+ Static Switching 6 Bot Slightly Larger
 
-Source leaderboard: 128795
-Target leaderboard: 185407
-Overlapping players: 787 (1.7%)
-Correlation: 0.8463
-Log correlation: 0.8456
-Linear regression: target ~= 0.9601 * source + 26.26 (R^2 0.7163)
-Trimmed regression: target ~= 0.9583 * source + 26.32 (R^2 0.7878, n=748)
-Log-log regression: log(target) ~= 0.7923 * log(source) + 1.1566 (R^2 0.7151, n=787)
+- Source leaderboard: 128795
+- Target leaderboard: 185407
+- Overlapping players: 787 (1.7%)
+- Correlation: 0.8463
+- Log correlation: 0.8456
+- Linear regression: target ~= 0.9601 * source + 26.26 (R^2 0.7163)
+- Trimmed regression: target ~= 0.9583 * source + 26.32 (R^2 0.7878, n=748)
+- Log-log regression: log(target) ~= 0.7923 * log(source) + 1.1566 (R^2 0.7151, n=787)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 95 | 25% | 115 | high |
-| 103 | 50% | 125 | high |
-| 105 | 60% | 128 | high |
-| 110 | 75% | 135 | high |
-| 118 | 88% | 143 | high |
-| 128 | 95% | 152 | high |
+| 83 | 25% | 113 | low |
+| 93 | 50% | 124 | low |
+| 97 | 60% | 128 | low |
+| 103 | 75% | 134 | low |
+| 108 | 88% | 143 | low |
+| 115 | 95% | 152 | low |
 
 ### Configured Cutoffs
 
@@ -857,20 +837,19 @@ Log-log regression: log(target) ~= 0.7923 * log(source) + 1.1566 (R^2 0.7151, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 4 cutoff row(s); largest difference is 46% below paired-window at source cutoff 36. This may indicate target leaderboard population skew or sparse paired data.
 
 ## beanTS Larger -> beanTS Larger
 
-Source leaderboard: 129353
-Target leaderboard: 129353
-Overlapping players: 47565 (100.0%)
-Correlation: 1.0000
-Log correlation: 1.0000
-Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
-Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45187)
-Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=47563)
+- Source leaderboard: 129353
+- Target leaderboard: 129353
+- Overlapping players: 47565 (100.0%)
+- Correlation: 1.0000
+- Log correlation: 1.0000
+- Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
+- Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45187)
+- Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=47563)
 
 ### Percentile Mapping
 
@@ -898,30 +877,29 @@ Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## FloatTS Angelic Easy Larger -> 1w6ts reload v2 20% bigger
 
-Source leaderboard: 135509
-Target leaderboard: 21620
-Overlapping players: 768 (1.8%)
-Correlation: 0.7623
-Log correlation: n/a
-Linear regression: target ~= 1.1521 * source + -14.06 (R^2 0.5811)
-Trimmed regression: target ~= 1.1885 * source + -18.57 (R^2 0.7148, n=730)
-Log-log regression: log(target) ~= 1.0654 * log(source) + -0.2900 (R^2 0.5896, n=767)
+- Source leaderboard: 135509
+- Target leaderboard: 21620
+- Overlapping players: 768 (1.8%)
+- Correlation: 0.7623
+- Log correlation: n/a
+- Linear regression: target ~= 1.1521 * source + -14.06 (R^2 0.5811)
+- Trimmed regression: target ~= 1.1885 * source + -18.57 (R^2 0.7148, n=730)
+- Log-log regression: log(target) ~= 1.0654 * log(source) + -0.2900 (R^2 0.5896, n=767)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 101 | 25% | 98 | high |
-| 109.85 | 50% | 109 | high |
-| 111.75 | 60% | 113 | high |
-| 113.95 | 75% | 120 | high |
-| 119 | 88% | 130 | high |
-| 125.75 | 95% | 142 | high |
+| 87.60 | 25% | 97 | low |
+| 97.85 | 50% | 108 | low |
+| 101.50 | 60% | 112 | low |
+| 107 | 75% | 120 | low |
+| 112.10 | 88% | 131 | low |
+| 115.90 | 95% | 145 | low |
 
 ### Configured Cutoffs
 
@@ -938,30 +916,29 @@ Log-log regression: log(target) ~= 1.0654 * log(source) + -0.2900 (R^2 0.5896, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## FloatTS Angelic Easy Larger -> StaticSwitchingVox
 
-Source leaderboard: 135509
-Target leaderboard: 15659
-Overlapping players: 2226 (5.2%)
-Correlation: 0.8087
-Log correlation: 0.7799
-Linear regression: target ~= 1.0183 * source + 12.63 (R^2 0.6539)
-Trimmed regression: target ~= 1.0458 * source + 10.73 (R^2 0.7617, n=2115)
-Log-log regression: log(target) ~= 0.8373 * log(source) + 0.8815 (R^2 0.6083, n=2226)
+- Source leaderboard: 135509
+- Target leaderboard: 15659
+- Overlapping players: 2226 (5.2%)
+- Correlation: 0.8087
+- Log correlation: 0.7799
+- Linear regression: target ~= 1.0183 * source + 12.63 (R^2 0.6539)
+- Trimmed regression: target ~= 1.0458 * source + 10.73 (R^2 0.7617, n=2115)
+- Log-log regression: log(target) ~= 0.8373 * log(source) + 0.8815 (R^2 0.6083, n=2226)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 91.90 | 25% | 103 | high |
-| 102 | 50% | 115 | high |
-| 106 | 60% | 120 | high |
-| 111.95 | 75% | 128 | high |
-| 116 | 88% | 138 | high |
-| 123.45 | 95% | 146 | high |
+| 87.60 | 25% | 96 | medium |
+| 97.85 | 50% | 107 | medium |
+| 101.50 | 60% | 112 | medium |
+| 107 | 75% | 120 | medium |
+| 112.10 | 88% | 131 | medium |
+| 115.90 | 95% | 141 | medium |
 
 ### Configured Cutoffs
 
@@ -978,20 +955,19 @@ Log-log regression: log(target) ~= 0.8373 * log(source) + 0.8815 (R^2 0.6083, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 1 cutoff row(s); largest difference is 21% below paired-window at source cutoff 65. This may indicate target leaderboard population skew or sparse paired data.
 
 ## waldoTS Novice -> waldoTS Novice
 
-Source leaderboard: 113019
-Target leaderboard: 113019
-Overlapping players: 48151 (100.0%)
-Correlation: 1.0000
-Log correlation: 1.0000
-Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
-Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45744)
-Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=48151)
+- Source leaderboard: 113019
+- Target leaderboard: 113019
+- Overlapping players: 48151 (100.0%)
+- Correlation: 1.0000
+- Log correlation: 1.0000
+- Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
+- Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=45744)
+- Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=48151)
 
 ### Percentile Mapping
 
@@ -1019,31 +995,30 @@ Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 1 cutoff row(s); largest difference is 22% below paired-window at source cutoff 65. This may indicate target leaderboard population skew or sparse paired data.
 
 ## devTS Goated NR Static 5Bot -> eth Pasu Micro Easier
 
-Source leaderboard: 125002
-Target leaderboard: 185394
-Overlapping players: 634 (1.2%)
-Correlation: 0.7810
-Log correlation: 0.7702
-Linear regression: target ~= 1.9163 * source + -258.69 (R^2 0.6100)
-Trimmed regression: target ~= 1.9317 * source + -274.22 (R^2 0.6953, n=603)
-Log-log regression: log(target) ~= 1.1840 * log(source) + -0.7744 (R^2 0.5932, n=634)
+- Source leaderboard: 125002
+- Target leaderboard: 185394
+- Overlapping players: 634 (1.2%)
+- Correlation: 0.7810
+- Log correlation: 0.7702
+- Linear regression: target ~= 1.9163 * source + -258.69 (R^2 0.6100)
+- Trimmed regression: target ~= 1.9317 * source + -274.22 (R^2 0.6953, n=603)
+- Log-log regression: log(target) ~= 1.1840 * log(source) + -0.7744 (R^2 0.5932, n=634)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 693 | 25% | 1028 | high |
-| 750 | 50% | 1162 | high |
-| 768 | 60% | 1216 | high |
-| 813 | 75% | 1298 | high |
-| 848 | 88% | 1404 | high |
-| 875 | 95% | 1528 | high |
+| 623 | 25% | 1010 | low |
+| 689 | 50% | 1148 | low |
+| 708 | 60% | 1198 | low |
+| 745 | 75% | 1288 | low |
+| 791 | 88% | 1398 | low |
+| 832 | 95% | 1522 | low |
 
 ### Configured Cutoffs
 
@@ -1060,31 +1035,30 @@ Log-log regression: log(target) ~= 1.1840 * log(source) + -0.7744 (R^2 0.5932, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 51% below paired-window at source cutoff 350. This may indicate target leaderboard population skew or sparse paired data.
 
 ## waldoTS Novice -> 1w2ts reload smallflicks larger
 
-Source leaderboard: 113019
-Target leaderboard: 185518
-Overlapping players: 746 (1.5%)
-Correlation: 0.8153
-Log correlation: 0.7891
-Linear regression: target ~= 0.7991 * source + 14.60 (R^2 0.6647)
-Trimmed regression: target ~= 0.8183 * source + 11.53 (R^2 0.7444, n=709)
-Log-log regression: log(target) ~= 0.8100 * log(source) + 0.8333 (R^2 0.6227, n=746)
+- Source leaderboard: 113019
+- Target leaderboard: 185518
+- Overlapping players: 746 (1.5%)
+- Correlation: 0.8153
+- Log correlation: 0.7891
+- Linear regression: target ~= 0.7991 * source + 14.60 (R^2 0.6647)
+- Trimmed regression: target ~= 0.8183 * source + 11.53 (R^2 0.7444, n=709)
+- Log-log regression: log(target) ~= 0.8100 * log(source) + 0.8333 (R^2 0.6227, n=746)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 127.20 | 25% | 113 | high |
-| 141.59 | 50% | 124 | high |
-| 143.80 | 60% | 129 | high |
-| 149.59 | 75% | 137 | high |
-| 159.59 | 88% | 147 | high |
-| 168.90 | 95% | 159 | high |
+| 111.14 | 25% | 113 | low |
+| 124.80 | 50% | 124 | low |
+| 129.89 | 60% | 128 | low |
+| 139 | 75% | 137 | low |
+| 145.14 | 88% | 147 | low |
+| 151.89 | 95% | 159 | low |
 
 ### Configured Cutoffs
 
@@ -1101,31 +1075,30 @@ Log-log regression: log(target) ~= 0.8100 * log(source) + 0.8333 (R^2 0.6227, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 1 cutoff row(s); largest difference is 22% below paired-window at source cutoff 65. This may indicate target leaderboard population skew or sparse paired data.
 
 ## domiSwitch Easy Slower -> domiSwitch Easier
 
-Source leaderboard: 128818
-Target leaderboard: 185428
-Overlapping players: 600 (1.4%)
-Correlation: 0.8607
-Log correlation: 0.8632
-Linear regression: target ~= 0.8950 * source + 1555.60 (R^2 0.7408)
-Trimmed regression: target ~= 0.9049 * source + 1479.69 (R^2 0.8096, n=570)
-Log-log regression: log(target) ~= 0.7514 * log(source) + 2.3067 (R^2 0.7451, n=600)
+- Source leaderboard: 128818
+- Target leaderboard: 185428
+- Overlapping players: 600 (1.4%)
+- Correlation: 0.8607
+- Log correlation: 0.8632
+- Linear regression: target ~= 0.8950 * source + 1555.60 (R^2 0.7408)
+- Trimmed regression: target ~= 0.9049 * source + 1479.69 (R^2 0.8096, n=570)
+- Log-log regression: log(target) ~= 0.7514 * log(source) + 2.3067 (R^2 0.7451, n=600)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 5807.20 | 25% | 6551 | high |
-| 6368 | 50% | 7142 | high |
-| 6472.80 | 60% | 7367 | high |
-| 6692 | 75% | 7780 | high |
-| 7149.60 | 88% | 8285 | high |
-| 7788 | 95% | 8850 | high |
+| 4868.79 | 25% | 6436 | low |
+| 5570.40 | 50% | 7104 | low |
+| 5824.80 | 60% | 7297 | low |
+| 6298.40 | 75% | 7718 | low |
+| 6567.20 | 88% | 8260 | low |
+| 6899.20 | 95% | 8867 | low |
 
 ### Configured Cutoffs
 
@@ -1142,30 +1115,29 @@ Log-log regression: log(target) ~= 0.7514 * log(source) + 2.3067 (R^2 0.7451, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## tamTargetSwitch Smooth Easy -> kinTS Voltaic Easy 85%
 
-Source leaderboard: 42505
-Target leaderboard: 185408
-Overlapping players: 627 (1.1%)
-Correlation: 0.8211
-Log correlation: 0.7936
-Linear regression: target ~= 1.1605 * source + 32.86 (R^2 0.6742)
-Trimmed regression: target ~= 1.1608 * source + 32.59 (R^2 0.7252, n=596)
-Log-log regression: log(target) ~= 0.4126 * log(source) + 2.8151 (R^2 0.6297, n=627)
+- Source leaderboard: 42505
+- Target leaderboard: 185408
+- Overlapping players: 627 (1.1%)
+- Correlation: 0.8211
+- Log correlation: 0.7936
+- Linear regression: target ~= 1.1605 * source + 32.86 (R^2 0.6742)
+- Trimmed regression: target ~= 1.1608 * source + 32.59 (R^2 0.7252, n=596)
+- Log-log regression: log(target) ~= 0.4126 * log(source) + 2.8151 (R^2 0.6297, n=627)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 27 | 25% | 61 | high |
-| 30 | 50% | 68 | high |
-| 32 | 60% | 70 | high |
-| 35 | 75% | 74 | high |
-| 37 | 88% | 79 | high |
-| 41 | 95% | 84 | high |
+| 19 | 25% | 61 | low |
+| 25 | 50% | 67 | low |
+| 27 | 60% | 69 | low |
+| 30 | 75% | 74 | low |
+| 34 | 88% | 78 | low |
+| 36 | 95% | 84 | low |
 
 ### Configured Cutoffs
 
@@ -1182,30 +1154,29 @@ Log-log regression: log(target) ~= 0.4126 * log(source) + 2.8151 (R^2 0.6297, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## domiSwitch Easy Slower -> B180T Voltaic Easy Slower
 
-Source leaderboard: 128818
-Target leaderboard: 185571
-Overlapping players: 578 (1.3%)
-Correlation: 0.8020
-Log correlation: 0.8066
-Linear regression: target ~= 0.0109 * source + -5.05 (R^2 0.6431)
-Trimmed regression: target ~= 0.0110 * source + -5.84 (R^2 0.7201, n=550)
-Log-log regression: log(target) ~= 1.0456 * log(source) + -4.9990 (R^2 0.6506, n=578)
+- Source leaderboard: 128818
+- Target leaderboard: 185571
+- Overlapping players: 578 (1.3%)
+- Correlation: 0.8020
+- Log correlation: 0.8066
+- Linear regression: target ~= 0.0109 * source + -5.05 (R^2 0.6431)
+- Trimmed regression: target ~= 0.0110 * source + -5.84 (R^2 0.7201, n=550)
+- Log-log regression: log(target) ~= 1.0456 * log(source) + -4.9990 (R^2 0.6506, n=578)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 5817.60 | 25% | 55 | high |
-| 6381.60 | 50% | 63 | high |
-| 6480 | 60% | 66 | high |
-| 6692 | 75% | 71 | high |
-| 7117.60 | 88% | 78 | high |
-| 7704.80 | 95% | 85 | high |
+| 4868.79 | 25% | 54 | low |
+| 5570.40 | 50% | 62 | low |
+| 5824.80 | 60% | 66 | low |
+| 6298.40 | 75% | 71 | low |
+| 6567.20 | 88% | 77 | low |
+| 6899.20 | 95% | 85 | low |
 
 ### Configured Cutoffs
 
@@ -1222,20 +1193,19 @@ Log-log regression: log(target) ~= 1.0456 * log(source) + -4.9990 (R^2 0.6506, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 17% above paired-window at source cutoff 5800. This may indicate target leaderboard population skew or sparse paired data.
 
 ## 1w3ts Pasu Perfected Micro Goated Larger 80% -> 1w3ts Pasu Perfected Micro Goated Larger 80%
 
-Source leaderboard: 128920
-Target leaderboard: 128920
-Overlapping players: 42782 (100.0%)
-Correlation: 1.0000
-Log correlation: 1.0000
-Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
-Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=40643)
-Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=42777)
+- Source leaderboard: 128920
+- Target leaderboard: 128920
+- Overlapping players: 42782 (100.0%)
+- Correlation: 1.0000
+- Log correlation: 1.0000
+- Linear regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000)
+- Trimmed regression: target ~= 1.0000 * source + 0.00 (R^2 1.0000, n=40643)
+- Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=42777)
 
 ### Percentile Mapping
 
@@ -1263,30 +1233,29 @@ Log-log regression: log(target) ~= 1.0000 * log(source) + 0.0000 (R^2 1.0000, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## 1wall5targets_pasu slow -> Pasu Voltaic Reload Easier
 
-Source leaderboard: 544
-Target leaderboard: 185636
-Overlapping players: 601 (0.5%)
-Correlation: 0.8223
-Log correlation: 0.7086
-Linear regression: target ~= 0.7012 * source + -11.25 (R^2 0.6763)
-Trimmed regression: target ~= 0.7309 * source + -15.65 (R^2 0.7813, n=571)
-Log-log regression: log(target) ~= 1.0871 * log(source) + -0.9203 (R^2 0.5022, n=601)
+- Source leaderboard: 544
+- Target leaderboard: 185636
+- Overlapping players: 601 (0.5%)
+- Correlation: 0.8223
+- Log correlation: 0.7086
+- Linear regression: target ~= 0.7012 * source + -11.25 (R^2 0.6763)
+- Trimmed regression: target ~= 0.7309 * source + -15.65 (R^2 0.7813, n=571)
+- Log-log regression: log(target) ~= 1.0871 * log(source) + -0.9203 (R^2 0.5022, n=601)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 129 | 25% | 74 | high |
-| 143 | 50% | 87 | high |
-| 150 | 60% | 92 | high |
-| 153 | 75% | 99 | high |
-| 160 | 88% | 108 | high |
-| 173 | 95% | 117 | high |
+| 93 | 25% | 73 | low |
+| 110 | 50% | 86 | low |
+| 117 | 60% | 91 | low |
+| 127 | 75% | 98 | low |
+| 139 | 88% | 108 | low |
+| 151 | 95% | 117 | low |
 
 ### Configured Cutoffs
 
@@ -1303,31 +1272,30 @@ Log-log regression: log(target) ~= 1.0871 * log(source) + -0.9203 (R^2 0.5022, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 7 cutoff row(s); largest difference is 30% above paired-window at source cutoff 110. This may indicate target leaderboard population skew or sparse paired data.
 
 ## B180 Voltaic Easy 92% -> VT Bounceshot Viscose Easier
 
-Source leaderboard: 12018
-Target leaderboard: 185392
-Overlapping players: 566 (1.3%)
-Correlation: 0.8708
-Log correlation: 0.8787
-Linear regression: target ~= 9.8960 * source + -4.96 (R^2 0.7582)
-Trimmed regression: target ~= 9.7868 * source + -1.09 (R^2 0.8029, n=538)
-Log-log regression: log(target) ~= 0.9535 * log(source) + 2.4827 (R^2 0.7721, n=566)
+- Source leaderboard: 12018
+- Target leaderboard: 185392
+- Overlapping players: 566 (1.3%)
+- Correlation: 0.8708
+- Log correlation: 0.8787
+- Linear regression: target ~= 9.8960 * source + -4.96 (R^2 0.7582)
+- Trimmed regression: target ~= 9.7868 * source + -1.09 (R^2 0.8029, n=538)
+- Log-log regression: log(target) ~= 0.9535 * log(source) + 2.4827 (R^2 0.7721, n=566)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 72 | 25% | 660 | high |
-| 84 | 50% | 790 | high |
-| 87 | 60% | 840 | high |
-| 90 | 75% | 920 | high |
-| 97 | 88% | 1030 | high |
-| 105 | 95% | 1130 | high |
+| 54 | 25% | 640 | low |
+| 67 | 50% | 780 | low |
+| 72 | 60% | 830 | low |
+| 80 | 75% | 910 | low |
+| 88 | 88% | 1020 | low |
+| 93 | 95% | 1130 | low |
 
 ### Configured Cutoffs
 
@@ -1344,31 +1312,30 @@ Log-log regression: log(target) ~= 0.9535 * log(source) + 2.4827 (R^2 0.7721, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 5 cutoff row(s); largest difference is 25% below paired-window at source cutoff 26. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Controlsphere Click Easy -> CatClick Easier
 
-Source leaderboard: 89547
-Target leaderboard: 184866
-Overlapping players: 545 (1.3%)
-Correlation: 0.8093
-Log correlation: 0.8001
-Linear regression: target ~= 1.2474 * source + 2.96 (R^2 0.6550)
-Trimmed regression: target ~= 1.2663 * source + 1.36 (R^2 0.7332, n=518)
-Log-log regression: log(target) ~= 0.8795 * log(source) + 0.7362 (R^2 0.6402, n=545)
+- Source leaderboard: 89547
+- Target leaderboard: 184866
+- Overlapping players: 545 (1.3%)
+- Correlation: 0.8093
+- Log correlation: 0.8001
+- Linear regression: target ~= 1.2474 * source + 2.96 (R^2 0.6550)
+- Trimmed regression: target ~= 1.2663 * source + 1.36 (R^2 0.7332, n=518)
+- Log-log regression: log(target) ~= 0.8795 * log(source) + 0.7362 (R^2 0.6402, n=545)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 50 | 25% | 60 | high |
-| 56 | 50% | 71 | high |
-| 58 | 60% | 76 | high |
-| 62 | 75% | 84 | high |
-| 68 | 88% | 95 | high |
-| 75 | 95% | 106 | high |
+| 38 | 25% | 58 | low |
+| 47 | 50% | 70 | low |
+| 51 | 60% | 75 | low |
+| 56 | 75% | 82 | low |
+| 60 | 88% | 93 | low |
+| 66 | 95% | 106 | low |
 
 ### Configured Cutoffs
 
@@ -1385,31 +1352,30 @@ Log-log regression: log(target) ~= 0.8795 * log(source) + 0.7362 (R^2 0.6402, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 2 cutoff row(s); largest difference is 27% below paired-window at source cutoff 15. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Popcorn MV Novice -> Popcorn MV Easier
 
-Source leaderboard: 76965
-Target leaderboard: 185398
-Overlapping players: 508 (1.2%)
-Correlation: 0.8026
-Log correlation: 0.8000
-Linear regression: target ~= 0.9850 * source + 63.61 (R^2 0.6441)
-Trimmed regression: target ~= 1.0114 * source + 52.49 (R^2 0.7246, n=483)
-Log-log regression: log(target) ~= 0.7707 * log(source) + 1.4839 (R^2 0.6400, n=508)
+- Source leaderboard: 76965
+- Target leaderboard: 185398
+- Overlapping players: 508 (1.2%)
+- Correlation: 0.8026
+- Log correlation: 0.8000
+- Linear regression: target ~= 0.9850 * source + 63.61 (R^2 0.6441)
+- Trimmed regression: target ~= 1.0114 * source + 52.49 (R^2 0.7246, n=483)
+- Log-log regression: log(target) ~= 0.7707 * log(source) + 1.4839 (R^2 0.6400, n=508)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 280 | 25% | 320 | high |
-| 340 | 50% | 390 | high |
-| 350 | 60% | 420 | high |
-| 380 | 75% | 480 | high |
-| 430 | 88% | 520 | high |
-| 480 | 95% | 580 | high |
+| 190 | 25% | 310 | low |
+| 270 | 50% | 380 | low |
+| 290 | 60% | 410 | low |
+| 330 | 75% | 470 | low |
+| 370 | 88% | 520 | low |
+| 410 | 95% | 580 | low |
 
 ### Configured Cutoffs
 
@@ -1426,31 +1392,30 @@ Log-log regression: log(target) ~= 0.7707 * log(source) + 1.4839 (R^2 0.6400, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 4 cutoff row(s); largest difference is 44% below paired-window at source cutoff 50. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Pasu Angelic 20% Larger 80% Speed -> skyClick Goated Easier
 
-Source leaderboard: 129352
-Target leaderboard: 185490
-Overlapping players: 538 (1.3%)
-Correlation: 0.8372
-Log correlation: 0.8377
-Linear regression: target ~= 1.0105 * source + 19.60 (R^2 0.7008)
-Trimmed regression: target ~= 1.0010 * source + 19.72 (R^2 0.7669, n=512)
-Log-log regression: log(target) ~= 0.7712 * log(source) + 1.2337 (R^2 0.7018, n=538)
+- Source leaderboard: 129352
+- Target leaderboard: 185490
+- Overlapping players: 538 (1.3%)
+- Correlation: 0.8372
+- Log correlation: 0.8377
+- Linear regression: target ~= 1.0105 * source + 19.60 (R^2 0.7008)
+- Trimmed regression: target ~= 1.0010 * source + 19.72 (R^2 0.7669, n=512)
+- Log-log regression: log(target) ~= 0.7712 * log(source) + 1.2337 (R^2 0.7018, n=538)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 82 | 25% | 99 | high |
-| 93 | 50% | 112 | high |
-| 97 | 60% | 115 | high |
-| 101 | 75% | 124 | high |
-| 106 | 88% | 135 | high |
-| 116 | 95% | 149 | high |
+| 66 | 25% | 97 | low |
+| 79 | 50% | 110 | low |
+| 84 | 60% | 114 | low |
+| 91 | 75% | 123 | low |
+| 98 | 88% | 135 | low |
+| 103 | 95% | 148 | low |
 
 ### Configured Cutoffs
 
@@ -1467,30 +1432,29 @@ Log-log regression: log(target) ~= 0.7712 * log(source) + 1.2337 (R^2 0.7018, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 
 ## 1w2ts Pasu Perfected Easy -> psalmTS Viscose Click Easier
 
-Source leaderboard: 57757
-Target leaderboard: 185609
-Overlapping players: 503 (1.0%)
-Correlation: 0.8102
-Log correlation: 0.8093
-Linear regression: target ~= 0.9695 * source + -26.92 (R^2 0.6565)
-Trimmed regression: target ~= 0.9847 * source + -28.35 (R^2 0.7312, n=478)
-Log-log regression: log(target) ~= 1.3829 * log(source) + -2.1334 (R^2 0.6550, n=503)
+- Source leaderboard: 57757
+- Target leaderboard: 185609
+- Overlapping players: 503 (1.0%)
+- Correlation: 0.8102
+- Log correlation: 0.8093
+- Linear regression: target ~= 0.9695 * source + -26.92 (R^2 0.6565)
+- Trimmed regression: target ~= 0.9847 * source + -28.35 (R^2 0.7312, n=478)
+- Log-log regression: log(target) ~= 1.3829 * log(source) + -2.1334 (R^2 0.6550, n=503)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 97 | 25% | 63 | high |
-| 106 | 50% | 74 | high |
-| 110 | 60% | 78 | high |
-| 112 | 75% | 85 | high |
-| 117 | 88% | 94 | high |
-| 125 | 95% | 104 | high |
+| 83 | 25% | 62 | low |
+| 94 | 50% | 72 | low |
+| 98 | 60% | 77 | low |
+| 104 | 75% | 83 | low |
+| 111 | 88% | 94 | low |
+| 115 | 95% | 104 | low |
 
 ### Configured Cutoffs
 
@@ -1507,31 +1471,30 @@ Log-log regression: log(target) ~= 1.3829 * log(source) + -2.1334 (R^2 0.6550, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 35% below paired-window at source cutoff 58. This may indicate target leaderboard population skew or sparse paired data.
 
 ## Floating Heads Timing 400% Larger -> VT Floating Heads Viscose Easier
 
-Source leaderboard: 1607
-Target leaderboard: 185409
-Overlapping players: 543 (1.1%)
-Correlation: 0.8512
-Log correlation: 0.8470
-Linear regression: target ~= 0.2778 * source + -73.92 (R^2 0.7245)
-Trimmed regression: target ~= 0.2775 * source + -74.63 (R^2 0.7815, n=516)
-Log-log regression: log(target) ~= 1.0791 * log(source) + -2.0152 (R^2 0.7174, n=543)
+- Source leaderboard: 1607
+- Target leaderboard: 185409
+- Overlapping players: 543 (1.1%)
+- Correlation: 0.8512
+- Log correlation: 0.8470
+- Linear regression: target ~= 0.2778 * source + -73.92 (R^2 0.7245)
+- Trimmed regression: target ~= 0.2775 * source + -74.63 (R^2 0.7815, n=516)
+- Log-log regression: log(target) ~= 1.0791 * log(source) + -2.0152 (R^2 0.7174, n=543)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 2844 | 25% | 699 | high |
-| 3204 | 50% | 807 | high |
-| 3348 | 60% | 845 | high |
-| 3600 | 75% | 929 | high |
-| 3924 | 88% | 1045 | high |
-| 4248 | 95% | 1174 | high |
+| 2520 | 25% | 686 | low |
+| 2880 | 50% | 790 | low |
+| 2988 | 60% | 838 | low |
+| 3204 | 75% | 921 | low |
+| 3528 | 88% | 1040 | low |
+| 3816 | 95% | 1161 | low |
 
 ### Configured Cutoffs
 
@@ -1548,31 +1511,30 @@ Log-log regression: log(target) ~= 1.0791 * log(source) + -2.0152 (R^2 0.7174, n
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 4 cutoff row(s); largest difference is 45% below paired-window at source cutoff 400. This may indicate target leaderboard population skew or sparse paired data.
 
 ## voxTargetSwitch Click -> VoxTS Click Easier
 
-Source leaderboard: 653
-Target leaderboard: 136076
-Overlapping players: 549 (0.7%)
-Correlation: 0.8552
-Log correlation: 0.8601
-Linear regression: target ~= 1.0843 * source + -2.48 (R^2 0.7313)
-Trimmed regression: target ~= 1.0870 * source + -3.20 (R^2 0.7842, n=522)
-Log-log regression: log(target) ~= 0.9954 * log(source) + 0.0717 (R^2 0.7398, n=549)
+- Source leaderboard: 653
+- Target leaderboard: 136076
+- Overlapping players: 549 (0.7%)
+- Correlation: 0.8552
+- Log correlation: 0.8601
+- Linear regression: target ~= 1.0843 * source + -2.48 (R^2 0.7313)
+- Trimmed regression: target ~= 1.0870 * source + -3.20 (R^2 0.7842, n=522)
+- Log-log regression: log(target) ~= 0.9954 * log(source) + 0.0717 (R^2 0.7398, n=549)
 
 ### Percentile Mapping
 
 | Source score | Source percentile | Equivalent target score | Confidence |
 | ---: | ---: | ---: | :--- |
-| 84 | 25% | 86 | high |
-| 94 | 50% | 98 | high |
-| 99 | 60% | 102 | high |
-| 101 | 75% | 108 | high |
-| 105 | 88% | 119 | high |
-| 112 | 95% | 131 | high |
+| 67 | 25% | 84 | low |
+| 78 | 50% | 97 | low |
+| 82 | 60% | 101 | low |
+| 89 | 75% | 107 | low |
+| 96 | 88% | 117 | low |
+| 102 | 95% | 130 | low |
 
 ### Configured Cutoffs
 
@@ -1589,6 +1551,5 @@ Log-log regression: log(target) ~= 0.9954 * log(source) + 0.0717 (R^2 0.7398, n=
 
 ### Warnings
 
-- Percentile mapping is restricted to overlapping players only.
 - Trimmed regression excludes the largest 5% residual outliers from the initial linear model.
 - Global percentile cutoff estimates differ from paired-window estimates by at least 15% on 3 cutoff row(s); largest difference is 18% above paired-window at source cutoff 74. This may indicate target leaderboard population skew or sparse paired data.

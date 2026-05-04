@@ -1019,27 +1019,27 @@ export function calibrationReportToMarkdown(report: CalibrationReport): string {
   for (const pair of report.pairs) {
     lines.push(`## ${pair.sourceScenario.name} -> ${pair.targetScenario.name}`);
     lines.push("");
-    lines.push(`Source leaderboard: ${pair.sourceScenario.leaderboardId ?? "unresolved"}`);
-    lines.push(`Target leaderboard: ${pair.targetScenario.leaderboardId ?? "unresolved"}`);
-    lines.push(`Overlapping players: ${pair.comparison.overlappingPlayers} (${pair.comparison.overlapPercentage.toFixed(1)}%)`);
-    lines.push(`Correlation: ${formatOptional(pair.comparison.correlation, 4)}`);
-    lines.push(`Log correlation: ${formatOptional(pair.comparison.logCorrelation, 4)}`);
+    lines.push(`- Source leaderboard: ${pair.sourceScenario.leaderboardId ?? "unresolved"}`);
+    lines.push(`- Target leaderboard: ${pair.targetScenario.leaderboardId ?? "unresolved"}`);
+    lines.push(`- Overlapping players: ${pair.comparison.overlappingPlayers} (${pair.comparison.overlapPercentage.toFixed(1)}%)`);
+    lines.push(`- Correlation: ${formatOptional(pair.comparison.correlation, 4)}`);
+    lines.push(`- Log correlation: ${formatOptional(pair.comparison.logCorrelation, 4)}`);
     if (pair.comparison.regression) {
       lines.push(
-        `Linear regression: target ~= ${pair.comparison.regression.slope.toFixed(4)} * source + ` +
+        `- Linear regression: target ~= ${pair.comparison.regression.slope.toFixed(4)} * source + ` +
           `${pair.comparison.regression.intercept.toFixed(2)} (R^2 ${pair.comparison.regression.rSquared.toFixed(4)})`,
       );
     }
     if (pair.comparison.trimmedRegression) {
       lines.push(
-        `Trimmed regression: target ~= ${pair.comparison.trimmedRegression.slope.toFixed(4)} * source + ` +
+        `- Trimmed regression: target ~= ${pair.comparison.trimmedRegression.slope.toFixed(4)} * source + ` +
           `${pair.comparison.trimmedRegression.intercept.toFixed(2)} ` +
           `(R^2 ${pair.comparison.trimmedRegression.rSquared.toFixed(4)}, n=${pair.comparison.trimmedRegression.sampleSize})`,
       );
     }
     if (pair.comparison.logRegression) {
       lines.push(
-        `Log-log regression: log(target) ~= ${pair.comparison.logRegression.slope.toFixed(4)} * log(source) + ` +
+        `- Log-log regression: log(target) ~= ${pair.comparison.logRegression.slope.toFixed(4)} * log(source) + ` +
           `${pair.comparison.logRegression.intercept.toFixed(4)} ` +
           `(R^2 ${pair.comparison.logRegression.rSquared.toFixed(4)}, n=${pair.comparison.logRegression.sampleSize})`,
       );
